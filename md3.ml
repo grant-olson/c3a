@@ -166,6 +166,41 @@ let in_tag f =
   let axis3 = in_vector f in
     {tag_name=name;tag_origin=origin;axis1=axis1;axis2=axis2;axis3=axis3};;
 
+
+
+let tag_to_matrix t =
+  let o = t.tag_origin in
+  let a1 = t.axis1 in
+  let a2 = t.axis2 in
+  let a3 = t.axis3 in
+  let matrix = [| [| a1.x;a1.y;a1.z;o.x |];
+                  [| a2.x;a2.y;a2.z;o.y |] ;
+                  [| a3.x;a3.y;a3.z;o.z |];
+                  [| 0.0; 0.0;0.0;1.0;|] |] in
+    GlMat.of_array matrix;;
+
+let tag_to_matrix t =
+  let o = t.tag_origin in
+  let a1 = t.axis1 in
+  let a2 = t.axis2 in
+  let a3 = t.axis3 in
+  let matrix = [| [| a1.x;a2.x;a3.x;o.x |];
+                  [| a1.y;a2.y;a3.y;o.y |];
+                  [| a1.z;a2.z;a3.z;o.z |];
+                  [| 0.0;0.0;0.0;1.0 |] |] in
+    GlMat.of_array matrix;;
+
+let tag_to_matrix t =
+  let o = t.tag_origin in
+  let a1 = t.axis1 in
+  let a2 = t.axis2 in
+  let a3 = t.axis3 in
+  let matrix = [| [| a1.x;a2.x;a3.x;0.0 |];
+                  [| a1.y;a2.y;a3.y;0.0 |];
+                  [| a1.z;a2.z;a3.z;0.0 |];
+                  [| o.z;o.y;o.z;1.0;|] |] in
+    GlMat.of_array matrix;;
+
 let in_shader f =
   let shader_name = read_path f in
   let shader_index = in_dword f in
@@ -306,18 +341,25 @@ let draw_surfaces md3 frame_no =
   Array.iter (fun x -> draw_surface x frame_no) md3.surfaces;;
 
 let draw_player frame_no lower upper head =
+  let lt = Array.get upper.tags 0 in
+  let lm = tag_to_matrix lt in
   let ut = Array.get upper.tags 0 in
-  let uo = ut.tag_origin in
+  let um = tag_to_matrix ut in
   let ht = Array.get head.tags 0 in
-  let ho = ht.tag_origin in
+  let hm = tag_to_matrix ht in
+    GlMat.push ();
+    (*GlMat.mult lm;*)
     draw_surfaces lower frame_no;
+    GlMat.pop();
+
     GlMat.push();
-    (*GlMat.translate ~x:(uo.x) ~y:(uo.y) ~z:(uo.z) ();*)
-    (*GlMat.rotate ~angle:90.0 ~y:(-1.0) ();*)
-    (*GlMat.mult u_matrix;*)
+    GlMat.mult um;
     draw_surfaces upper frame_no;
-    (*GlMat.translate ~x:(ho.x) ~y:(ho.y) ~z:(ho.z) ();*)
-    draw_surfaces head frame_no;
+    (*GlMat.pop();
+
+    GlMat.push();
+    GlMat.mult hm;
+    draw_surfaces head frame_no;*)
     GlMat.pop();;
 
 let load_file fname =
@@ -366,7 +408,9 @@ let main () =
       (*GlMat.mode `projection;*)
       GlMat.load_identity ();
       (*myinit();*)
-      GlMat.ortho ~x:(-50.0,50.0) ~y:(-50.0,50.0) ~z:(-50.0,50.0);
+      GlMat.ortho ~x:(-50.0,150.0) ~y:(-50.0,50.0) ~z:(-50.0,50.0);
+      GlMat.translate ~x:(12.5) ~y:(-12.5) ~z:(-12.5) ();
+      GlMat.rotate ~angle:270.0 ~z:1.0 ();
 
       draw_player 0 lower upper head;
 
