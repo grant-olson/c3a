@@ -305,11 +305,11 @@ let draw_triangle t =
   let (v1,v2,v3) = t in
     GlDraw.color (1.0,1.0,1.0);
     GlDraw.begins `triangles;
-    GlDraw.normal3 (v1.nx, v1.ny, v1.nz);
+    (*GlDraw.normal3 (v1.nx, v1.ny, v1.nz);*)
     GlDraw.vertex3 (v1.vx, v1.vy, v1.vz);
-    GlDraw.normal3 (v2.nx, v2.ny, v2.nz);
+    (*GlDraw.normal3 (v2.nx, v2.ny, v2.nz);*)
     GlDraw.vertex3 (v2.vx, v2.vy, v2.vz);
-    GlDraw.normal3 (v3.nx, v3.ny, v3.nz);
+    (*GlDraw.normal3 (v3.nx, v3.ny, v3.nz);*)
     GlDraw.vertex3 (v3.vx, v3.vy, v3.vz);
     GlDraw.ends ();
     GlDraw.color (0.0,1.0,0.0);
@@ -341,25 +341,29 @@ let draw_surfaces md3 frame_no =
   Array.iter (fun x -> draw_surface x frame_no) md3.surfaces;;
 
 let draw_player frame_no lower upper head =
-  let lt = Array.get upper.tags 0 in
+  let lt = Array.get lower.tags 0 in
   let lm = tag_to_matrix lt in
+  let lf = Array.get lower.frames frame_no in
   let ut = Array.get upper.tags 0 in
   let um = tag_to_matrix ut in
+  let uf = Array.get upper.frames frame_no in
   let ht = Array.get head.tags 0 in
   let hm = tag_to_matrix ht in
+  let hf = Array.get head.frames frame_no in
     GlMat.push ();
     (*GlMat.mult lm;*)
+    (*GlMat.translate ~x:lf.frame_origin.x ~y:lf.frame_origin.y ~z:lf.frame_origin.z ();*)
     draw_surfaces lower frame_no;
-    GlMat.pop();
-
-    GlMat.push();
-    GlMat.mult um;
+   
+    (*GlMat.mult um;*)
+    GlMat.translate ~x:uf.frame_origin.x ~y:uf.frame_origin.y ~z:lf.frame_origin.z ();
+    
     draw_surfaces upper frame_no;
+    
     (*GlMat.pop();
-
-    GlMat.push();
-    GlMat.mult hm;
-    draw_surfaces head frame_no;*)
+    GlMat.push();*)
+    GlMat.translate ~x:hf.frame_origin.x ~y:hf.frame_origin.y ~z:hf.frame_origin.z ();
+    draw_surfaces head 0;
     GlMat.pop();;
 
 let load_file fname =
@@ -369,13 +373,11 @@ let load_file fname =
     md3;;
 
 (* testcode *)
-let lower = load_file "c:/src/3dgame/pak0/models/players/mynx/lower.md3" ;;
+let lower = load_file "c:/src/3dgame/pak0/models/players/lucy/lower.md3" ;;
 
-let upper = load_file "c:/src/3dgame/pak0/models/players/mynx/upper.md3" ;;
+let upper = load_file "c:/src/3dgame/pak0/models/players/lucy/upper.md3" ;;
 
-let head = load_file "c:/src/3dgame/pak0/models/players/mynx/head.md3" ;;
-
-
+let head = load_file "c:/src/3dgame/pak0/models/players/lucy/head.md3" ;;
 (* $Id$ *)
 
 (* open Tk *)
@@ -410,8 +412,8 @@ let main () =
       (*myinit();*)
       GlMat.ortho ~x:(-50.0,150.0) ~y:(-50.0,50.0) ~z:(-50.0,50.0);
       GlMat.translate ~x:(12.5) ~y:(-12.5) ~z:(-12.5) ();
+      
       GlMat.rotate ~angle:270.0 ~z:1.0 ();
-
       draw_player 0 lower upper head;
 
       Gl.flush ()
