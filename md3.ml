@@ -1,4 +1,5 @@
-(* Bender model from planet quake for testing purposes located in ... *)
+(* Load a Quake 3 .md3 format file into a structure and provide
+   render it in openGl *)
 
 exception Invalid_md3_format;;
 
@@ -18,12 +19,6 @@ type frame = {min_bounds:vector;
               frame_origin:vector;
               radius:float;
               frame_name:string};;
-
-(*let print_frame frame =*)
-  (*Printf.printf " frame = {min_bounds=%s; max_bounds=%s;frame_origin=%s;radius=%.2f;frame_name=%s}" frame.min_bounds frame.max_bounds frame.frame_origin frame.radius frame.frame_name;;*)
-
-(*#install_printer print_frame;;*)
-
 
 
 type tag = {tag_name:string;
@@ -272,7 +267,7 @@ let read_version f =
            skins=skins;frame_offset=frame_offset;tag_offset=tag_offset;
            surface_offset=surface_offset;eof_offset=eof_offset;
            frames=frames;tags=tags;surfaces=surfaces;}
-    | _ -> raise Invalid_md3_format;;
+   | _ -> raise Invalid_md3_format;;
 
 let readfile f =
     match input_char f, input_char f,
@@ -282,12 +277,6 @@ let readfile f =
 
 let get_point v p =
   Array.get v (Int32.to_int p);;
-
-(*let get_point_as_float v p =
-  let v = get_point v p in
-    (float_of_int v.vx) , (float_of_int v.vy)  , (float_of_int v.vz) , (float_of_int )  ;;*)
-
-
 
 let triangle_to_points t v =
  get_point v t.a, get_point v t.b, get_point v t.c;;
@@ -301,69 +290,92 @@ let map_triangles f s =
   let triangles = all_triangles_to_points s in
     Array.map f triangles;;
 
-let draw_triangle t =
+let draw_triangle t color style =
   let (v1,v2,v3) = t in
-    GlDraw.color (1.0,1.0,1.0);
+    GlDraw.color color;
     GlDraw.begins `triangles;
-    (*GlDraw.normal3 (v1.nx, v1.ny, v1.nz);*)
-    GlDraw.vertex3 (v1.vx, v1.vy, v1.vz);
-    (*GlDraw.normal3 (v2.nx, v2.ny, v2.nz);*)
-    GlDraw.vertex3 (v2.vx, v2.vy, v2.vz);
-    (*GlDraw.normal3 (v3.nx, v3.ny, v3.nz);*)
+
+    GlDraw.normal3 (v3.nx, v3.ny, v3.nz);
     GlDraw.vertex3 (v3.vx, v3.vy, v3.vz);
-    GlDraw.ends ();
-    GlDraw.color (0.0,1.0,0.0);
-    GlDraw.begins `line_strip;
-    GlDraw.vertex3 (v1.vx, v1.vy, v1.vz);
-    GlDraw.vertex3 (v2.vx, v2.vy, v2.vz);
-    GlDraw.vertex3 (v3.vx, v3.vy, v3.vz);
-    GlDraw.vertex3 (v1.vx, v1.vy, v1.vz);
+
+    GlDraw.normal3 (v2.nx, v2.ny, v2.nz);
+    GlDraw.vertex3 (v2.vx, v2.vy, v2.vz); 
+
+
+    GlDraw.normal3 (v1.nx, v1.ny, v1.nz);
+    GlDraw.vertex3 (v1.vx, v1.vy, v1.vz); 
+
     GlDraw.ends ();;
 
-(*let draw_triangles s =
-  map_triangles draw_triangle s;;
-*)
-(*let draw_frame md3 frame_no =
-  let s = Array.get md3.surfaces frame_no in
-    GlDraw.begins `triangles;
-    draw_triangles s;
-    GlDraw.ends ();;*)
-
-let draw_frame_triangles surface frame_no =
+let draw_frame_triangles surface frame_no color style =
   let triangles = surface.triangles in
   let frame = Array.get surface.vertexes frame_no in
-  Array.iter (fun x -> draw_triangle (triangle_to_points x frame)) triangles;;
+  Array.iter (fun x -> draw_triangle (triangle_to_points x frame) color style) triangles;;
 
-let draw_surface surface frame_no =
-  draw_frame_triangles surface frame_no;;
+let draw_surface surface frame_no color style =
+  draw_frame_triangles surface frame_no color style;;
 
-let draw_surfaces md3 frame_no =
-  Array.iter (fun x -> draw_surface x frame_no) md3.surfaces;;
+let draw_surfaces md3 frame_no color style =
+  Array.iter (fun x -> draw_surface x frame_no color style) md3.surfaces;;
+
+let set_material_color r g b a =
+  GlLight.material `front (`specular (r, g, b, a));
+  GlLight.material `front (`diffuse (r, g, b, a));
+  GlLight.material `front (`ambient (r, g, b, a));;
+
+
+let draw_axes () =
+  (*Material to do color? *)
+  (* Z - RED *)
+  
+  GlDraw.begins `lines;
+  set_material_color 1.0 0.0 0.0 1.0;
+  GlDraw.vertex3 (0.0,0.0,-250.0);
+  GlDraw.vertex3 (0.0,0.0,250.0);
+  
+  (* X GREEN *)
+
+  set_material_color 0.0 1.0 0.0 1.0;
+  GlDraw.vertex3 (-250.0,0.0,0.0);
+  GlDraw.vertex3 (250.0, 0.0, 0.0);
+  
+  (* Y BLUE *)
+  set_material_color 0.0 0.0 1.0 1.0;
+  GlDraw.vertex3 (0.0,-250.0,0.0);
+  GlDraw.vertex3 (0.0,250.0,0.0);
+ 
+  GlDraw.ends ();;
+
+
+let leg_position = ref 151;;
 
 let draw_player frame_no lower upper head =
   let lt = Array.get lower.tags 0 in
   let lm = tag_to_matrix lt in
-  let lf = Array.get lower.frames frame_no in
+  let lf = Array.get lower.frames !leg_position in
   let ut = Array.get upper.tags 0 in
   let um = tag_to_matrix ut in
   let uf = Array.get upper.frames frame_no in
   let ht = Array.get head.tags 0 in
   let hm = tag_to_matrix ht in
-  let hf = Array.get head.frames frame_no in
-    GlMat.push ();
-    (*GlMat.mult lm;*)
-    (*GlMat.translate ~x:lf.frame_origin.x ~y:lf.frame_origin.y ~z:lf.frame_origin.z ();*)
-    draw_surfaces lower frame_no;
-   
-    (*GlMat.mult um;*)
-    GlMat.translate ~x:uf.frame_origin.x ~y:uf.frame_origin.y ~z:lf.frame_origin.z ();
-    
-    draw_surfaces upper frame_no;
-    
-    (*GlMat.pop();
-    GlMat.push();*)
-    GlMat.translate ~x:hf.frame_origin.x ~y:hf.frame_origin.y ~z:hf.frame_origin.z ();
-    draw_surfaces head 0;
+  let hf = Array.get head.frames 0 in
+  let foff = !leg_position - 191 in
+  let angle = (float_of_int foff) /. 17.0 *. 360.0 in
+    GlMat.push();
+
+    (*GlMat.rotate ~angle:angle ~y:(1.0) ();*)
+    set_material_color 1.0 1.0 1.0 1.0;
+    draw_surfaces lower !leg_position (0.0,1.0,1.0) `triangles;
+    leg_position := !leg_position + 1;
+    if !leg_position > 151 then leg_position := 151;
+
+    GlMat.translate ~z:10.0 ();
+    GlMat.translate ~x:(-10.0) ();
+    draw_surfaces upper frame_no (0.75,0.75,0.75) `triangles;
+
+    GlMat.translate ~x:(22.0) ~y:0.0 ~z:(3.0) ();
+    draw_surfaces head 0 (0.5,0.5,0.5) `triangles;
+
     GlMat.pop();;
 
 let load_file fname =
@@ -372,55 +384,79 @@ let load_file fname =
   let _ = close_in f in
     md3;;
 
-(* testcode *)
-let lower = load_file "c:/src/3dgame/pak0/models/players/lucy/lower.md3" ;;
+(* test harness.  We should probably move at least some of this
+  stuff to a 'player' module *)
+let lower = load_file "./pak0/models/players/sarge/lower.md3" ;;
 
-let upper = load_file "c:/src/3dgame/pak0/models/players/lucy/upper.md3" ;;
+let upper = load_file "./pak0/models/players/sarge/upper.md3" ;;
 
-let head = load_file "c:/src/3dgame/pak0/models/players/lucy/head.md3" ;;
-(* $Id$ *)
+let head = load_file "./pak0/models/players/sarge/head.md3" ;;
 
-(* open Tk *)
-
-let myinit () =
-  let light_ambient = 0.0, 0.0, 0.0, 1.0
-  and light_diffuse = 1.0, 1.0, 1.0, 1.0
-  and light_specular = 1.0, 1.0, 1.0, 1.0
+let lighting_init () =
+  let light_ambient = 0.1, 0.1, 0.1, 1.0
+  and light_diffuse = 0.2, 0.2, 0.2, 1.0
+  and light_specular = 0.25, 0.25, 0.25, 1.0
   (*  light_position is NOT default value	*)
-  and light_position = 25.0, 25.0, 25.0, 0.0
+  and light_position = -50.0, 50.0, 25.0, 0.0
   in
+  GlDraw.shade_model `smooth;
+
   GlLight.light ~num:0 (`ambient light_ambient);
   GlLight.light ~num:0 (`diffuse light_diffuse);
   GlLight.light ~num:0 (`specular light_specular);
   GlLight.light ~num:0 (`position light_position);
   
-  GlFunc.depth_func `less;
-  List.iter Gl.enable [`lighting; `light0; `depth_test]
+  List.iter Gl.enable [`lighting; `light0; `depth_test];;
+
+let angle = ref 0.0;;
+
+
+let display () =
+  Gl.enable `cull_face;
+  GlDraw.cull_face `back;
+  GlClear.color (0.0, 0.0, 0.0);
+  GlClear.clear [`color];
+  GlClear.clear [`depth];
+  GlDraw.color (1.0, 1.0, 1.0);
+
+  GlMat.mode `projection;
+  GlMat.load_identity ();
+  
+  GlMat.mode `modelview;
+
+  GlMat.load_identity ();
+  GlMat.ortho ~x:(-50.0,50.0) ~y:(-50.0,50.0) ~z:(-50.0,50.0);
+
+  GlMat.rotate ~angle:270.0 ~x:(1.0) ();
+  GlMat.rotate ~angle:90.0 ~z:1.0 ();
+      
+  GlMat.rotate ~angle:!angle ~z:1.0 ();     
+  angle := !angle +. 1.0;
+  if !angle > 359.0 then angle := 0.0;
+
+  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(0.0) ();
+
+  draw_axes ();
+
+  lighting_init(); 
+
+  draw_player 136 lower upper head;
+
+  Gl.flush ();
+  Glut.postRedisplay () ;;
 
 let main () =
   ignore(Glut.init Sys.argv);
   Glut.initDisplayMode ~alpha:true ~depth:true () ;
   Glut.initWindowSize ~w:500 ~h:500 ;
   ignore(Glut.createWindow ~title:"lablglut & LablGL");
-  Glut.displayFunc ~cb:
-    begin fun () -> (* display callback *)
-      GlClear.color (0.0, 0.0, 0.0);
-      GlClear.clear [`color];
-      GlDraw.color (1.0, 1.0, 1.0);
-      (*GlMat.mode `projection;*)
-      GlMat.load_identity ();
-      (*myinit();*)
-      GlMat.ortho ~x:(-50.0,150.0) ~y:(-50.0,50.0) ~z:(-50.0,50.0);
-      GlMat.translate ~x:(12.5) ~y:(-12.5) ~z:(-12.5) ();
-      
-      GlMat.rotate ~angle:270.0 ~z:1.0 ();
-      draw_player 0 lower upper head;
+  Glut.displayFunc ~cb:display;
 
-      Gl.flush ()
-    end;
-  (* ignore (Timer.add ~ms:10000 ~callback:(fun () -> exit 0));  *)
   Glut.mainLoop();
   ;;
 
 let _ = main ()
+
+
+
 
