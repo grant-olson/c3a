@@ -162,7 +162,6 @@ let in_tag f =
     {tag_name=name;tag_origin=origin;axis1=axis1;axis2=axis2;axis3=axis3};;
 
 
-
 let tag_to_matrix t =
   let o = t.tag_origin in
   let a1 = t.axis1 in
@@ -172,17 +171,6 @@ let tag_to_matrix t =
                   [| a2.x;a2.y;a2.z;o.y |] ;
                   [| a3.x;a3.y;a3.z;o.z |];
                   [| 0.0; 0.0;0.0;1.0;|] |] in
-    GlMat.of_array matrix;;
-
-let tag_to_matrix t =
-  let o = t.tag_origin in
-  let a1 = t.axis1 in
-  let a2 = t.axis2 in
-  let a3 = t.axis3 in
-  let matrix = [| [| a1.x;a2.x;a3.x;o.x |];
-                  [| a1.y;a2.y;a3.y;o.y |];
-                  [| a1.z;a2.z;a3.z;o.z |];
-                  [| 0.0;0.0;0.0;1.0 |] |] in
     GlMat.of_array matrix;;
 
 let tag_to_matrix t =
@@ -364,18 +352,19 @@ let draw_player frame_no lower upper head =
     GlMat.push();
 
     (*GlMat.rotate ~angle:angle ~y:(1.0) ();*)
+ 
     set_material_color 1.0 1.0 1.0 1.0;
     draw_surfaces lower !leg_position (0.0,1.0,1.0) `triangles;
     leg_position := !leg_position + 1;
     if !leg_position > 151 then leg_position := 151;
 
-    GlMat.translate ~z:10.0 ();
+    (*GlMat.translate ~z:10.0 ();
     GlMat.translate ~x:(-10.0) ();
     draw_surfaces upper frame_no (0.75,0.75,0.75) `triangles;
 
     GlMat.translate ~x:(22.0) ~y:0.0 ~z:(3.0) ();
     draw_surfaces head 0 (0.5,0.5,0.5) `triangles;
-
+    *)
     GlMat.pop();;
 
 let load_file fname =
@@ -397,7 +386,7 @@ let lighting_init () =
   and light_diffuse = 0.2, 0.2, 0.2, 1.0
   and light_specular = 0.25, 0.25, 0.25, 1.0
   (*  light_position is NOT default value	*)
-  and light_position = -50.0, 50.0, 25.0, 0.0
+  and light_position = -25.0, 0.0, 50.0, 0.0
   in
   GlDraw.shade_model `smooth;
 
@@ -422,25 +411,28 @@ let display () =
   GlMat.mode `projection;
   GlMat.load_identity ();
   
+  GlMat.ortho ~x:(-50.0,50.0) ~y:(-50.0,50.0) ~z:(-50.0,50.0);
+
+
   GlMat.mode `modelview;
 
   GlMat.load_identity ();
-  GlMat.ortho ~x:(-50.0,50.0) ~y:(-50.0,50.0) ~z:(-50.0,50.0);
 
   GlMat.rotate ~angle:270.0 ~x:(1.0) ();
   GlMat.rotate ~angle:90.0 ~z:1.0 ();
       
   GlMat.rotate ~angle:!angle ~z:1.0 ();     
-  angle := !angle +. 1.0;
+  angle := !angle +. 0.1;
   if !angle > 359.0 then angle := 0.0;
 
   GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(0.0) ();
 
   draw_axes ();
 
-  lighting_init(); 
-
+ 
   draw_player 136 lower upper head;
+
+  lighting_init(); 
 
   Gl.flush ();
   Glut.postRedisplay () ;;
@@ -456,7 +448,4 @@ let main () =
   ;;
 
 let _ = main ()
-
-
-
 
