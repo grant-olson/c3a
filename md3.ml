@@ -6,7 +6,8 @@ exception Invalid_md3_format;;
 type vector = {x:float;y:float;z:float};;
 
 let print_vector vect =
-  Printf.printf " vector = {x = %.2f; y = %.2f; z = %.2f;}" vect.x vect.y vect.z;;
+  Printf.printf " vector = {x = %.2f; y = %.2f; z = %.2f;}" vect.x
+    vect.y vect.z;;
 
 (*#install_printer print_vector;;*)
 
@@ -34,15 +35,15 @@ type shader = {shader_name:string;
 
 type surface = {surface_name:string;
                 surface_flags:int32;
-                surface_frame_count:int32;
-                shader_count:int32;
-                vertex_count:int32;
-                triangle_count:int32;
-                triangle_offset:int32;
-                shader_offset:int32;
-                st_offset:int32;
-                vertex_offset:int32;
-                end_offset:int32;
+                surface_frame_count:int;
+                shader_count:int;
+                vertex_count:int;
+                triangle_count:int;
+                triangle_offset:int;
+                shader_offset:int;
+                st_offset:int;
+                vertex_offset:int;
+                end_offset:int;
                 shaders:shader array;
                 triangles:triangle array;
                 sts:st array;
@@ -51,34 +52,39 @@ type surface = {surface_name:string;
 
 type md3 = {path:string;
             flags:int32;
-            md3_frame_count:int32;
-            tag_count:int32;
-            surface_count:int32;
-            skins:int32;
-            frame_offset:int32;
-            tag_offset:int32;
-            surface_offset:int32;
-            eof_offset:int32;
+            md3_frame_count:int;
+            tag_count:int;
+            surface_count:int;
+            skins:int;
+            frame_offset:int;
+            tag_offset:int;
+            surface_offset:int;
+            eof_offset:int;
            frames:frame array;
            tags:tag array;
-           surfaces:surface array;
-};;
+           surfaces:surface array;};;
           
 
 
 let int32_of_int =
   Int32.of_int;;
 
-let in_char f =
+let in_char_as_int32 f =
   Int32.of_int (input_byte f);;
 
-let in_word f =
-  let c1 = in_char f in
-  let c2 = in_char f in
+let in_char f =
+  Int32.to_int (in_char_as_int32 f);;
+
+let in_word_as_int32 f =
+  let c1 = in_char_as_int32 f in
+  let c2 = in_char_as_int32 f in
     Int32.add c1 (Int32.mul 256l c2);;
+
+let in_word f =
+  Int32.to_int (in_word_as_int32 f);;
   
 let in_signed_word f =
-  let w1 = Int32.to_int (in_word f) in
+  let w1 = Int32.to_int (in_word_as_int32 f) in
     if
       w1 > 32767
     then
@@ -93,14 +99,17 @@ let in_packed_float f =
   let sw1 = float_of_int (in_signed_word f) in
     sw1 /. 64.0;;
 
-let in_dword f =
-  let w1 = in_word f in
-  let c1 = in_char f in
-  let c2 = in_char f in
+let in_dword_as_int32 f =
+  let w1 = in_word_as_int32 f in
+  let c1 = in_char_as_int32 f in
+  let c2 = in_char_as_int32 f in
     Int32.add w1 (Int32.add (Int32.mul c1 65536l) (Int32.mul c2 16777216l));;
 
+let in_dword f =
+  Int32.to_int (in_dword_as_int32 f);;
+
 let in_single f =
-  let dw = in_dword f in
+  let dw = in_dword_as_int32 f in
     Int32.float_of_bits dw;;
 
 
@@ -111,9 +120,9 @@ let in_vector f =
     {x=x;y=y;z=y};;
 
 let in_triangle f =
-  let a = in_dword f in
-  let b = in_dword f in
-  let c = in_dword f in
+  let a = in_dword_as_int32 f in
+  let b = in_dword_as_int32 f in
+  let c = in_dword_as_int32 f in
     {a=a;b=b;c=c};;
 
 let in_st f =
@@ -125,8 +134,8 @@ let in_vertex f =
   let vx = in_packed_float f in
   let vy = in_packed_float f in
   let vz = in_packed_float f in
-  let a = float_of_int (Int32.to_int (in_char f)) in
-  let b = float_of_int (Int32.to_int (in_char f)) in
+  let a = float_of_int (Int32.to_int (in_char_as_int32 f)) in
+  let b = float_of_int (Int32.to_int (in_char_as_int32 f)) in
   let lat = a /. 255.0 in
   let lng = b /. 255.0 in
   let nx = (cos lat) *. (sin lng) in
@@ -186,20 +195,20 @@ let tag_to_matrix t =
 
 let in_shader f =
   let shader_name = read_path f in
-  let shader_index = in_dword f in
+  let shader_index = in_dword_as_int32 f in
     {shader_name=shader_name;shader_index=shader_index};;
 
 let in_array f offset count constructor =
-  seek_in f (Int32.to_int offset);
-  Array.init (Int32.to_int count) (fun x -> constructor f);;
+  seek_in f offset;
+  Array.init count (fun x -> constructor f);;
 
 let in_frame_vertexes f surface_offset vertex_offset vertex_count frame_no =
-  let begin_frame = (Int32.add surface_offset (Int32.add vertex_offset (Int32.mul (Int32.mul vertex_count frame_no) (Int32.of_int 8)))) in (* 8 is sizeof(vertex) *)
-  let _ = seek_in f (Int32.to_int begin_frame) in
-    Array.init (Int32.to_int vertex_count) (fun x -> in_vertex f);; 
+  let begin_frame = surface_offset + vertex_offset + (vertex_count * frame_no *8) in (* 8 is sizeof(vertex) *)
+  let _ = seek_in f begin_frame in
+    Array.init vertex_count (fun x -> in_vertex f);; 
 
 let in_vertexes f surface_offset vertex_offset vertex_count frame_count =
-  Array.init (Int32.to_int frame_count) (fun x -> in_frame_vertexes f surface_offset vertex_offset vertex_count (Int32.of_int x));;
+  Array.init frame_count (fun x -> in_frame_vertexes f surface_offset vertex_offset vertex_count x);;
 
 
 let in_surface surface_offset f =
@@ -207,7 +216,7 @@ let in_surface surface_offset f =
     input_char f, input_char f with
         'I','D','P','3' ->
           let surface_name = in_string f 64 in
-          let surface_flags = in_dword f in
+          let surface_flags = in_dword_as_int32 f in
           let frame_count = in_dword f in
           let shader_count = in_dword f in
           let vertex_count = in_dword f in
@@ -217,27 +226,41 @@ let in_surface surface_offset f =
           let st_offset = in_dword f in
           let vertex_offset = in_dword f in
           let end_offset = in_dword f in
-          let shaders = in_array f (Int32.add surface_offset shader_offset) shader_count in_shader in
-          let triangles = in_array f (Int32.add surface_offset triangle_offset) triangle_count in_triangle in
-          let sts = in_array f (Int32.add surface_offset st_offset) triangle_count in_st in
-          let vertexes = in_vertexes f surface_offset vertex_offset vertex_count frame_count in
-          let _ = seek_in f (Int32.to_int (Int32.add surface_offset end_offset)) in
-            {surface_name=surface_name;surface_flags=surface_flags;surface_frame_count=frame_count;
-             shader_count=shader_count;vertex_count=vertex_count;triangle_count=triangle_count;
-             triangle_offset=triangle_offset;shader_offset=shader_offset;
-             st_offset=st_offset;vertex_offset=vertex_offset;end_offset=end_offset;shaders=shaders;triangles=triangles;
-            sts=sts;vertexes=vertexes};
+          let shaders = in_array f (surface_offset + shader_offset)
+            shader_count in_shader in
+          let triangles = in_array f (surface_offset + triangle_offset)
+            triangle_count in_triangle in
+          let sts = in_array f (surface_offset + st_offset)
+            triangle_count in_st in
+          let vertexes = in_vertexes f surface_offset vertex_offset
+            vertex_count frame_count in
+          let _ = seek_in f (surface_offset + end_offset) in
+            {surface_name=surface_name;
+             surface_flags=surface_flags;
+             surface_frame_count=frame_count;
+             shader_count=shader_count;
+             vertex_count=vertex_count;
+             triangle_count=triangle_count;
+             triangle_offset=triangle_offset;
+             shader_offset=shader_offset;
+             st_offset=st_offset;
+             vertex_offset=vertex_offset;
+             end_offset=end_offset;
+             shaders=shaders;
+             triangles=triangles;
+             sts=sts;
+             vertexes=vertexes};
       | _ -> raise Invalid_md3_format;;
 
 let in_surface_array f offset count  =
-  seek_in f (Int32.to_int offset);
-  Array.init (Int32.to_int count) (fun x -> in_surface (Int32.of_int (pos_in f)) f);;
+  seek_in f offset;
+  Array.init count (fun x -> in_surface (pos_in f) f);;
 
 let read_version f =
-  match in_dword f with
+  match in_dword_as_int32 f with
       15l ->
         let path = read_path f in
-        let flags = in_dword f in
+        let flags = in_dword_as_int32 f in
         let frame_count = in_dword f in
         let tag_count = in_dword f in
         let surface_count = in_dword f in
@@ -250,11 +273,20 @@ let read_version f =
         let tags = in_array f tag_offset tag_count in_tag in
         let surfaces = in_surface_array f surface_offset surface_count in
           
-          {path=path;flags=flags;md3_frame_count=frame_count;tag_count=tag_count;
+          {path=path;
+           flags=flags;
+           md3_frame_count=frame_count;
+           tag_count=tag_count;
            surface_count=surface_count;
-           skins=skins;frame_offset=frame_offset;tag_offset=tag_offset;
-           surface_offset=surface_offset;eof_offset=eof_offset;
-           frames=frames;tags=tags;surfaces=surfaces;}
+           skins=skins;
+           frame_offset=frame_offset;
+           tag_offset=tag_offset;
+           surface_offset=surface_offset;
+           eof_offset=eof_offset;
+           frames=frames;
+           tags=tags;
+           surfaces=surfaces;}
+
    | _ -> raise Invalid_md3_format;;
 
 let readfile f =
