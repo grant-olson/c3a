@@ -11,7 +11,7 @@ let print_vector vect =
 
 (*#install_printer print_vector;;*)
 
-type triangle = {a:int32;b:int32;c:int32};;
+type triangle = {a:int;b:int;c:int};;
 
 type st = {s:float;t:float};;
 
@@ -31,7 +31,7 @@ type tag = {tag_name:string;
 type vertex = {vx:float;vy:float;vz:float;nx:float;ny:float;nz:float};;
 
 type shader = {shader_name:string;
-               shader_index:int32;}
+               shader_index:int;}
 
 type surface = {surface_name:string;
                 surface_flags:int32;
@@ -120,9 +120,9 @@ let in_vector f =
     {x=x;y=y;z=y};;
 
 let in_triangle f =
-  let a = in_dword_as_int32 f in
-  let b = in_dword_as_int32 f in
-  let c = in_dword_as_int32 f in
+  let a = in_dword f in
+  let b = in_dword f in
+  let c = in_dword f in
     {a=a;b=b;c=c};;
 
 let in_st f =
@@ -134,8 +134,8 @@ let in_vertex f =
   let vx = in_packed_float f in
   let vy = in_packed_float f in
   let vz = in_packed_float f in
-  let a = float_of_int (Int32.to_int (in_char_as_int32 f)) in
-  let b = float_of_int (Int32.to_int (in_char_as_int32 f)) in
+  let a = float_of_int (in_char f) in
+  let b = float_of_int (in_char f) in
   let lat = a /. 255.0 in
   let lng = b /. 255.0 in
   let nx = (cos lat) *. (sin lng) in
@@ -195,7 +195,7 @@ let tag_to_matrix t =
 
 let in_shader f =
   let shader_name = read_path f in
-  let shader_index = in_dword_as_int32 f in
+  let shader_index = in_dword f in
     {shader_name=shader_name;shader_index=shader_index};;
 
 let in_array f offset count constructor =
@@ -296,7 +296,7 @@ let readfile f =
     | _ -> raise Invalid_md3_format;;
 
 let get_point v p =
-  Array.get v (Int32.to_int p);;
+  Array.get v p;;
 
 let triangle_to_points t v =
  get_point v t.a, get_point v t.b, get_point v t.c;;
