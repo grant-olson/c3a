@@ -1,7 +1,11 @@
 (* Load a Quake 3 .md3 format file into a structure and provide
    render it in openGl *)
 
+open Binfile;;
+
 exception Invalid_md3_format;;
+
+
 
 type vector = {x:float;y:float;z:float};;
 
@@ -65,33 +69,6 @@ type md3 = {path:string;
            surfaces:surface array;};;
           
 
-
-let int32_of_int =
-  Int32.of_int;;
-
-let in_char_as_int32 f =
-  Int32.of_int (input_byte f);;
-
-let in_char f =
-  Int32.to_int (in_char_as_int32 f);;
-
-let in_word_as_int32 f =
-  let c1 = in_char_as_int32 f in
-  let c2 = in_char_as_int32 f in
-    Int32.add c1 (Int32.mul 256l c2);;
-
-let in_word f =
-  Int32.to_int (in_word_as_int32 f);;
-  
-let in_signed_word f =
-  let w1 = Int32.to_int (in_word_as_int32 f) in
-    if
-      w1 > 32767
-    then
-      w1 - 65545
-    else
-      w1;;
-
 let in_packed_float f =
   (* I guess to save space, md3 files pack floats
      as a signed 16 bit int.  You devide by 64.0
@@ -99,25 +76,11 @@ let in_packed_float f =
   let sw1 = float_of_int (in_signed_word f) in
     sw1 /. 64.0;;
 
-let in_dword_as_int32 f =
-  let w1 = in_word_as_int32 f in
-  let c1 = in_char_as_int32 f in
-  let c2 = in_char_as_int32 f in
-    Int32.add w1 (Int32.add (Int32.mul c1 65536l) (Int32.mul c2 16777216l));;
-
-let in_dword f =
-  Int32.to_int (in_dword_as_int32 f);;
-
-let in_single f =
-  let dw = in_dword_as_int32 f in
-    Int32.float_of_bits dw;;
-
-
 let in_vector f =
   let x = in_single f in
   let y = in_single f in
   let z = in_single f in
-    {x=x;y=y;z=y};;
+    {x=x;y=y;z=z};;
 
 let in_triangle f =
   let a = in_dword f in
@@ -142,11 +105,6 @@ let in_vertex f =
   let ny = (sin lat) *. (sin lng) in
   let nz = (cos lng) in    
     {vx=vx;vy=vy;vz=vz;nx=nx;ny=ny;nz=nz};;
-
-let in_string f len = 
-  let buf = String.create len in
-  let i = input f buf 0 len in
-      buf;;
  
 let read_path f =
   let buf = in_string f 64 in
@@ -169,18 +127,6 @@ let in_tag f =
   let axis2 = in_vector f in
   let axis3 = in_vector f in
     {tag_name=name;tag_origin=origin;axis1=axis1;axis2=axis2;axis3=axis3};;
-
-
-let tag_to_matrix t =
-  let o = t.tag_origin in
-  let a1 = t.axis1 in
-  let a2 = t.axis2 in
-  let a3 = t.axis3 in
-  let matrix = [| [| a1.x;a1.y;a1.z;o.x |];
-                  [| a2.x;a2.y;a2.z;o.y |] ;
-                  [| a3.x;a3.y;a3.z;o.z |];
-                  [| 0.0; 0.0;0.0;1.0;|] |] in
-    GlMat.of_array matrix;;
 
 let tag_to_matrix t =
   let o = t.tag_origin in
@@ -338,146 +284,20 @@ let draw_surface surface frame_no color style =
 let draw_surfaces md3 frame_no color style =
   Array.iter (fun x -> draw_surface x frame_no color style) md3.surfaces;;
 
-let set_material_color r g b a =
-  GlLight.material `front (`specular (r, g, b, a));
-  GlLight.material `front (`diffuse (r, g, b, a));
-  GlLight.material `front (`ambient (r, g, b, a));;
-
-
-let draw_axes () =
-  (*Material to do color? *)
-  (* Z - RED *)
-  
-  GlDraw.begins `lines;
-  set_material_color 1.0 0.0 0.0 1.0;
-  GlDraw.vertex3 (0.0,0.0,-250.0);
-  GlDraw.vertex3 (0.0,0.0,250.0);
-  
-  (* X GREEN *)
-
-  set_material_color 0.0 1.0 0.0 1.0;
-  GlDraw.vertex3 (-250.0,0.0,0.0);
-  GlDraw.vertex3 (250.0, 0.0, 0.0);
-  
-  (* Y BLUE *)
-  set_material_color 0.0 0.0 1.0 1.0;
-  GlDraw.vertex3 (0.0,-250.0,0.0);
-  GlDraw.vertex3 (0.0,250.0,0.0);
- 
-  GlDraw.ends ();;
-
-
-let leg_position = ref 151;;
-
-let draw_player frame_no lower upper head =
-  let lt = Array.get lower.tags 0 in
-  let lm = tag_to_matrix lt in
-  let lf = Array.get lower.frames !leg_position in
-  let ut = Array.get upper.tags 0 in
-  let um = tag_to_matrix ut in
-  let uf = Array.get upper.frames frame_no in
-  let ht = Array.get head.tags 0 in
-  let hm = tag_to_matrix ht in
-  let hf = Array.get head.frames 0 in
-  let foff = !leg_position - 191 in
-  let angle = (float_of_int foff) /. 17.0 *. 360.0 in
+let draw_md3 md3 frame_no =
+  let t = Array.get md3.tags 0 in
+  let m = tag_to_matrix t in
+  let f = Array.get md3.frames frame_no in
+  let fo = f.frame_origin in
     GlMat.push();
-
-    (*GlMat.rotate ~angle:angle ~y:(1.0) ();*)
- 
-    set_material_color 1.0 1.0 1.0 1.0;
-    draw_surfaces lower !leg_position (0.0,1.0,1.0) `triangles;
-    leg_position := !leg_position + 1;
-    if !leg_position > 151 then leg_position := 151;
-
-    (*GlMat.translate ~z:10.0 ();
-    GlMat.translate ~x:(-10.0) ();
-    draw_surfaces upper frame_no (0.75,0.75,0.75) `triangles;
-
-    GlMat.translate ~x:(22.0) ~y:0.0 ~z:(3.0) ();
-    draw_surfaces head 0 (0.5,0.5,0.5) `triangles;
-    *)
+    GlMat.mult m;
+    GlMat.translate ~x:(-.fo.x) ~y:(-.fo.y) ~z:(-.fo.z) ();
+    draw_surfaces md3 frame_no (0.0,1.0,1.0) `triangles;
     GlMat.pop();;
 
-let load_file fname =
+let load_md3_file fname =
   let f = open_in_bin(fname) in
   let md3 = readfile f in
   let _ = close_in f in
     md3;;
-
-(* test harness.  We should probably move at least some of this
-  stuff to a 'player' module *)
-let lower = load_file "./pak0/models/players/sarge/lower.md3" ;;
-
-let upper = load_file "./pak0/models/players/sarge/upper.md3" ;;
-
-let head = load_file "./pak0/models/players/sarge/head.md3" ;;
-
-let lighting_init () =
-  let light_ambient = 0.1, 0.1, 0.1, 1.0
-  and light_diffuse = 0.2, 0.2, 0.2, 1.0
-  and light_specular = 0.25, 0.25, 0.25, 1.0
-  (*  light_position is NOT default value	*)
-  and light_position = -25.0, 0.0, 50.0, 0.0
-  in
-  GlDraw.shade_model `smooth;
-
-  GlLight.light ~num:0 (`ambient light_ambient);
-  GlLight.light ~num:0 (`diffuse light_diffuse);
-  GlLight.light ~num:0 (`specular light_specular);
-  GlLight.light ~num:0 (`position light_position);
-  
-  List.iter Gl.enable [`lighting; `light0; `depth_test];;
-
-let angle = ref 0.0;;
-
-
-let display () =
-  Gl.enable `cull_face;
-  GlDraw.cull_face `back;
-  GlClear.color (0.0, 0.0, 0.0);
-  GlClear.clear [`color];
-  GlClear.clear [`depth];
-  GlDraw.color (1.0, 1.0, 1.0);
-
-  GlMat.mode `projection;
-  GlMat.load_identity ();
-  
-  GlMat.ortho ~x:(-50.0,50.0) ~y:(-50.0,50.0) ~z:(-50.0,50.0);
-
-
-  GlMat.mode `modelview;
-
-  GlMat.load_identity ();
-
-  GlMat.rotate ~angle:270.0 ~x:(1.0) ();
-  GlMat.rotate ~angle:90.0 ~z:1.0 ();
-      
-  GlMat.rotate ~angle:!angle ~z:1.0 ();     
-  angle := !angle +. 0.1;
-  if !angle > 359.0 then angle := 0.0;
-
-  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(0.0) ();
-
-  draw_axes ();
-
- 
-  draw_player 136 lower upper head;
-
-  lighting_init(); 
-
-  Gl.flush ();
-  Glut.postRedisplay () ;;
-
-let main () =
-  ignore(Glut.init Sys.argv);
-  Glut.initDisplayMode ~alpha:true ~depth:true () ;
-  Glut.initWindowSize ~w:500 ~h:500 ;
-  ignore(Glut.createWindow ~title:"lablglut & LablGL");
-  Glut.displayFunc ~cb:display;
-
-  Glut.mainLoop();
-  ;;
-
-let _ = main ()
 
