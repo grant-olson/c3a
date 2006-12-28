@@ -290,8 +290,8 @@ let draw_md3 md3 frame_no =
   let f = Array.get md3.frames frame_no in
   let fo = f.frame_origin in
     GlMat.push();
-    GlMat.mult m;
-    GlMat.translate ~x:(-.fo.x) ~y:(-.fo.y) ~z:(-.fo.z) ();
+    (*GlMat.mult m;
+    GlMat.translate ~x:(-.fo.x) ~y:(-.fo.y) ~z:(-.fo.z) ();*)
     draw_surfaces md3 frame_no (0.0,1.0,1.0) `triangles;
     GlMat.pop();;
 
@@ -300,4 +300,6 @@ let load_md3_file fname =
   let md3 = readfile f in
   let _ = close_in f in
     md3;;
+
+
 
