@@ -128,16 +128,20 @@ let in_tag f =
   let axis3 = in_vector f in
     {tag_name=name;tag_origin=origin;axis1=axis1;axis2=axis2;axis3=axis3};;
 
+
 let tag_to_matrix t =
   let o = t.tag_origin in
   let a1 = t.axis1 in
   let a2 = t.axis2 in
   let a3 = t.axis3 in
-  let matrix = [| [| a1.x;a2.x;a3.x;0.0 |];
-                  [| a1.y;a2.y;a3.y;0.0 |];
-                  [| a1.z;a2.z;a3.z;0.0 |];
-                  [| o.z;o.y;o.z;1.0;|] |] in
+  let matrix = [| [| a1.x;a1.y;a1.z;o.z |];
+                  [| a2.x;a2.y;a2.z;o.z |];
+                  [| a3.x;a3.y;a3.z;o.z |];
+                  [| 0.0;0.0;0.0;1.0;|] |] in
     GlMat.of_array matrix;;
+
+
+
 
 let in_shader f =
   let shader_name = read_path f in

@@ -8,9 +8,6 @@ type player = {lower:md3;upper:md3;head:md3;}
 
 
 let leg_position = ref 0;;
-
-
-
 let draw_player frame_no p =
   let pelvis_tag = Array.get p.lower.tags 0 in
   let pelvis_matrix = tag_to_matrix pelvis_tag in
@@ -20,18 +17,19 @@ let draw_player frame_no p =
   let head_matrix = tag_to_matrix head_tag in
     GlMat.push();
 
-     draw_md3 p.lower !leg_position;
-    leg_position := !leg_position + 1;
-    if !leg_position >= 180 then leg_position := 0;
+    draw_md3 p.lower !leg_position;
+    GlMat.mult upper_matrix;
 
-    (*GlMat.mult pelvis_matrix;*)
-
-
-   draw_md3 p.upper frame_no;
+   draw_md3 p.upper !leg_position;
 
    (*GlMat.mult head_matrix;*)
 
     draw_md3 p.head 0;
+
+    leg_position := !leg_position + 1;
+    if !leg_position >= 0 then leg_position := 0;
+
+    (*GlMat.mult pelvis_matrix;*)
 
     GlMat.pop();;
  
