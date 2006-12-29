@@ -65,7 +65,7 @@ type md3 = {path:string;
             surface_offset:int;
             eof_offset:int;
            frames:frame array;
-           tags:tag array;
+           tags:tag array array;
            surfaces:surface array;};;
           
 
@@ -134,10 +134,10 @@ let tag_to_matrix t =
   let a1 = t.axis1 in
   let a2 = t.axis2 in
   let a3 = t.axis3 in
-  let matrix = [| [| a1.x;a1.y;a1.z;o.z |];
-                  [| a2.x;a2.y;a2.z;o.z |];
-                  [| a3.x;a3.y;a3.z;o.z |];
-                  [| 0.0;0.0;0.0;1.0;|] |] in
+  let matrix = [| [| a1.x;a2.x;a3.x;0.0 |];
+                  [| a1.y;a2.y;a3.y;0.0 |];
+                  [| a1.z;a2.z;a3.z;0.0 |];
+                  [| o.x; o.y ;o.z;1.0;|] |] in
     GlMat.of_array matrix;;
 
 
@@ -148,9 +148,12 @@ let in_shader f =
   let shader_index = in_dword f in
     {shader_name=shader_name;shader_index=shader_index};;
 
-let in_array f offset count constructor =
-  seek_in f offset;
+let in_array f count constructor =
   Array.init count (fun x -> constructor f);;
+
+let in_array_array f rows columns constructor =
+  Array.init rows (fun x -> in_array f columns constructor);;
+  
 
 let in_frame_vertexes f surface_offset vertex_offset vertex_count frame_no =
   let begin_frame = surface_offset + vertex_offset + (vertex_count * frame_no *8) in (* 8 is sizeof(vertex) *)
@@ -176,12 +179,12 @@ let in_surface surface_offset f =
           let st_offset = in_dword f in
           let vertex_offset = in_dword f in
           let end_offset = in_dword f in
-          let shaders = in_array f (surface_offset + shader_offset)
-            shader_count in_shader in
-          let triangles = in_array f (surface_offset + triangle_offset)
-            triangle_count in_triangle in
-          let sts = in_array f (surface_offset + st_offset)
-            triangle_count in_st in
+          let _ = seek_in f (surface_offset + shader_offset) in
+          let shaders = in_array f shader_count in_shader in
+          let _ = seek_in f (surface_offset + triangle_offset) in
+          let triangles = in_array f triangle_count in_triangle in
+          let _ = seek_in f (surface_offset + st_offset) in
+          let sts = in_array f triangle_count in_st in
           let vertexes = in_vertexes f surface_offset vertex_offset
             vertex_count frame_count in
           let _ = seek_in f (surface_offset + end_offset) in
@@ -219,8 +222,10 @@ let read_version f =
         let tag_offset = in_dword f in
         let surface_offset = in_dword f in
         let eof_offset = in_dword f in
-        let frames = in_array f frame_offset frame_count in_frame in
-        let tags = in_array f tag_offset tag_count in_tag in
+        let _ = seek_in f frame_offset in
+        let frames = in_array f frame_count in_frame in
+        let _ = seek_in f tag_offset in
+        let tags = in_array_array f frame_count tag_count in_tag in
         let surfaces = in_surface_array f surface_offset surface_count in
           
           {path=path;
@@ -289,13 +294,7 @@ let draw_surfaces md3 frame_no color style =
   Array.iter (fun x -> draw_surface x frame_no color style) md3.surfaces;;
 
 let draw_md3 md3 frame_no =
-  let t = Array.get md3.tags 0 in
-  let m = tag_to_matrix t in
-  let f = Array.get md3.frames frame_no in
-  let fo = f.frame_origin in
     GlMat.push();
-    (*GlMat.mult m;
-    GlMat.translate ~x:(-.fo.x) ~y:(-.fo.y) ~z:(-.fo.z) ();*)
     draw_surfaces md3 frame_no (0.0,1.0,1.0) `triangles;
     GlMat.pop();;
 

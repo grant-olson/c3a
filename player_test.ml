@@ -1,6 +1,6 @@
 
 
-let p = Player.load_player "./pak0/models/players/sarge/";;
+let p = Player.load_player "./pak0/models/players/mynx/";;
 
 let set_material_color r g b a =
   GlLight.material `front (`specular (r, g, b, a));

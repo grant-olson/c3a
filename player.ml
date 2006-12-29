@@ -9,25 +9,23 @@ type player = {lower:md3;upper:md3;head:md3;}
 
 let leg_position = ref 0;;
 let draw_player frame_no p =
-  let pelvis_tag = Array.get p.lower.tags 0 in
-  let pelvis_matrix = tag_to_matrix pelvis_tag in
-  let upper_tag = Array.get p.upper.tags 2 in
-  let upper_matrix = tag_to_matrix upper_tag in
-  let head_tag = Array.get p.upper.tags 1 in
-  let head_matrix = tag_to_matrix head_tag in
+  let lower_tag_set = Array.get p.lower.tags !leg_position in
+  let lower_tag = Array.get lower_tag_set 0 in
+  let lower_matrix = tag_to_matrix lower_tag in
+  let upper_tag_set = Array.get p.upper.tags !leg_position in
+  let upper_head_tag = Array.get upper_tag_set 0 in
+  let head_matrix = tag_to_matrix upper_head_tag in
     GlMat.push();
-
     draw_md3 p.lower !leg_position;
-    GlMat.mult upper_matrix;
+    GlMat.mult lower_matrix;
 
-   draw_md3 p.upper !leg_position;
+    draw_md3 p.upper !leg_position;
 
-   (*GlMat.mult head_matrix;*)
-
+    GlMat.mult head_matrix;
     draw_md3 p.head 0;
 
     leg_position := !leg_position + 1;
-    if !leg_position >= 0 then leg_position := 0;
+    if !leg_position >= 30 then leg_position := 0;
 
     (*GlMat.mult pelvis_matrix;*)
 
