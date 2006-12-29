@@ -13,7 +13,7 @@ let draw_player frame_no p =
   let lower_tag = Array.get lower_tag_set 0 in
   let lower_matrix = tag_to_matrix lower_tag in
   let upper_tag_set = Array.get p.upper.tags !leg_position in
-  let upper_head_tag = Array.get upper_tag_set 0 in
+  let upper_head_tag = Array.get upper_tag_set 1 in
   let head_matrix = tag_to_matrix upper_head_tag in
     GlMat.push();
     draw_md3 p.lower !leg_position;
@@ -23,7 +23,7 @@ let draw_player frame_no p =
 
     GlMat.mult head_matrix;
     draw_md3 p.head 0;
-
+    
     leg_position := !leg_position + 1;
     if !leg_position >= 30 then leg_position := 0;
 

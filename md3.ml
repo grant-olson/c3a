@@ -134,9 +134,9 @@ let tag_to_matrix t =
   let a1 = t.axis1 in
   let a2 = t.axis2 in
   let a3 = t.axis3 in
-  let matrix = [| [| a1.x;a2.x;a3.x;0.0 |];
-                  [| a1.y;a2.y;a3.y;0.0 |];
-                  [| a1.z;a2.z;a3.z;0.0 |];
+  let matrix = [| [| a1.x;a1.y;a1.z;0.0 |];
+                  [| a2.x;a2.y;a2.z;0.0 |];
+                  [| a3.x;a3.y;a3.z;0.0 |];
                   [| o.x; o.y ;o.z;1.0;|] |] in
     GlMat.of_array matrix;;
 

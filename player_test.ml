@@ -75,10 +75,12 @@ let display () =
   angle := !angle +. 1.0;
   if !angle > 359.0 then angle := 0.0;
 
-  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(0.0) ();
+
+  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-15.0) ();
 
   draw_axes ();
 
+  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(30.0) ();
   set_material_color 1.0 1.0 1.0 1.0; 
   Player.draw_player 135 p;
 
