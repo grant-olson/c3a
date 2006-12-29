@@ -1,6 +1,7 @@
 
 
 let p = Player.load_player "./pak0/models/players/mynx/";;
+let g = Md3.load_md3_file "./pak0/models/weapons2/shotgun/shotgun.md3";;
 
 let set_material_color r g b a =
   GlLight.material `front (`specular (r, g, b, a));
@@ -82,7 +83,7 @@ let display () =
 
   GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(30.0) ();
   set_material_color 1.0 1.0 1.0 1.0; 
-  Player.draw_player 135 p;
+  Player.draw_player 135 p g;
 
   lighting_init(); 
 

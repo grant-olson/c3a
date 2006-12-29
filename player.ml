@@ -8,18 +8,25 @@ type player = {lower:md3;upper:md3;head:md3;}
 
 
 let leg_position = ref 0;;
-let draw_player frame_no p =
+let draw_player frame_no p weapon =
   let lower_tag_set = Array.get p.lower.tags !leg_position in
   let lower_tag = Array.get lower_tag_set 0 in
   let lower_matrix = tag_to_matrix lower_tag in
   let upper_tag_set = Array.get p.upper.tags !leg_position in
   let upper_head_tag = Array.get upper_tag_set 1 in
   let head_matrix = tag_to_matrix upper_head_tag in
+  let weapon_tag = Array.get upper_tag_set 0 in
+  let weapon_matrix = tag_to_matrix weapon_tag in
     GlMat.push();
     draw_md3 p.lower !leg_position;
     GlMat.mult lower_matrix;
 
     draw_md3 p.upper !leg_position;
+
+    GlMat.push();
+    GlMat.mult weapon_matrix;
+    draw_md3 weapon 0;
+    GlMat.pop();
 
     GlMat.mult head_matrix;
     draw_md3 p.head 0;
