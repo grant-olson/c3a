@@ -45,3 +45,10 @@ let in_string f len =
   let buf = String.create len in
   let _ = input f buf 0 len in
       buf;;
+
+let in_array f count constructor =
+  Array.init count (fun x -> constructor f);;
+
+let in_array_array f rows columns constructor =
+  Array.init rows (fun x -> in_array f columns constructor);;
+  

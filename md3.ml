@@ -148,13 +148,6 @@ let in_shader f =
   let shader_index = in_dword f in
     {shader_name=shader_name;shader_index=shader_index};;
 
-let in_array f count constructor =
-  Array.init count (fun x -> constructor f);;
-
-let in_array_array f rows columns constructor =
-  Array.init rows (fun x -> in_array f columns constructor);;
-  
-
 let in_frame_vertexes f surface_offset vertex_offset vertex_count frame_no =
   let begin_frame = surface_offset + vertex_offset + (vertex_count * frame_no *8) in (* 8 is sizeof(vertex) *)
   let _ = seek_in f begin_frame in
