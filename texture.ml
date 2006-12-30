@@ -24,7 +24,7 @@ let make_image_from_tga tga =
   for i = 0 to width - 1 do
     for j = 0 to height - 1 do
       let row = Array.get tga.rgb_data j in
-      let rgb_val = Array.get row (width - i - 1) in
+      let rgb_val = Array.get row i in
         Raw.sets (GlPix.to_raw image) ~pos:(3*(i*height+j))
           [| rgb_val.r;rgb_val.g;rgb_val.b |]
     done
