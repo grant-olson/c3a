@@ -44,8 +44,9 @@ let lighting_init () =
   GlLight.light ~num:0 (`diffuse light_diffuse);
   GlLight.light ~num:0 (`specular light_specular);
   GlLight.light ~num:0 (`position light_position);
-  
-  List.iter Gl.enable [`lighting; `light0; `depth_test];;
+
+  Texture.load_image ();
+  List.iter Gl.enable [`lighting; `light0; `depth_test; `texture_2d];;
 
 let angle = ref 0.0;;
 
@@ -53,7 +54,7 @@ let angle = ref 0.0;;
 let display () =
   Gl.enable `cull_face;
   GlDraw.cull_face `back;
-  GlClear.color (0.0, 0.0, 0.0);
+  GlClear.color (0.25, 0.25, 0.25);
   GlClear.clear [`color];
   GlClear.clear [`depth];
   GlDraw.color (1.0, 1.0, 1.0);

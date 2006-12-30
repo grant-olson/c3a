@@ -44,7 +44,11 @@ let in_single f =
 let in_string f len = 
   let buf = String.create len in
   let _ = input f buf 0 len in
-      buf;;
+    (* remove trailing nulls. for some reason some names start
+       with a \000, so we skip that and fix later *)
+  let eos = String.index_from buf 1 '\000' in
+  let str = String.sub buf 0 eos in
+      str;;
 
 let in_array f count constructor =
   Array.init count (fun x -> constructor f);;

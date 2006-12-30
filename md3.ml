@@ -177,7 +177,7 @@ let in_surface surface_offset f =
           let _ = seek_in f (surface_offset + triangle_offset) in
           let triangles = in_array f triangle_count in_triangle in
           let _ = seek_in f (surface_offset + st_offset) in
-          let sts = in_array f triangle_count in_st in
+          let sts = in_array f vertex_count in_st in
           let vertexes = in_vertexes f surface_offset vertex_offset
             vertex_count frame_count in
           let _ = seek_in f (surface_offset + end_offset) in
@@ -258,18 +258,24 @@ let map_triangles f s =
   let triangles = all_triangles_to_points s in
     Array.map f triangles;;
 
-let draw_triangle t color style =
-  let (v1,v2,v3) = t in
-    GlDraw.color color;
+let draw_triangle surface frame triangle =
+  let current_frame = Array.get surface.vertexes frame in
+  let (v1,v2,v3) = triangle_to_points triangle current_frame in
+  let st1 = (Array.get surface.sts triangle.a) in
+  let st2 = (Array.get surface.sts triangle.b) in
+  let st3 = (Array.get surface.sts triangle.c) in
+
     GlDraw.begins `triangles;
 
+    GlTex.coord2 (st3.s, st3.t);
     GlDraw.normal3 (v3.nx, v3.ny, v3.nz);
     GlDraw.vertex3 (v3.vx, v3.vy, v3.vz);
 
+    GlTex.coord2 (st2.s, st2.t);
     GlDraw.normal3 (v2.nx, v2.ny, v2.nz);
     GlDraw.vertex3 (v2.vx, v2.vy, v2.vz); 
 
-
+    GlTex.coord2 (st1.s, st1.t);
     GlDraw.normal3 (v1.nx, v1.ny, v1.nz);
     GlDraw.vertex3 (v1.vx, v1.vy, v1.vz); 
 
@@ -278,7 +284,7 @@ let draw_triangle t color style =
 let draw_frame_triangles surface frame_no color style =
   let triangles = surface.triangles in
   let frame = Array.get surface.vertexes frame_no in
-  Array.iter (fun x -> draw_triangle (triangle_to_points x frame) color style) triangles;;
+  Array.iter (fun x -> draw_triangle surface frame_no x) triangles;;
 
 let draw_surface surface frame_no color style =
   draw_frame_triangles surface frame_no color style;;

@@ -25,9 +25,10 @@ type tga = {tga_id:int;
            };;
 
 let in_rgb f =
-  let r = in_char f in
-  let g = in_char f in
   let b = in_char f in
+  let g = in_char f in
+  let r = in_char f in
+  let alpha = in_char f in (* should we use this later? *)
     {r=r;g=g;b=b;};;
 
 let in_spec f =
@@ -61,8 +62,9 @@ let read_tga_file f =
     cms=cms;spec=spec;rgb_data=rgb_data;};;
 
 
-let f = open_in_bin("./pak0/models/players/mynx/mynx.tga");;
+let load_tga_file filename =
+  let f = open_in_bin(filename) in
+  let tga = read_tga_file f in
+  let _ = close_in f in
+    tga;;
 
-let x = read_tga_file f;;
-
-let _ = close_in f;;

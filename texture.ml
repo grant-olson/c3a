@@ -1,0 +1,48 @@
+open Tga;;
+
+let image_height = 64
+and image_width = 64
+
+let make_generic_image () =
+  let image =
+    GlPix.create `ubyte ~format:`rgb ~width:image_width ~height:image_height in
+  for i = 0 to image_width - 1 do
+    for j = 0 to image_height - 1 do
+      Raw.sets (GlPix.to_raw image) ~pos:(3*(i*image_height+j))
+	(if (i land 2 ) lxor (j land 2) = 0
+	 then [|255;255;255|]
+	 else [|0;0;0|])
+    done
+  done;
+  image
+
+let make_image_from_tga tga =
+  let width = tga.spec.width in
+  let height = tga.spec.height in
+  let image =
+  GlPix.create `ubyte ~format:`rgb ~width:width ~height:height in
+  for i = 0 to width - 1 do
+    for j = 0 to height - 1 do
+      let row = Array.get tga.rgb_data j in
+      let rgb_val = Array.get row (width - i - 1) in
+        Raw.sets (GlPix.to_raw image) ~pos:(3*(i*height+j))
+          [| rgb_val.r;rgb_val.g;rgb_val.b |]
+    done
+  done;
+  image
+
+let make_image_from_tga_file filename =
+  let tga = Tga.load_tga_file filename in
+    make_image_from_tga tga;;
+
+let load_image () =
+  let unknown_image = make_image_from_tga_file "./pak0/models/players/mynx/mynx_shiny.tga" in
+    GlPix.store (`unpack_alignment 1);
+    GlTex.image2d unknown_image;
+    List.iter (GlTex.parameter ~target:`texture_2d)
+      [ `wrap_s `clamp;
+        `wrap_t `clamp;
+        `mag_filter `linear;
+        `min_filter `linear ];
+    GlTex.env (`mode `modulate);;
+
