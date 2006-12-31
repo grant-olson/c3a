@@ -41,7 +41,6 @@ Hashtbl.add textures "unknown" (make_generic_image ());;
 
 let load_texture_from_file filename =
   let is_loaded = Hashtbl.mem textures filename in
-    Printf.printf "Loading file %s\n" filename;
     if is_loaded = false then
       try
         let tga_file = make_image_from_tga_file ("./pak0/" ^ filename) in

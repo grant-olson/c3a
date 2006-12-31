@@ -1,7 +1,18 @@
 
 
-let p = Player.load_player "./pak0/models/players/xaero/";;
-let g = Md3.load_md3_file "./pak0/models/weapons2/rocketl/rocketl_1.md3";;
+
+let m = Player.load_player "./pak0/models/players/mynx/";;
+let m_state = ref (Player.init_animation_state 0 30 0 30 20);;
+let s = Player.load_player "./pak0/models/players/sarge/";;
+let s_state =  ref (Player.init_animation_state 31 60 31 60 20);;
+let b = Player.load_player "./pak0/models/players/biker/";;
+let b_state =  ref (Player.init_animation_state 62 94 62 94 20);;
+let r = Player.load_player "./pak0/models/players/razor/";;
+let r_state =  ref (Player.init_animation_state 0 30 0 30 20);;
+let wrl = Md3.load_md3_file "./pak0/models/weapons2/rocketl/rocketl_1.md3";;
+let ws = Md3.load_md3_file "./pak0/models/weapons2/shotgun/shotgun.md3";;
+let wr = Md3.load_md3_file "./pak0/models/weapons2/gauntlet/gauntlet.md3";;
+let wg = Md3.load_md3_file "./pak0/models/weapons2/railgun/railgun.md3";;
 
 let set_material_color r g b a =
   GlLight.material `front (`specular (r, g, b, a));
@@ -83,12 +94,41 @@ let display () =
 
   GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(30.0) ();
   set_material_color 1.0 1.0 1.0 1.0; 
-  Player.draw_player 135 p g;
+  Player.draw_player m wr !m_state;
+
+  GlMat.translate ~x:(0.0) ~y:(-25.0) ~z:(0.0) ();
+  Player.draw_player s ws !s_state;
+
+  GlMat.translate ~x:(0.0) ~y:(-50.0) ~z:(0.0) ();
+  Player.draw_player b wrl !b_state;
+
+  GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(0.0) ();
+  Player.draw_player r wg !r_state;
+
+  GlMat.translate ~x:(0.0) ~y:(25.0) ~z:(0.0) ();
+  Player.draw_player m ws !m_state;
+
+  GlMat.translate ~x:(0.0) ~y:(50.0) ~z:(0.0) ();
+  Player.draw_player b wg !b_state;
+
+  GlMat.translate ~x:(0.0) ~y:(75.0) ~z:(0.0) ();
+  Player.draw_player s wr !s_state;
 
   lighting_init(); 
 
   Gl.flush ();
-  Unix.select [] [] [] 0.1;
+
+  let new_time = Unix.gettimeofday () in
+    begin
+      m_state := Player.update_animation_state new_time !m_state;
+      s_state := Player.update_animation_state new_time !s_state;
+      b_state := Player.update_animation_state new_time !b_state;
+      r_state := Player.update_animation_state new_time !r_state;
+    end;
+    
+
+    
+
   Glut.postRedisplay () ;;
 
 let main () =

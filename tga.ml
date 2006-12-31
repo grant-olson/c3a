@@ -54,7 +54,6 @@ let in_spec f =
   let height = in_word f in
   let px_depth = in_char f in
   let image_descriptor = in_char f in
-    Printf.printf "Spec: x: %d y:%d width:%d height: %d px_depth:%d desc: %d\n" xorg yorg width height px_depth image_descriptor;
     {xorg=xorg;yorg=yorg;width=width;height=height;px_depth=px_depth;
      image_descriptor=image_descriptor};;
 
