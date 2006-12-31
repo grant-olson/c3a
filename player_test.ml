@@ -1,7 +1,7 @@
 
 
-let p = Player.load_player "./pak0/models/players/mynx/";;
-let g = Md3.load_md3_file "./pak0/models/weapons2/shotgun/shotgun.md3";;
+let p = Player.load_player "./pak0/models/players/xaero/";;
+let g = Md3.load_md3_file "./pak0/models/weapons2/rocketl/rocketl_1.md3";;
 
 let set_material_color r g b a =
   GlLight.material `front (`specular (r, g, b, a));
@@ -45,7 +45,6 @@ let lighting_init () =
   GlLight.light ~num:0 (`specular light_specular);
   GlLight.light ~num:0 (`position light_position);
 
-  Texture.load_image ();
   List.iter Gl.enable [`lighting; `light0; `depth_test; `texture_2d];;
 
 let angle = ref 0.0;;

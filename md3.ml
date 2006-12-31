@@ -146,6 +146,8 @@ let tag_to_matrix t =
 let in_shader f =
   let shader_name = read_path f in
   let shader_index = in_dword f in
+    String.set shader_name 0 'm';
+    Texture.load_texture_from_file shader_name;
     {shader_name=shader_name;shader_index=shader_index};;
 
 let in_frame_vertexes f surface_offset vertex_offset vertex_count frame_no =
@@ -287,7 +289,9 @@ let draw_frame_triangles surface frame_no color style =
   Array.iter (fun x -> draw_triangle surface frame_no x) triangles;;
 
 let draw_surface surface frame_no color style =
-  draw_frame_triangles surface frame_no color style;;
+  let tex = Array.get surface.shaders 0 in
+    Texture.set_current_texture tex.shader_name;
+    draw_frame_triangles surface frame_no color style;;
 
 let draw_surfaces md3 frame_no color style =
   Array.iter (fun x -> draw_surface x frame_no color style) md3.surfaces;;
