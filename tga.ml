@@ -1,9 +1,11 @@
 (* tga parsing *)
 
+exception Unknown_tga_format;;
+
 open Binfile;;
 
 
-type rgb = {r:int;g:int;b:int;};;
+type rgba = {r:int;g:int;b:int;a:int};;
 
 type color_map_spec = {first_index:int;
                        color_map_length:int;
@@ -21,15 +23,29 @@ type tga = {tga_id:int;
             image_type:int;
             cms:color_map_spec;
             spec:image_spec;
-            rgb_data:rgb array array;
+            rgb_data:rgba array array;
            };;
+
+let in_rgba f =
+  let b = in_char f in
+  let g = in_char f in
+  let r = in_char f in
+  let a = in_char f in (* should we use this later? *)
+    {r=r;g=g;b=b;a=a};;
 
 let in_rgb f =
   let b = in_char f in
   let g = in_char f in
   let r = in_char f in
-  let alpha = in_char f in (* should we use this later? *)
-    {r=r;g=g;b=b;};;
+  let a = 255 in
+    {r=r;g=g;b=b;a=a};;
+
+let in_color_data f spec =
+  match spec.px_depth with
+      32 -> in_rgba f
+    | 24 -> in_rgb f
+    | _ -> raise Unknown_tga_format;;
+        
 
 let in_spec f =
   let xorg = in_word f in
@@ -38,6 +54,7 @@ let in_spec f =
   let height = in_word f in
   let px_depth = in_char f in
   let image_descriptor = in_char f in
+    Printf.printf "Spec: x: %d y:%d width:%d height: %d px_depth:%d desc: %d\n" xorg yorg width height px_depth image_descriptor;
     {xorg=xorg;yorg=yorg;width=width;height=height;px_depth=px_depth;
      image_descriptor=image_descriptor};;
 
@@ -55,7 +72,7 @@ let read_tga_file f =
   let image_type = in_char f in
   let cms = in_cms f in
   let spec = in_spec f in
-  let rgb_data = in_array_array f spec.height spec.width in_rgb in
+  let rgb_data = in_array_array f spec.height spec.width (fun x -> in_color_data x spec) in
     {tga_id=tga_id;
      color_map_type=color_map_type;
      image_type=image_type;

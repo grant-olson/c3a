@@ -35,14 +35,39 @@ let make_image_from_tga_file filename =
   let tga = Tga.load_tga_file filename in
     make_image_from_tga tga;;
 
-let load_image () =
-  let unknown_image = make_image_from_tga_file "./pak0/models/players/mynx/mynx_shiny.tga" in
-    GlPix.store (`unpack_alignment 1);
-    GlTex.image2d unknown_image;
-    List.iter (GlTex.parameter ~target:`texture_2d)
+let textures : (string,([`rgb],[`ubyte])GlPix.t) Hashtbl.t = Hashtbl.create 100;;
+
+Hashtbl.add textures "unknown" (make_generic_image ());;
+
+let load_texture_from_file filename =
+  let is_loaded = Hashtbl.mem textures filename in
+    Printf.printf "Loading file %s\n" filename;
+    if is_loaded = false then
+      try
+        let tga_file = make_image_from_tga_file ("./pak0/" ^ filename) in
+          Hashtbl.add textures filename tga_file
+      with
+          Sys_error a -> () ;; (* TODO: Better handling *)
+
+      
+
+let activate_texture tex = 
+  GlPix.store (`unpack_alignment 1);
+  GlTex.image2d tex;
+  List.iter (GlTex.parameter ~target:`texture_2d)
       [ `wrap_s `clamp;
         `wrap_t `clamp;
         `mag_filter `linear;
         `min_filter `linear ];
-    GlTex.env (`mode `modulate);;
+  GlTex.env (`mode `modulate);;
+
+let set_current_texture texname =
+  if
+    Hashtbl.mem textures texname
+  then
+    activate_texture (Hashtbl.find textures texname)
+  else
+    activate_texture (Hashtbl.find textures "unknown");;
+
+
 

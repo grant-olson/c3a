@@ -61,7 +61,7 @@ let display () =
   GlMat.mode `projection;
   GlMat.load_identity ();
   
-  GlMat.ortho ~x:(-50.0,50.0) ~y:(-50.0,50.0) ~z:(-50.0,50.0);
+  GlMat.ortho ~x:(-100.0,100.0) ~y:(-100.0,100.0) ~z:(-100.0,100.0);
 
 
   GlMat.mode `modelview;
