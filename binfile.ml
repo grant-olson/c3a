@@ -43,7 +43,7 @@ let in_single f =
 
 let in_string f len = 
   let buf = String.create len in
-  let _ = input f buf 0 len in
+  let _ = really_input f buf 0 len in
     (* remove trailing nulls. for some reason some names start
        with a \000, so we skip that and fix later *)
   let eos = String.index_from buf 1 '\000' in
@@ -55,4 +55,4 @@ let in_array f count constructor =
 
 let in_array_array f rows columns constructor =
   Array.init rows (fun x -> in_array f columns constructor);;
-  
+

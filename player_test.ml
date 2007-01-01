@@ -2,11 +2,11 @@
 
 
 let m = Player.load_player "./pak0/models/players/mynx/";;
-let m_state = ref (Player.init_animation_state 0 30 0 30 20);;
+let m_state = ref (Player.init_animation_state 111 128 156 156 20);;
 let s = Player.load_player "./pak0/models/players/sarge/";;
-let s_state =  ref (Player.init_animation_state 31 60 31 60 20);;
+let s_state =  ref (Player.init_animation_state 31 45 31 45 20);;
 let b = Player.load_player "./pak0/models/players/biker/";;
-let b_state =  ref (Player.init_animation_state 62 94 62 94 20);;
+let b_state =  ref (Player.init_animation_state 130 138 130 135 20);;
 let r = Player.load_player "./pak0/models/players/razor/";;
 let r_state =  ref (Player.init_animation_state 0 30 0 30 20);;
 let wrl = Md3.load_md3_file "./pak0/models/weapons2/rocketl/rocketl_1.md3";;

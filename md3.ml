@@ -80,7 +80,7 @@ let in_vector f =
   let x = in_single f in
   let y = in_single f in
   let z = in_single f in
-    {x=x;y=y;z=z};;
+     {x=x;y=y;z=z};;
 
 let in_triangle f =
   let a = in_dword f in
@@ -121,6 +121,7 @@ let in_frame f =
 
 
 let in_tag f =
+  let cur_pos = pos_in f in
   let name = read_path f in
   let origin = in_vector f in
   let axis1 = in_vector f in
@@ -239,6 +240,16 @@ let read_version f =
 
    | _ -> raise Invalid_md3_format;;
 
+let rec get_tag_two name tags =
+  match tags with
+      [] -> raise Not_found
+    | h::t -> (if h.tag_name = name then h else get_tag_two name t);;
+
+let get_tag name md3 frame_no =
+  let tags = Array.get md3.tags frame_no in
+  let tag_list = Array.to_list tags in
+    get_tag_two name tag_list;;
+
 let readfile f =
     match input_char f, input_char f,
       input_char f, input_char f with
@@ -295,6 +306,7 @@ let draw_surface surface frame_no color style =
 
 let draw_surfaces md3 frame_no color style =
   Array.iter (fun x -> draw_surface x frame_no color style) md3.surfaces;;
+
 
 let draw_md3 md3 frame_no =
     GlMat.push();

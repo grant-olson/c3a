@@ -17,13 +17,11 @@ type animation_state = {time_to_advance:float;
 
 
 let draw_player p weapon state =
-  let lower_tag_set = Array.get p.lower.tags state.leg_position in
-  let lower_tag = Array.get lower_tag_set 0 in
+  let lower_tag = Md3.get_tag "tag_torso" p.lower state.leg_position in
   let lower_matrix = tag_to_matrix lower_tag in
-  let upper_tag_set = Array.get p.upper.tags state.torso_position in
-  let upper_head_tag = Array.get upper_tag_set 1 in
+  let upper_head_tag = Md3.get_tag "tag_head" p.upper state.torso_position in
   let head_matrix = tag_to_matrix upper_head_tag in
-  let weapon_tag = Array.get upper_tag_set 0 in
+  let weapon_tag = Md3.get_tag "tag_weapon" p.upper state.torso_position in
   let weapon_matrix = tag_to_matrix weapon_tag in
     GlMat.push();
     draw_md3 p.lower state.leg_position;
