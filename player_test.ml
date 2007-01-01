@@ -32,14 +32,19 @@ let draw_axes () =
   (* X GREEN *)
 
   set_material_color 0.0 1.0 0.0 1.0;
-  GlDraw.vertex3 (-250.0,0.0,0.0);
-  GlDraw.vertex3 (250.0, 0.0, 0.0);
+  for i = -100 to 100 do
+    let ymark = 10.0 *. (float_of_int i) in
+      GlDraw.vertex3 (-1000.0,ymark,0.0);GlDraw.vertex3 (1000.0, ymark, 0.0)
+  done;
   
   (* Y BLUE *)
   set_material_color 0.0 0.0 1.0 1.0;
-  GlDraw.vertex3 (0.0,-250.0,0.0);
-  GlDraw.vertex3 (0.0,250.0,0.0);
- 
+  
+  for i = 0 to 100 do
+    let xmark = 10.0 *. (float_of_int i) in
+      GlDraw.vertex3 (xmark,-1000.0,0.0);GlDraw.vertex3 (xmark,1000.0,0.0)
+  done;
+
   GlDraw.ends ();;
 
 let lighting_init () =
@@ -59,7 +64,8 @@ let lighting_init () =
   List.iter Gl.enable [`lighting; `light0; `depth_test; `texture_2d];;
 
 let angle = ref 0.0;;
-
+let xpos = ref 100.0;;
+let xdir = ref false;;
 
 let display () =
   Gl.enable `cull_face;
@@ -72,9 +78,7 @@ let display () =
   GlMat.mode `projection;
   GlMat.load_identity ();
   
-  GlMat.ortho ~x:(-100.0,100.0) ~y:(-100.0,100.0) ~z:(-100.0,100.0);
-
-
+  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
   GlMat.mode `modelview;
 
   GlMat.load_identity ();
@@ -83,36 +87,64 @@ let display () =
   GlMat.rotate ~angle:90.0 ~z:1.0 ();
       
   GlMat.translate ~x:(5.0) ();
-  GlMat.rotate ~angle:!angle ~z:1.0 ();     
-  angle := !angle +. 1.0;
-  if !angle > 359.0 then angle := 0.0;
-
+  (*GlMat.rotate ~angle:!angle ~z:1.0 ();     
+  angle := !angle +. 0.25;
+  if !angle > 359.0 then angle := 0.0;*)
 
   GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-15.0) ();
 
   draw_axes ();
 
-  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(30.0) ();
-  set_material_color 1.0 1.0 1.0 1.0; 
+  GlMat.push();
+  GlMat.translate ~x:(!xpos) ~y:(0.0) ~z:(30.0) ();
+
+  if !xdir = true then GlMat.rotate ~angle:180.0 ~z:(1.0) ();
+  set_material_color 1.5 1.5 1.5 1.0; 
   Player.draw_player m wr !m_state;
+  GlMat.pop();
 
-  GlMat.translate ~x:(0.0) ~y:(-25.0) ~z:(0.0) ();
-  Player.draw_player s ws !s_state;
 
-  GlMat.translate ~x:(0.0) ~y:(-50.0) ~z:(0.0) ();
+
+  GlMat.push();
+  GlMat.translate ~x:(!xpos) ~y:(-25.0) ~z:(0.0) ();
+  if !xdir = true then GlMat.rotate ~angle:180.0 ~z:(1.0) ();
+  Player.draw_player r ws !s_state;
+  GlMat.pop();
+
+  GlMat.push();
+  GlMat.translate ~x:(!xpos) ~y:(-50.0) ~z:(0.0) ();
+  if !xdir = true then GlMat.rotate ~angle:180.0 ~z:(1.0) ();
   Player.draw_player b wrl !b_state;
 
-  GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(0.0) ();
+  GlMat.pop();
+
+  GlMat.push();
+  GlMat.translate ~x:(!xpos) ~y:(-75.0) ~z:(0.0) ();
+  if !xdir = true then GlMat.rotate ~angle:180.0 ~z:(1.0) ();
   Player.draw_player r wg !r_state;
+  GlMat.pop();
 
-  GlMat.translate ~x:(0.0) ~y:(25.0) ~z:(0.0) ();
+  GlMat.push();
+  GlMat.translate ~x:(!xpos) ~y:(25.0) ~z:(0.0) ();
+  if !xdir = true then GlMat.rotate ~angle:180.0 ~z:(1.0) ();
   Player.draw_player m ws !m_state;
+  GlMat.pop();
 
-  GlMat.translate ~x:(0.0) ~y:(50.0) ~z:(0.0) ();
+  GlMat.push();
+  GlMat.translate ~x:(!xpos) ~y:(50.0) ~z:(0.0) ();
+  if !xdir = true then GlMat.rotate ~angle:180.0 ~z:(1.0) ();
   Player.draw_player b wg !b_state;
+  GlMat.pop();
 
-  GlMat.translate ~x:(0.0) ~y:(75.0) ~z:(0.0) ();
-  Player.draw_player s wr !s_state;
+  GlMat.push();
+  GlMat.translate ~x:(!xpos) ~y:(75.0) ~z:(0.0) ();
+  if !xdir = true then GlMat.rotate ~angle:180.0 ~z:(1.0) ();
+  Player.draw_player r wr !s_state;
+  GlMat.pop();
+
+  if !xdir = false then xpos := !xpos +. 0.5 else xpos := !xpos -. 0.5;
+  if !xpos > 500.0 then xdir := true;
+  if !xpos < 1.0 then xdir := false;
 
   lighting_init(); 
 
