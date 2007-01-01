@@ -6,28 +6,31 @@ open Md3;;
 
 type player = {lower:md3;upper:md3;head:md3;}
 
-type animation_state = {time_to_advance:float;
-                   leg_start:int;
-                   leg_stop:int;
-                   leg_position:int;
-                   torso_start:int;
-                   torso_stop:int;
-                   torso_position:int;
-                   frame_rate:float; }
+type anim_state = {time_to_advance:float;
+                   start_pos:int;
+                   end_pos:int;
+                   loop_pos:int;
+                   current_pos:int;
+                   frame_rate:float;
+                  }
+
+               
+
+type player_anim_state = {leg:anim_state;torso:anim_state;}
 
 
 let draw_player p weapon state =
-  let lower_tag = Md3.get_tag "tag_torso" p.lower state.leg_position in
+  let lower_tag = Md3.get_tag "tag_torso" p.lower state.leg.current_pos in
   let lower_matrix = tag_to_matrix lower_tag in
-  let upper_head_tag = Md3.get_tag "tag_head" p.upper state.torso_position in
+  let upper_head_tag = Md3.get_tag "tag_head" p.upper state.torso.current_pos in
   let head_matrix = tag_to_matrix upper_head_tag in
-  let weapon_tag = Md3.get_tag "tag_weapon" p.upper state.torso_position in
+  let weapon_tag = Md3.get_tag "tag_weapon" p.upper state.torso.current_pos in
   let weapon_matrix = tag_to_matrix weapon_tag in
     GlMat.push();
-    draw_md3 p.lower state.leg_position;
+    draw_md3 p.lower state.leg.current_pos;
     GlMat.mult lower_matrix;
 
-    draw_md3 p.upper state.torso_position;
+    draw_md3 p.upper state.torso.current_pos;
 
     GlMat.push();
     GlMat.mult weapon_matrix;
@@ -48,25 +51,34 @@ let load_player path =
 
 (* animation operations *)
 
-let init_animation_state leg_start leg_stop torso_start torso_stop fps =
+let init_anim_state start stop loop fps =
   let frame_rate = 1.0 /. (float_of_int fps) in
   let update_time = frame_rate +. (Unix.gettimeofday ()) in
-    {time_to_advance=update_time;leg_start=leg_start;leg_stop=leg_stop;
-     leg_position=leg_start;torso_start=torso_start;torso_stop=torso_stop;
-     torso_position=torso_start;frame_rate=frame_rate};;
+    {time_to_advance=update_time;start_pos=start;end_pos=stop;
+     loop_pos=loop;current_pos=start;frame_rate=frame_rate};;
 
-let update_animation_state cur_time cur_state =
+let init_player_anim_state (lstart,lstop,lloop,lfps)
+                           (tstart,tstop,tloop,tfps) =
+  let leg_state = init_anim_state lstart lstop lloop lfps in
+  let torso_state = init_anim_state tstart tstop tloop tfps in
+    {leg=leg_state;torso=torso_state;};;
+
+let update_anim_state cur_time cur_state =
   if
     cur_time > cur_state.time_to_advance
   then
     let tta = cur_state.time_to_advance +. cur_state.frame_rate in
-    let next_leg = (if cur_state.leg_position = cur_state.leg_stop
-      then cur_state.leg_start else cur_state.leg_position + 1) in
-    let next_torso = (if cur_state.torso_position = cur_state.torso_stop
-      then cur_state.torso_start else cur_state.torso_position + 1) in
-      {time_to_advance=tta;leg_start=cur_state.leg_start;
-       leg_stop=cur_state.leg_stop;leg_position=next_leg;
-       torso_start=cur_state.torso_start;torso_stop=cur_state.torso_stop;
-       torso_position=next_torso;frame_rate=cur_state.frame_rate;}
+    let next_frame = (if cur_state.current_pos = cur_state.end_pos
+      then cur_state.loop_pos else cur_state.current_pos + 1) in
+      {time_to_advance=tta;start_pos=cur_state.start_pos;
+       end_pos=cur_state.end_pos;loop_pos=cur_state.loop_pos;
+       current_pos=next_frame;
+       frame_rate=cur_state.frame_rate;}
   else
     cur_state;;
+
+let update_player_anim_state cur_time cur_state =
+  let leg_state = update_anim_state cur_time cur_state.leg in
+  let torso_state = update_anim_state cur_time cur_state.torso in
+    {leg=leg_state;torso=torso_state;};;
+
