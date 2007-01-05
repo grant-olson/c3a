@@ -63,17 +63,19 @@ let init_player_anim_state (lstart,lstop,lloop,lfps)
   let torso_state = init_anim_state tstart tstop tloop tfps in
     {leg=leg_state;torso=torso_state;};;
 
-let update_anim_state cur_time cur_state =
+let rec update_anim_state cur_time cur_state =
   if
     cur_time > cur_state.time_to_advance
   then
     let tta = cur_state.time_to_advance +. cur_state.frame_rate in
     let next_frame = (if cur_state.current_pos = cur_state.end_pos
       then cur_state.loop_pos else cur_state.current_pos + 1) in
-      {time_to_advance=tta;start_pos=cur_state.start_pos;
-       end_pos=cur_state.end_pos;loop_pos=cur_state.loop_pos;
-       current_pos=next_frame;
-       frame_rate=cur_state.frame_rate;}
+      update_anim_state cur_time {time_to_advance=tta;
+                                  start_pos=cur_state.start_pos;
+                                  end_pos=cur_state.end_pos;
+                                  loop_pos=cur_state.loop_pos;
+                                  current_pos=next_frame;
+                                  frame_rate=cur_state.frame_rate;}
   else
     cur_state;;
 
