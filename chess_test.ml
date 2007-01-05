@@ -5,18 +5,27 @@ let pawn = Player.load_player "./pak0/models/players/orbb/";;
 let pawn_state = ref (Player.init_player_anim_state (165,185,165,20)
                          (93,93,93,20));;
 
-let m = Player.load_player "./pak0/models/players/mynx/";;
-let m_state = ref (Player.init_player_anim_state (111,128,111,20)
-                      (95,134,95,15));;
-let s = Player.load_player "./pak0/models/players/sarge/";;
-let s_state =  ref (Player.init_player_anim_state (31,45,31,20)
-                       (31,45,31,20));;
-let b = Player.load_player "./pak0/models/players/orbb/";;
-let b_state =  ref (Player.init_player_anim_state (141,148,141,10)
-                       (99,104,99,20));;
-let r = Player.load_player "./pak0/models/players/slash/";;
-let r_state =  ref (Player.init_player_anim_state (97,107,97,20)
-                       (134,137,134,20));;
+
+let knight = Player.load_player "./pak0/models/players/hunter/"
+let knight_state = ref (Player.init_player_anim_state (180,193,180,15)
+                         (90,139,90,20))
+
+let queen = Player.load_player "./pak0/models/players/mynx/"
+let queen_state = ref (Player.init_player_anim_state (195,211,195,15)
+                          (95,134,95,20))
+
+let bishop = Player.load_player "./pak0/models/players/slash/"
+let bishop_state = ref (Player.init_player_anim_state (160,174,160,15)
+                          (70,116,70,15))
+
+let rook = Player.load_player "./pak0/models/players/tankjr/"
+let rook_state = ref (Player.init_player_anim_state (194, 194, 194, 15)
+                         (92, 131, 92, 19))
+
+let king = Player.load_player "./pak0/models/players/xaero/"
+let king_state = ref (Player.init_player_anim_state (193, 193, 193, 15)
+                         (117,149, 117, 15))
+
 let wrl = Md3.load_md3_file "./pak0/models/weapons2/rocketl/rocketl_1.md3";;
 let ws = Md3.load_md3_file "./pak0/models/weapons2/shotgun/shotgun.md3";;
 let wr = Md3.load_md3_file "./pak0/models/weapons2/gauntlet/gauntlet.md3";;
@@ -28,32 +37,54 @@ let set_material_color r g b a =
   GlLight.material `front (`ambient (r, g, b, a));;
 
 
-let draw_axes () =
-  (*Material to do color? *)
-  (* Z - RED *)
-  
-  GlDraw.begins `lines;
-  set_material_color 1.0 0.0 0.0 1.0;
-  GlDraw.vertex3 (0.0,0.0,-250.0);
-  GlDraw.vertex3 (0.0,0.0,250.0);
-  
-  (* X GREEN *)
+let square_size = 50.0
 
-  set_material_color 0.0 1.0 0.0 1.0;
-  for i = -100 to 100 do
-    let ymark = 10.0 *. (float_of_int i) in
-      GlDraw.vertex3 (-1000.0,ymark,0.0);GlDraw.vertex3 (1000.0, ymark, 0.0)
-  done;
-  
-  (* Y BLUE *)
-  set_material_color 0.0 0.0 1.0 1.0;
-  
-  for i = 0 to 100 do
-    let xmark = 10.0 *. (float_of_int i) in
-      GlDraw.vertex3 (xmark,-1000.0,0.0);GlDraw.vertex3 (xmark,1000.0,0.0)
-  done;
+let square_center (x,y) =
+  let x_f = float_of_int x in
+  let y_f = float_of_int y in
+  let xc = (square_size *. -4.0) +. (square_size *. x_f) -. (square_size /. 2.0) in
+  let yc = (square_size *. 4.0) -. (square_size *. y_f) +. (square_size /. 2.0) in
+    (xc, yc)
 
-  GlDraw.ends ();;
+let draw_squares () =
+  for i = 1 to 8  do
+    for j = 1 to 8 do
+      let i_f = float_of_int i in
+      let j_f = float_of_int j in
+       let x1 = (-4.0 *. square_size) +. ((i_f -. 1.0) *. square_size) in
+      let x2 = x1 +. square_size in
+      let y1 = (4.0 *. square_size) -. ((j_f -. 1.0) *. square_size) in
+      let y2 = y1 -. square_size in
+      let even_row = (i mod 2) = 0 in
+      let even_column = (j mod 2) = 0 in
+        begin
+          (if (even_row == false && even_column == false) or
+            (even_row == true && even_column == true) then
+              set_material_color 0.8 0.8 0.8 1.0
+            else
+              set_material_color 0.2 0.2 0.2 1.0);
+          GlDraw.begins `quads;       
+          GlDraw.vertex3 (x1, y1, 0.0);
+          GlDraw.vertex3 (x1, y2, 0.0);
+          GlDraw.vertex3 (x2, y2, 0.0);
+          GlDraw.vertex3 (x2, y1, 0.0);
+          GlDraw.ends ();
+        end
+        done
+    done
+
+let draw_player x y model weapon state dir =
+  let x,y = square_center(x,y) in
+    GlMat.push();
+    set_material_color 1.0 1.0 1.0 1.0;
+    GlMat.translate ~x:x ~y:y ~z:(0.0) ();
+    (match dir with
+        `black -> GlMat.rotate ~angle:270.0 ~z:1.0 ()
+      | `white -> GlMat.rotate ~angle:90.0 ~z:1.0 ());
+    Player.draw_player model weapon !state;
+    GlMat.pop()
+
+          
 
 let lighting_init () =
   let light_ambient = 0.1, 0.1, 0.1, 1.0
@@ -91,175 +122,47 @@ let display () =
 
   GlMat.load_identity ();
 
-  (*GlMat.rotate ~angle:!angle ~z:1.0 ();     
-  angle := !angle +. 0.25;
-  if !angle > 359.0 then angle := 0.0;*)
-
-  (*draw_axes ();*)
-
-  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-150.0) ();
  
-  for i = 1 to 8  do
-    for j = 1 to 8 do
-      let i_f = float_of_int i in
-      let j_f = float_of_int j in
-      let size = 40.0 in
-      let x1 = (i_f *. size) -. (8.0 *. size /. 2.0) -. size in
-      let x2 = x1 +. size in
-      let y1 = (j_f *. size) -. (8.0 *. size /. 2.0) -. size in
-      let y2 = y1 +. size in
-      let even_row = (i mod 2) = 0 in
-      let even_column = (j mod 2) = 0 in
-        begin
-          (if (even_row == true && even_column == true) or
-            (even_row == false && even_column == false) then
-              set_material_color 0.8 0.8 0.8 1.0
-            else
-              set_material_color 0.2 0.2 0.2 1.0);
-          GlDraw.begins `quads;       
-          GlDraw.vertex3 (x2, y1, 0.0);
-          GlDraw.vertex3 (x2, y2, 0.0);
-          GlDraw.vertex3 (x1, y2, 0.0);
-          GlDraw.vertex3 (x1, y1, 0.0);
-          GlDraw.ends ();
-        end
-        done
-    done;
+  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-200.0) ();
 
-  GlMat.push();
-  if !xdir = true then GlMat.rotate ~angle:180.0 ~z:(1.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player m wr !m_state;
-  GlMat.pop();
+  draw_squares ();
+  set_material_color 1.0 0.0 0.0 1.0;
 
-  GlMat.push();
-  GlMat.rotate ~angle:90.0 ~z:(1.0) ();
-  GlMat.translate ~x:(-100.0) ~y:(-140.0) ~z:(0.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player pawn wr !pawn_state;
-  GlMat.pop();
+  for i = 1 to 8 do
+    draw_player i 2 pawn wr pawn_state `black
+  done;
 
-  GlMat.push();
-  GlMat.rotate ~angle:90.0 ~z:(1.0) ();
-  GlMat.translate ~x:(-100.0) ~y:(-100.0) ~z:(0.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player pawn wr !pawn_state;
-  GlMat.pop();
+  for i = 1 to 8 do
+    draw_player i 7 pawn wr pawn_state `white
+  done;
+  
+(* Knights *)
 
-  GlMat.push();
-  GlMat.rotate ~angle:90.0 ~z:(1.0) ();
-  GlMat.translate ~x:(-100.0) ~y:(-60.0) ~z:(0.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player pawn wr !pawn_state;
-  GlMat.pop();
+  draw_player 2 1 knight wr knight_state `black;
+  draw_player 7 1 knight wr knight_state `black;
+  draw_player 2 8 knight wr knight_state `white;
+  draw_player 7 8 knight wr knight_state `white;
 
-  GlMat.push();
-  GlMat.rotate ~angle:90.0 ~z:(1.0) ();
-  GlMat.translate ~x:(-100.0) ~y:(-20.0) ~z:(0.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player pawn wr !pawn_state;
-  GlMat.pop();
+  (* queens *)
+  draw_player 4 1 queen wr queen_state `black;
+  draw_player 4 8 queen wr queen_state `white;
 
-  GlMat.push();
- GlMat.rotate ~angle:90.0 ~z:(1.0) ();
-  GlMat.translate ~x:(-100.0) ~y:(20.0) ~z:(0.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player pawn wr !pawn_state;
-  GlMat.pop();
+  (* bishops *)
+  draw_player 3 1 bishop wr bishop_state `black;
+  draw_player 6 1 bishop wr bishop_state `black;
+  draw_player 3 8 bishop wr bishop_state `white;
+  draw_player 6 8 bishop wr bishop_state `white;
 
-  GlMat.push();
- GlMat.rotate ~angle:90.0 ~z:(1.0) ();
-  GlMat.translate ~x:(-100.0) ~y:(60.0) ~z:(0.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player pawn wr !pawn_state;
-  GlMat.pop();
-
-  GlMat.push();
- GlMat.rotate ~angle:90.0 ~z:(1.0) ();
-  GlMat.translate ~x:(-100.0) ~y:(100.0) ~z:(0.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player pawn wr !pawn_state;
-  GlMat.pop();
-
-  GlMat.push();
- GlMat.rotate ~angle:90.0 ~z:(1.0) ();
-  GlMat.translate ~x:(-100.0) ~y:(140.0) ~z:(0.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player pawn wr !pawn_state;
-  GlMat.pop();
+  (* rooks *)
+  draw_player 1 1 rook wr rook_state `black;
+  draw_player 8 1 rook wr rook_state `black;
+  draw_player 1 8 rook wr rook_state `white;
+  draw_player 8 8 rook wr rook_state `white;
 
 
-(* other pawns *)
-
-
-
-  GlMat.push();
-  if !xdir = true then GlMat.rotate ~angle:180.0 ~z:(1.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player m wr !m_state;
-  GlMat.pop();
-
-  GlMat.push();
-  GlMat.rotate ~angle:90.0 ~z:(1.0) ();
-  GlMat.translate ~x:(100.0) ~y:(-140.0) ~z:(0.0) ();
-  GlMat.rotate ~angle:180.0 ~z:(1.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player pawn wr !pawn_state;
-  GlMat.pop();
-
-  GlMat.push();
-  GlMat.rotate ~angle:90.0 ~z:(1.0) ();
-  GlMat.translate ~x:(100.0) ~y:(-100.0) ~z:(0.0) ();
-  GlMat.rotate ~angle:180.0 ~z:(1.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player pawn wr !pawn_state;
-  GlMat.pop();
-
-  GlMat.push();
-  GlMat.rotate ~angle:90.0 ~z:(1.0) ();
-  GlMat.translate ~x:(100.0) ~y:(-60.0) ~z:(0.0) ();
-  GlMat.rotate ~angle:180.0 ~z:(1.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player pawn wr !pawn_state;
-  GlMat.pop();
-
-  GlMat.push();
-  GlMat.rotate ~angle:270.0 ~z:(1.0) ();
-  GlMat.translate ~x:(100.0) ~y:(-20.0) ~z:(0.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player pawn wr !pawn_state;
-  GlMat.pop();
-
-  GlMat.push();
- GlMat.rotate ~angle:270.0 ~z:(1.0) ();
-  GlMat.translate ~x:(100.0) ~y:(20.0) ~z:(0.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player pawn wr !pawn_state;
-  GlMat.pop();
-
-  GlMat.push();
- GlMat.rotate ~angle:270.0 ~z:(1.0) ();
-  GlMat.translate ~x:(100.0) ~y:(60.0) ~z:(0.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player pawn wr !pawn_state;
-  GlMat.pop();
-
-  GlMat.push();
- GlMat.rotate ~angle:270.0 ~z:(1.0) ();
-  GlMat.translate ~x:(100.0) ~y:(100.0) ~z:(0.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player pawn wr !pawn_state;
-  GlMat.pop();
-
-  GlMat.push();
- GlMat.rotate ~angle:270.0 ~z:(1.0) ();
-  GlMat.translate ~x:(100.0) ~y:(140.0) ~z:(0.0) ();
-  set_material_color 1.5 1.5 1.5 1.0; 
-  Player.draw_player pawn wr !pawn_state;
-  GlMat.pop();
-
-
-
+  (* kings *)
+  draw_player 5 1 king wr king_state `black;
+  draw_player 5 8 king wr king_state `white;
 
   lighting_init(); 
 
@@ -267,11 +170,12 @@ let display () =
 
   let new_time = Unix.gettimeofday () in
     begin
-      m_state := Player.update_player_anim_state new_time !m_state;
-      s_state := Player.update_player_anim_state new_time !s_state;
-      b_state := Player.update_player_anim_state new_time !b_state;
-      r_state := Player.update_player_anim_state new_time !r_state;
       pawn_state := Player.update_player_anim_state new_time !pawn_state;
+      knight_state := Player.update_player_anim_state new_time !knight_state;
+      queen_state := Player.update_player_anim_state new_time !queen_state;
+      bishop_state := Player.update_player_anim_state new_time !bishop_state;
+      rook_state := Player.update_player_anim_state new_time !rook_state;
+      king_state := Player.update_player_anim_state new_time !king_state;
     end;
     
 
