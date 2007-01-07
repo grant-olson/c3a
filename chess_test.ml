@@ -181,9 +181,6 @@ let lighting_init () =
 
   List.iter Gl.enable [`lighting; `light0; `depth_test; `texture_2d];;
 
-let angle = ref 0.0;;
-let xpos = ref 100.0;;
-let xdir = ref false;;
 
 let draw_active_piece ap =
   let really_draw x y k a dir =
