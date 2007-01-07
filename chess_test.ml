@@ -1,5 +1,84 @@
+type piece_type = Pawn | Rook | Bishop | Knight | Queen | King
 
+type piece = Black of piece_type | White of piece_type
 
+type active_piece = {xpos:int;ypos:int;kind:piece;anim_state:Player.player_anim_state;}
+
+let init_board () =
+  [{xpos=1;ypos=2;kind=Black Pawn;
+    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
+   {xpos=2;ypos=2;kind=Black Pawn;
+    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
+   {xpos=3;ypos=2;kind=Black Pawn;
+    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
+   {xpos=4;ypos=2;kind=Black Pawn;
+    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
+   {xpos=5;ypos=2;kind=Black Pawn;
+    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
+   {xpos=6;ypos=2;kind=Black Pawn;
+    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
+   {xpos=7;ypos=2;kind=Black Pawn;
+    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
+   {xpos=8;ypos=2;kind=Black Pawn;
+    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
+   {xpos=1;ypos=1;kind=Black Rook;
+    anim_state=(Player.init_player_anim_state (194, 194, 194, 15) (92, 131, 92, 19))};
+   {xpos=8;ypos=1;kind=Black Rook;
+    anim_state=(Player.init_player_anim_state (194, 194, 194, 15) (92, 131, 92, 19))};
+   {xpos=2;ypos=1;kind=Black Knight;
+    anim_state=(Player.init_player_anim_state (180,193,180,15) (90,139,90,20))};
+   {xpos=7;ypos=1;kind=Black Knight;
+    anim_state=(Player.init_player_anim_state (180,193,180,15) (90,139,90,20))};
+   {xpos=3;ypos=1;kind=Black Bishop;
+    anim_state=(Player.init_player_anim_state (160,174,160,15)
+                          (70,116,70,15))};
+   {xpos=6;ypos=1;kind=Black Bishop;
+    anim_state=(Player.init_player_anim_state (160,174,160,15)
+                          (70,116,70,15))};
+   {xpos=4;ypos=1;kind=Black Queen;
+    anim_state=(Player.init_player_anim_state (195,211,195,15)
+                          (95,134,95,20))};
+   {xpos=5;ypos=1;kind=Black King;
+    anim_state=(Player.init_player_anim_state (193, 193, 193, 15)
+                         (117,149, 117, 15))};
+
+   {xpos=1;ypos=7;kind=White Pawn;
+    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
+   {xpos=2;ypos=7;kind=White Pawn;
+    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
+   {xpos=3;ypos=7;kind=White Pawn;
+    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
+   {xpos=4;ypos=7;kind=White Pawn;
+    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
+   {xpos=5;ypos=7;kind=White Pawn;
+    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
+   {xpos=6;ypos=7;kind=White Pawn;
+    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
+   {xpos=7;ypos=7;kind=White Pawn;
+    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
+   {xpos=8;ypos=7;kind=White Pawn;
+    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
+   {xpos=1;ypos=8;kind=White Rook;
+    anim_state=(Player.init_player_anim_state (194, 194, 194, 15) (92, 131, 92, 19))};
+   {xpos=8;ypos=8;kind=White Rook;
+    anim_state=(Player.init_player_anim_state (194, 194, 194, 15) (92, 131, 92, 19))};
+   {xpos=2;ypos=8;kind=White Knight;
+    anim_state=(Player.init_player_anim_state (180,193,180,15) (90,139,90,20))};
+   {xpos=7;ypos=8;kind=White Knight;
+    anim_state=(Player.init_player_anim_state (180,193,180,15) (90,139,90,20))};
+   {xpos=3;ypos=8;kind=White Bishop;
+    anim_state=(Player.init_player_anim_state (160,174,160,15)
+                          (70,116,70,15))};
+   {xpos=6;ypos=8;kind=White Bishop;
+    anim_state=(Player.init_player_anim_state (160,174,160,15)
+                          (70,116,70,15))};
+   {xpos=4;ypos=8;kind=White Queen;
+    anim_state=(Player.init_player_anim_state (195,211,195,15)
+                          (95,134,95,20))};
+   {xpos=5;ypos=8;kind=White King;
+    anim_state=(Player.init_player_anim_state (193, 193, 193, 15)
+                         (117,149, 117, 15))};
+  ]
 
 let pawn = Player.load_player "./pak0/models/players/orbb/";;
 let pawn_state = ref (Player.init_player_anim_state (165,185,165,20)
@@ -81,7 +160,7 @@ let draw_player x y model weapon state dir =
     (match dir with
         `black -> GlMat.rotate ~angle:270.0 ~z:1.0 ()
       | `white -> GlMat.rotate ~angle:90.0 ~z:1.0 ());
-    Player.draw_player model weapon !state;
+    Player.draw_player model weapon state;
     GlMat.pop()
 
           
@@ -106,6 +185,24 @@ let angle = ref 0.0;;
 let xpos = ref 100.0;;
 let xdir = ref false;;
 
+let draw_active_piece ap =
+  let really_draw x y k a dir =
+    match k with
+        Pawn -> draw_player x y pawn wr a dir
+      | Bishop -> draw_player x y bishop wr a dir
+      | Rook -> draw_player x y rook wr a dir
+      | Knight -> draw_player x y knight wr a dir
+      | King -> draw_player x y king wr a dir
+      | Queen -> draw_player x y queen wr a dir
+  in
+    match ap with
+      {xpos=x;ypos=y;kind=Black k;anim_state=anim_state} ->
+        really_draw x y k anim_state `black
+      | {xpos=x;ypos=y;kind=White k;anim_state=anim_state} ->
+          really_draw x y k anim_state `white
+
+let active_players = ref (init_board ())
+
 let display () =
   Gl.enable `cull_face;
   GlDraw.cull_face `back;
@@ -122,70 +219,27 @@ let display () =
 
   GlMat.load_identity ();
 
+
  
   GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-200.0) ();
 
   draw_squares ();
   set_material_color 1.0 0.0 0.0 1.0;
 
-  for i = 1 to 8 do
-    draw_player i 2 pawn wr pawn_state `black
-  done;
-
-  for i = 1 to 8 do
-    draw_player i 7 pawn wr pawn_state `white
-  done;
-  
-(* Knights *)
-
-  draw_player 2 1 knight wr knight_state `black;
-  draw_player 7 1 knight wr knight_state `black;
-  draw_player 2 8 knight wr knight_state `white;
-  draw_player 7 8 knight wr knight_state `white;
-
-  (* queens *)
-  draw_player 4 1 queen wr queen_state `black;
-  draw_player 4 8 queen wr queen_state `white;
-
-  (* bishops *)
-  draw_player 3 1 bishop wr bishop_state `black;
-  draw_player 6 1 bishop wr bishop_state `black;
-  draw_player 3 8 bishop wr bishop_state `white;
-  draw_player 6 8 bishop wr bishop_state `white;
-
-  (* rooks *)
-  draw_player 1 1 rook wr rook_state `black;
-  draw_player 8 1 rook wr rook_state `black;
-  draw_player 1 8 rook wr rook_state `white;
-  draw_player 8 8 rook wr rook_state `white;
-
-
-  (* kings *)
-  draw_player 5 1 king wr king_state `black;
-  draw_player 5 8 king wr king_state `white;
+  List.iter draw_active_piece !active_players;
 
   lighting_init(); 
 
   Gl.flush ();
-
+  Glut.swapBuffers ();
   let new_time = Unix.gettimeofday () in
-    begin
-      pawn_state := Player.update_player_anim_state new_time !pawn_state;
-      knight_state := Player.update_player_anim_state new_time !knight_state;
-      queen_state := Player.update_player_anim_state new_time !queen_state;
-      bishop_state := Player.update_player_anim_state new_time !bishop_state;
-      rook_state := Player.update_player_anim_state new_time !rook_state;
-      king_state := Player.update_player_anim_state new_time !king_state;
-    end;
-    
-
-    
+    active_players := List.map (fun x -> {xpos=x.xpos;ypos=x.ypos;kind=x.kind;anim_state=(Player.update_player_anim_state new_time x.anim_state)}) !active_players;
 
   Glut.postRedisplay () ;;
 
 let main () =
   ignore(Glut.init Sys.argv);
-  Glut.initDisplayMode ~alpha:true ~depth:true () ;
+  Glut.initDisplayMode ~alpha:true ~double_buffer:true ~depth:true () ;
   Glut.initWindowSize ~w:500 ~h:500 ;
   ignore(Glut.createWindow ~title:"lablglut & LablGL");
   Glut.displayFunc ~cb:display;
