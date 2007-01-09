@@ -22,11 +22,13 @@ type player_anim_state = {leg:anim_state;torso:anim_state;}
 let draw_player p weapon state =
   let lower_tag = Md3.get_tag "tag_torso" p.lower state.leg.current_pos in
   let lower_matrix = tag_to_matrix lower_tag in
+  let lower_frame = Array.get p.lower.frames state.leg.current_pos in
   let upper_head_tag = Md3.get_tag "tag_head" p.upper state.torso.current_pos in
   let head_matrix = tag_to_matrix upper_head_tag in
   let weapon_tag = Md3.get_tag "tag_weapon" p.upper state.torso.current_pos in
   let weapon_matrix = tag_to_matrix weapon_tag in
     GlMat.push();
+    GlMat.translate ~z:(-. lower_frame.min_bounds.z) ();
     draw_md3 p.lower state.leg.current_pos;
     GlMat.mult lower_matrix;
 
