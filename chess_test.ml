@@ -4,111 +4,77 @@ type piece = Black of piece_type | White of piece_type
 
 type active_piece = {xpos:int;ypos:int;kind:piece;anim_state:Player.player_anim_state;}
 
-let init_board () =
-  [{xpos=1;ypos=2;kind=Black Pawn;
-    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
-   {xpos=2;ypos=2;kind=Black Pawn;
-    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
-   {xpos=3;ypos=2;kind=Black Pawn;
-    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
-   {xpos=4;ypos=2;kind=Black Pawn;
-    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
-   {xpos=5;ypos=2;kind=Black Pawn;
-    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
-   {xpos=6;ypos=2;kind=Black Pawn;
-    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
-   {xpos=7;ypos=2;kind=Black Pawn;
-    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
-   {xpos=8;ypos=2;kind=Black Pawn;
-    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
-   {xpos=1;ypos=1;kind=Black Rook;
-    anim_state=(Player.init_player_anim_state (194, 194, 194, 15) (92, 131, 92, 19))};
-   {xpos=8;ypos=1;kind=Black Rook;
-    anim_state=(Player.init_player_anim_state (194, 194, 194, 15) (92, 131, 92, 19))};
-   {xpos=2;ypos=1;kind=Black Knight;
-    anim_state=(Player.init_player_anim_state (180,193,180,15) (90,139,90,20))};
-   {xpos=7;ypos=1;kind=Black Knight;
-    anim_state=(Player.init_player_anim_state (180,193,180,15) (90,139,90,20))};
-   {xpos=3;ypos=1;kind=Black Bishop;
-    anim_state=(Player.init_player_anim_state (160,174,160,15)
-                          (70,116,70,15))};
-   {xpos=6;ypos=1;kind=Black Bishop;
-    anim_state=(Player.init_player_anim_state (160,174,160,15)
-                          (70,116,70,15))};
-   {xpos=4;ypos=1;kind=Black Queen;
-    anim_state=(Player.init_player_anim_state (195,211,195,15)
-                          (95,134,95,20))};
-   {xpos=5;ypos=1;kind=Black King;
-    anim_state=(Player.init_player_anim_state (193, 193, 193, 15)
-                         (117,149, 117, 15))};
 
-   {xpos=1;ypos=7;kind=White Pawn;
-    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
-   {xpos=2;ypos=7;kind=White Pawn;
-    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
-   {xpos=3;ypos=7;kind=White Pawn;
-    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
-   {xpos=4;ypos=7;kind=White Pawn;
-    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
-   {xpos=5;ypos=7;kind=White Pawn;
-    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
-   {xpos=6;ypos=7;kind=White Pawn;
-    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
-   {xpos=7;ypos=7;kind=White Pawn;
-    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
-   {xpos=8;ypos=7;kind=White Pawn;
-    anim_state=(Player.init_player_anim_state (165,185,165,20) (93,93,93,20))};
-   {xpos=1;ypos=8;kind=White Rook;
-    anim_state=(Player.init_player_anim_state (194, 194, 194, 15) (92, 131, 92, 19))};
-   {xpos=8;ypos=8;kind=White Rook;
-    anim_state=(Player.init_player_anim_state (194, 194, 194, 15) (92, 131, 92, 19))};
-   {xpos=2;ypos=8;kind=White Knight;
-    anim_state=(Player.init_player_anim_state (180,193,180,15) (90,139,90,20))};
-   {xpos=7;ypos=8;kind=White Knight;
-    anim_state=(Player.init_player_anim_state (180,193,180,15) (90,139,90,20))};
-   {xpos=3;ypos=8;kind=White Bishop;
-    anim_state=(Player.init_player_anim_state (160,174,160,15)
-                          (70,116,70,15))};
-   {xpos=6;ypos=8;kind=White Bishop;
-    anim_state=(Player.init_player_anim_state (160,174,160,15)
-                          (70,116,70,15))};
-   {xpos=4;ypos=8;kind=White Queen;
-    anim_state=(Player.init_player_anim_state (195,211,195,15)
-                          (95,134,95,20))};
-   {xpos=5;ypos=8;kind=White King;
-    anim_state=(Player.init_player_anim_state (193, 193, 193, 15)
-                         (117,149, 117, 15))};
-  ]
 
-let pawn = Player.load_player "./pak0/models/players/orbb/";;
-let pawn_state = ref (Player.init_player_anim_state (165,185,165,20)
-                         (93,93,93,20));;
-
+let pawn = Player.load_player "./pak0/models/players/orbb/"
+let pawn_anim_idle = Player.init_player_anim_state (165,185,165,20) (93,93,93,20)
+let pawn_anim_walk = Player.init_player_anim_state (165,185,165,20) (93,93,93,20)
 
 let knight = Player.load_player "./pak0/models/players/hunter/"
-let knight_state = ref (Player.init_player_anim_state (180,193,180,15)
-                         (90,139,90,20))
+let knight_anim_idle = Player.init_player_anim_state (180,193,180,15) (90,139,90,20)
 
 let queen = Player.load_player "./pak0/models/players/mynx/"
-let queen_state = ref (Player.init_player_anim_state (195,211,195,15)
-                          (95,134,95,20))
+let queen_anim_idle = Player.init_player_anim_state (195,211,195,15) (95,134,95,20)
+let queen_anim_walk = Player.init_player_anim_state (111,117,111,25) (135,140,135,15)
 
 let bishop = Player.load_player "./pak0/models/players/slash/"
-let bishop_state = ref (Player.init_player_anim_state (160,174,160,15)
-                          (70,116,70,15))
+let bishop_anim_idle = Player.init_player_anim_state (160,174,160,15) (70,116,70,15)
 
 let rook = Player.load_player "./pak0/models/players/tankjr/"
-let rook_state = ref (Player.init_player_anim_state (194, 194, 194, 15)
-                         (92, 131, 92, 19))
+let rook_anim_idle = Player.init_player_anim_state (194, 194, 194, 15) (92, 131, 92, 19)
 
 let king = Player.load_player "./pak0/models/players/xaero/"
-let king_state = ref (Player.init_player_anim_state (193, 193, 193, 15)
-                         (117,149, 117, 15))
+let king_anim_idle = Player.init_player_anim_state (193, 193, 193, 15) (117,149, 117, 15)
 
 let wrl = Md3.load_md3_file "./pak0/models/weapons2/rocketl/rocketl_1.md3";;
 let ws = Md3.load_md3_file "./pak0/models/weapons2/shotgun/shotgun.md3";;
 let wr = Md3.load_md3_file "./pak0/models/weapons2/gauntlet/gauntlet.md3";;
 let wg = Md3.load_md3_file "./pak0/models/weapons2/railgun/railgun.md3";;
+
+let init_board () =
+  [{xpos=1;ypos=2;kind=Black Pawn;anim_state=pawn_anim_idle};
+   {xpos=2;ypos=2;kind=Black Pawn;anim_state=pawn_anim_idle};
+   {xpos=3;ypos=2;kind=Black Pawn;anim_state=pawn_anim_idle};
+   {xpos=4;ypos=2;kind=Black Pawn;anim_state=pawn_anim_idle};
+   {xpos=5;ypos=2;kind=Black Pawn;anim_state=pawn_anim_idle};
+   {xpos=6;ypos=2;kind=Black Pawn;anim_state=pawn_anim_idle};
+   {xpos=7;ypos=2;kind=Black Pawn;anim_state=pawn_anim_idle};
+   {xpos=8;ypos=2;kind=Black Pawn;anim_state=pawn_anim_idle};
+
+   {xpos=1;ypos=1;kind=Black Rook;anim_state=pawn_anim_idle};
+   {xpos=8;ypos=1;kind=Black Rook;anim_state=rook_anim_idle};
+
+   {xpos=2;ypos=1;kind=Black Knight;anim_state=knight_anim_idle};
+   {xpos=7;ypos=1;kind=Black Knight;anim_state=knight_anim_idle}
+;
+   {xpos=3;ypos=1;kind=Black Bishop;anim_state=bishop_anim_idle};
+   {xpos=6;ypos=1;kind=Black Bishop;anim_state=bishop_anim_idle};
+
+   {xpos=4;ypos=1;kind=Black Queen;anim_state=queen_anim_idle};
+   {xpos=5;ypos=1;kind=Black King;
+    anim_state=king_anim_idle};
+
+   {xpos=1;ypos=7;kind=White Pawn;anim_state=pawn_anim_idle};
+   {xpos=2;ypos=7;kind=White Pawn;anim_state=pawn_anim_idle};
+   {xpos=3;ypos=7;kind=White Pawn;anim_state=pawn_anim_idle};
+   {xpos=4;ypos=7;kind=White Pawn;anim_state=pawn_anim_idle};
+   {xpos=5;ypos=7;kind=White Pawn;anim_state=pawn_anim_idle};
+   {xpos=6;ypos=7;kind=White Pawn;anim_state=pawn_anim_idle};
+   {xpos=7;ypos=7;kind=White Pawn;anim_state=pawn_anim_idle};
+   {xpos=8;ypos=7;kind=White Pawn;anim_state=pawn_anim_idle};
+
+   {xpos=1;ypos=8;kind=White Rook;anim_state=rook_anim_idle};
+   {xpos=8;ypos=8;kind=White Rook;anim_state=rook_anim_idle};
+
+   {xpos=2;ypos=8;kind=White Knight;anim_state=knight_anim_idle};
+   {xpos=7;ypos=8;kind=White Knight;anim_state=knight_anim_idle};
+
+   {xpos=3;ypos=8;kind=White Bishop;anim_state=bishop_anim_idle};
+   {xpos=6;ypos=8;kind=White Bishop;anim_state=bishop_anim_idle};
+
+   {xpos=4;ypos=8;kind=White Queen;anim_state=queen_anim_idle};
+   {xpos=5;ypos=8;kind=White King;anim_state=king_anim_idle};
+  ]
 
 let set_material_color r g b a =
   GlLight.material `front (`specular (r, g, b, a));
@@ -200,6 +166,48 @@ let draw_active_piece ap =
 
 let active_players = ref (init_board ())
 
+let start_anim = Unix.gettimeofday ()
+
+let moving_player_anim = ref queen_anim_walk
+
+let calc_current_pos (from_x, from_y) (to_x, to_y) = 
+  let start_x, start_y = square_center (from_x,from_y) in
+  let end_x, end_y = square_center(to_x,to_y) in
+  let dif_x, dif_y = end_x -. start_x, end_y -. start_y in
+  let currenttime = Unix.gettimeofday () in
+  let delta = (currenttime -. start_anim) /. 1.0  in
+  let cur_x = start_x +. (dif_x *. delta) in
+  let cur_y = start_y +. (dif_y *. delta) in
+    cur_x, cur_y
+
+let draw_moving_player (from_x,from_y) (to_x,to_y) =
+  let cur_x,cur_y = calc_current_pos (from_x,from_y) (to_x, to_y) in
+    GlMat.push();
+    set_material_color 1.0 1.0 1.0 1.0;
+    GlMat.translate ~x:cur_x ~y:cur_y ~z:(0.0) ();
+    GlMat.rotate ~angle:90.0 ~z:1.0 ();
+    Player.draw_player queen wr !moving_player_anim;
+    GlMat.pop()
+
+let is_at_destination (from_x, from_y) (to_x, to_y) =
+  let cur_x,cur_y = calc_current_pos (from_x,from_y) (to_x,to_y) in
+  let dest_x,dest_y = square_center(to_x, to_y) in
+  let diff_x = dest_x -. cur_x in
+  let diff_y = cur_y -. dest_y in
+  let distance = sqrt ( (diff_x *. diff_x) +. (diff_y *. diff_y) ) in
+  let epsilon = square_size /. 5.0 in
+    Printf.printf "%f \n" distance;
+    if
+      distance <= epsilon
+    then
+      true
+    else
+      false
+
+let moving_player = ref (Some (White Pawn))
+let moving_player_pos = ref ( (4,7),(4,5) )
+let hit_dest = ref false
+
 let display () =
   Gl.enable `cull_face;
   GlDraw.cull_face `back;
@@ -219,19 +227,41 @@ let display () =
 
  
   GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-200.0) ();
+  GlMat.rotate ~angle:75.0 ~z:1.0 ~y:1.0 ~x:(-1.0) ();
 
   draw_squares ();
   set_material_color 1.0 0.0 0.0 1.0;
 
   List.iter draw_active_piece !active_players;
 
+  (*match !moving_player with
+      Some x ->
+        begin
+          let start,finish = !moving_player_pos in
+            (if is_at_destination start finish then moving_player := None);
+            draw_moving_player start finish;
+        end
+    | None -> () ;*)
+
+  (if
+      !hit_dest = false
+    then
+      begin
+        hit_dest := (is_at_destination (4,7) (4,5));
+        draw_moving_player (4,7) (4,5);
+      end
+  );
+
   lighting_init(); 
 
   Gl.flush ();
   Glut.swapBuffers ();
   let new_time = Unix.gettimeofday () in
-    active_players := List.map (fun x -> {xpos=x.xpos;ypos=x.ypos;kind=x.kind;anim_state=(Player.update_player_anim_state new_time x.anim_state)}) !active_players;
-
+    begin
+      active_players := List.map (fun x -> {x with anim_state=(Player.update_player_anim_state new_time x.anim_state)}) !active_players;
+      moving_player_anim := Player.update_player_anim_state new_time !moving_player_anim;
+    end;
+    
   Glut.postRedisplay () ;;
 
 let main () =
