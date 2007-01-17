@@ -1,14 +1,4 @@
-type piece_type = Pawn | Rook | Bishop | Knight | Queen | King
-
-type piece = Black of piece_type | White of piece_type
-
-type location = {x:int;y:int;}
-type move = {move_from:location;move_to:location;}
-
-
-type active_piece = {loc:location;kind:piece;anim_state:Player.player_anim_state;}
-
-
+(* LOAD GRAPHICS *)
 
 let pawn = Player.load_player "./pak0/models/players/orbb/"
 let pawn_anim_idle = Player.init_player_anim_state (165,185,165,20) (93,93,93,20)
@@ -34,6 +24,18 @@ let wrl = Md3.load_md3_file "./pak0/models/weapons2/rocketl/rocketl_1.md3";;
 let ws = Md3.load_md3_file "./pak0/models/weapons2/shotgun/shotgun.md3";;
 let wr = Md3.load_md3_file "./pak0/models/weapons2/gauntlet/gauntlet.md3";;
 let wg = Md3.load_md3_file "./pak0/models/weapons2/railgun/railgun.md3";;
+
+(* TYPES *)
+
+type piece_type = Pawn | Rook | Bishop | Knight | Queen | King
+
+type piece = Black of piece_type | White of piece_type
+
+type location = {x:int;y:int;}
+type move = {move_from:location;move_to:location;}
+
+
+type active_piece = {loc:location;kind:piece;anim_state:Player.player_anim_state;}
 
 let init_board () =
   [{loc={x=1;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
@@ -80,7 +82,22 @@ let init_board () =
   ]
 
 
+(* INIT GLOBALS *)
+let moves = ref [ {move_from={x=4;y=5};move_to={x=4;y=5}} ]
 
+let active_players = ref (init_board ())
+
+let start_anim = Unix.gettimeofday ()
+
+let moving_player_anim = ref pawn_anim_walk
+
+let moving_player = ref (None)
+
+let moving_player_pos = ref ( {x=4;y=7},{x=4;y=5} )
+
+let hit_dest = ref false
+
+(* TRANSLATE BETWEEN BOARD COORDINATES AND X/Y VALS, COLLISION DETECTION, ETC *)
 
 let square_size = 50.0
 
@@ -91,7 +108,37 @@ let square_center loc =
   let yc = (square_size *. 4.0) -. (square_size *. y_f) +. (square_size /. 2.0) in
     (xc, yc)
 
+let calc_current_pos start finish = 
+  let start_x, start_y = square_center start in
+  let end_x, end_y = square_center finish in
+  let dif_x, dif_y = end_x -. start_x, end_y -. start_y in
+  let currenttime = Unix.gettimeofday () in
+  let delta = (currenttime -. start_anim) /. 1.0  in
+  let cur_x = start_x +. (dif_x *. delta) in
+  let cur_y = start_y +. (dif_y *. delta) in
+    cur_x, cur_y
+
+let is_at_destination start finish =
+  let cur_x,cur_y = calc_current_pos start finish in
+  let dest_x,dest_y = square_center finish in
+  let diff_x = dest_x -. cur_x in
+  let diff_y = cur_y -. dest_y in
+  let distance = sqrt ( (diff_x *. diff_x) +. (diff_y *. diff_y) ) in
+  let epsilon = square_size /. 2.5 in
+    Printf.printf "%f \n" distance;
+    if
+      distance <= epsilon
+    then
+      true
+    else
+      false
+
 (* OPENGL DRAWING FUNCTIONS *)
+
+let set_material_color r g b a =
+  GlLight.material `front (`specular (r, g, b, a));
+  GlLight.material `front (`diffuse (r, g, b, a));
+  GlLight.material `front (`ambient (r, g, b, a));;      
 
 let draw_squares () =
   for i = 1 to 8  do
@@ -130,11 +177,6 @@ let draw_player loc model weapon state dir =
       | `white -> GlMat.rotate ~angle:90.0 ~z:1.0 ());
     Player.draw_player model weapon state;
     GlMat.pop()
-
-let set_material_color r g b a =
-  GlLight.material `front (`specular (r, g, b, a));
-  GlLight.material `front (`diffuse (r, g, b, a));
-  GlLight.material `front (`ambient (r, g, b, a));;          
 
 let lighting_init () =
   let light_ambient = 0.1, 0.1, 0.1, 1.0
@@ -177,6 +219,7 @@ let draw_moving_player start finish =
     Player.draw_player pawn wr !moving_player_anim;
     GlMat.pop()
 
+
 let extract_piece_from_list lst xpos ypos =
   let rec ep lst x y acc =
     match lst with
@@ -186,46 +229,11 @@ let extract_piece_from_list lst xpos ypos =
   in
     ep lst xpos ypos []
 
-let moves = ref [ {move_from={x=4;y=5};move_to={x=4;y=5}} ]
-
-let active_players = ref (init_board ())
-
-let start_anim = Unix.gettimeofday ()
-
-let moving_player_anim = ref pawn_anim_walk
-
-let moving_player = ref (None)
-
-let moving_player_pos = ref ( {x=4;y=7},{x=4;y=5} )
-
-let hit_dest = ref false
 
 
-let calc_current_pos start finish = 
-  let start_x, start_y = square_center start in
-  let end_x, end_y = square_center finish in
-  let dif_x, dif_y = end_x -. start_x, end_y -. start_y in
-  let currenttime = Unix.gettimeofday () in
-  let delta = (currenttime -. start_anim) /. 1.0  in
-  let cur_x = start_x +. (dif_x *. delta) in
-  let cur_y = start_y +. (dif_y *. delta) in
-    cur_x, cur_y
 
 
-let is_at_destination start finish =
-  let cur_x,cur_y = calc_current_pos start finish in
-  let dest_x,dest_y = square_center finish in
-  let diff_x = dest_x -. cur_x in
-  let diff_y = cur_y -. dest_y in
-  let distance = sqrt ( (diff_x *. diff_x) +. (diff_y *. diff_y) ) in
-  let epsilon = square_size /. 2.5 in
-    Printf.printf "%f \n" distance;
-    if
-      distance <= epsilon
-    then
-      true
-    else
-      false
+
 
 let display () =
   Gl.enable `cull_face;
