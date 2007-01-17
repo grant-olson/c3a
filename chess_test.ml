@@ -79,10 +79,7 @@ let init_board () =
    {loc={x=5;y=8};kind=White King;anim_state=king_anim_idle};
   ]
 
-let set_material_color r g b a =
-  GlLight.material `front (`specular (r, g, b, a));
-  GlLight.material `front (`diffuse (r, g, b, a));
-  GlLight.material `front (`ambient (r, g, b, a));;
+
 
 
 let square_size = 50.0
@@ -93,6 +90,8 @@ let square_center loc =
   let xc = (square_size *. -4.0) +. (square_size *. x_f) -. (square_size /. 2.0) in
   let yc = (square_size *. 4.0) -. (square_size *. y_f) +. (square_size /. 2.0) in
     (xc, yc)
+
+(* OPENGL DRAWING FUNCTIONS *)
 
 let draw_squares () =
   for i = 1 to 8  do
@@ -132,7 +131,10 @@ let draw_player loc model weapon state dir =
     Player.draw_player model weapon state;
     GlMat.pop()
 
-          
+let set_material_color r g b a =
+  GlLight.material `front (`specular (r, g, b, a));
+  GlLight.material `front (`diffuse (r, g, b, a));
+  GlLight.material `front (`ambient (r, g, b, a));;          
 
 let lighting_init () =
   let light_ambient = 0.1, 0.1, 0.1, 1.0
@@ -150,18 +152,6 @@ let lighting_init () =
 
   List.iter Gl.enable [`lighting; `light0; `depth_test; `texture_2d];;
 
-let active_players = ref (init_board ())
-
-let start_anim = Unix.gettimeofday ()
-
-let moving_player_anim = ref pawn_anim_walk
-
-let moving_player = ref (None)
-
-let moving_player_pos = ref ( {x=4;y=7},{x=4;y=5} )
-
-let hit_dest = ref false
-
 let draw_active_piece ap =
   let really_draw loc k a dir =
     match k with
@@ -178,6 +168,39 @@ let draw_active_piece ap =
       | {loc=loc;kind=White k;anim_state=anim_state} ->
           really_draw loc k anim_state `white
 
+let draw_moving_player start finish =
+  let cur_x,cur_y = calc_current_pos start finish in
+    GlMat.push();
+    set_material_color 1.0 1.0 1.0 1.0;
+    GlMat.translate ~x:cur_x ~y:cur_y ~z:(0.0) ();
+    GlMat.rotate ~angle:90.0 ~z:1.0 ();
+    Player.draw_player pawn wr !moving_player_anim;
+    GlMat.pop()
+
+let extract_piece_from_list lst xpos ypos =
+  let rec ep lst x y acc =
+    match lst with
+        [] -> raise Not_found
+      | h :: t when h.loc.x = x && h.loc.y=y -> h, t @ acc
+      | h :: t -> ep t xpos ypos (h::acc)
+  in
+    ep lst xpos ypos []
+
+let moves = ref [ {move_from={x=4;y=5};move_to={x=4;y=5}} ]
+
+let active_players = ref (init_board ())
+
+let start_anim = Unix.gettimeofday ()
+
+let moving_player_anim = ref pawn_anim_walk
+
+let moving_player = ref (None)
+
+let moving_player_pos = ref ( {x=4;y=7},{x=4;y=5} )
+
+let hit_dest = ref false
+
+
 let calc_current_pos start finish = 
   let start_x, start_y = square_center start in
   let end_x, end_y = square_center finish in
@@ -188,14 +211,6 @@ let calc_current_pos start finish =
   let cur_y = start_y +. (dif_y *. delta) in
     cur_x, cur_y
 
-let draw_moving_player start finish =
-  let cur_x,cur_y = calc_current_pos start finish in
-    GlMat.push();
-    set_material_color 1.0 1.0 1.0 1.0;
-    GlMat.translate ~x:cur_x ~y:cur_y ~z:(0.0) ();
-    GlMat.rotate ~angle:90.0 ~z:1.0 ();
-    Player.draw_player pawn wr !moving_player_anim;
-    GlMat.pop()
 
 let is_at_destination start finish =
   let cur_x,cur_y = calc_current_pos start finish in
@@ -211,23 +226,6 @@ let is_at_destination start finish =
       true
     else
       false
-
-
-
-
-
-let extract_piece_from_list lst xpos ypos =
-  let rec ep lst x y acc =
-    match lst with
-        [] -> raise Not_found
-      | h :: t when h.loc.x = x && h.loc.y=y -> h, t @ acc
-      | h :: t -> ep t xpos ypos (h::acc)
-  in
-    ep lst xpos ypos []
-
-let moves = ref [ {move_from={x=4;y=5};move_to={x=4;y=5}} ]
-
-
 
 let display () =
   Gl.enable `cull_face;
