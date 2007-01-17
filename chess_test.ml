@@ -83,15 +83,16 @@ let init_board () =
 
 
 (* INIT GLOBALS *)
-let moves = ref [ {move_from={x=4;y=5};move_to={x=4;y=5}} ]
+let moves = ref [ {move_from={x=4;y=7};move_to={x=4;y=5}} ;
+                  {move_from={x=5;y=7};move_to={x=5;y=6}} ]
 
 let active_players = ref (init_board ())
 
-let start_anim = Unix.gettimeofday ()
+let start_anim = ref (Unix.gettimeofday ())
 
 let moving_player_anim = ref pawn_anim_walk
 
-let moving_player = ref (None)
+let moving_player = ref None
 
 let moving_player_pos = ref ( {x=4;y=7},{x=4;y=5} )
 
@@ -113,7 +114,7 @@ let calc_current_pos start finish =
   let end_x, end_y = square_center finish in
   let dif_x, dif_y = end_x -. start_x, end_y -. start_y in
   let currenttime = Unix.gettimeofday () in
-  let delta = (currenttime -. start_anim) /. 1.0  in
+  let delta = (currenttime -. !start_anim) /. 1.0  in
   let cur_x = start_x +. (dif_x *. delta) in
   let cur_y = start_y +. (dif_y *. delta) in
     cur_x, cur_y
@@ -124,7 +125,7 @@ let is_at_destination start finish =
   let diff_x = dest_x -. cur_x in
   let diff_y = cur_y -. dest_y in
   let distance = sqrt ( (diff_x *. diff_x) +. (diff_y *. diff_y) ) in
-  let epsilon = square_size /. 2.5 in
+  let epsilon = square_size /. 1.0 in
     Printf.printf "%f \n" distance;
     if
       distance <= epsilon
@@ -229,11 +230,62 @@ let extract_piece_from_list lst xpos ypos =
   in
     ep lst xpos ypos []
 
+let add_piece_to_list lst piece x y =
+  let loc = {x=x;y=y} in
+  let anim_state =
+    let p = match piece with
+        Black x -> x
+      | White x -> x in
+    match p with
+        Pawn -> pawn_anim_idle
+      | Knight -> knight_anim_idle
+      | Bishop -> bishop_anim_idle
+      | Rook -> rook_anim_idle
+      | Queen -> queen_anim_idle
+      | King -> king_anim_idle
+  in
+    {loc=loc;kind=piece;anim_state=anim_state} :: lst
 
+let set_next_move () =
+  moving_player := None;
+  match !moves with
+      [] -> ()
+    | h::t ->
+        let start_x = h.move_from.x in
+        let start_y = h.move_from.y in
+        let np, ps = extract_piece_from_list !active_players start_x start_y in
+          moves := t;
+          moving_player := Some np.kind;
+          moving_player_pos := ( h.move_from , h.move_to );
+          start_anim := Unix.gettimeofday ();
+          active_players := ps
 
+let is_move_done piece start finish =
+  if
+    is_at_destination start finish
+  then
+    begin
+      set_next_move ();
+      active_players := add_piece_to_list !active_players piece finish.x finish.y;
+    end
+  else
+    ()
+          
 
+(* MAIN DISPLAY LOOP *)
 
+let handle_moving_player () =
+  match !moving_player with
+      Some x ->
+          let start,finish =  !moving_player_pos in
+            draw_moving_player start finish;
+            is_move_done x start finish
+    | None -> set_next_move ()
 
+let update_anim_states () = 
+  let new_time = Unix.gettimeofday () in
+    active_players := List.map (fun x -> {x with anim_state=(Player.update_player_anim_state new_time x.anim_state)}) !active_players;
+    moving_player_anim := Player.update_player_anim_state new_time !moving_player_anim
 
 let display () =
   Gl.enable `cull_face;
@@ -251,38 +303,23 @@ let display () =
 
   GlMat.load_identity ();
 
-
- 
   GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-250.0) ();
   (*GlMat.rotate ~angle:75.0 ~z:1.0 ~y:1.0 ~x:(-1.0) ();*)
 
   draw_squares ();
+
   set_material_color 1.0 0.0 0.0 1.0;
 
   List.iter draw_active_piece !active_players;
-
-  (match !moving_player with
-      Some x ->
-          let start,finish =  !moving_player_pos in
-            begin
-              draw_moving_player start finish;
-              (if is_at_destination start finish then moving_player := None);
-            end
-    | None -> ()
-        );
-
-
+  handle_moving_player ();
+ 
   lighting_init(); 
 
   Gl.flush ();
   Glut.swapBuffers ();
-  let new_time = Unix.gettimeofday () in
-    begin
-      active_players := List.map (fun x -> {x with anim_state=(Player.update_player_anim_state new_time x.anim_state)}) !active_players;
-      moving_player_anim := Player.update_player_anim_state new_time !moving_player_anim;
-    end;
-    
-  Glut.postRedisplay () ;;
+
+  update_anim_states ();
+  Glut.postRedisplay ()
 
 let main () =
   ignore(Glut.init Sys.argv);
@@ -291,8 +328,7 @@ let main () =
   ignore(Glut.createWindow ~title:"lablglut & LablGL");
   Glut.displayFunc ~cb:display;
 
-  Glut.mainLoop();
-  ;;
+  Glut.mainLoop()
 
 let _ = main ()
 
