@@ -83,8 +83,11 @@ let init_board () =
 
 
 (* INIT GLOBALS *)
-let moves = ref [ {move_from={x=4;y=7};move_to={x=4;y=5}} ;
-                  {move_from={x=5;y=7};move_to={x=5;y=6}} ]
+let moves = ref [ {move_from={x=4;y=7};move_to={x=4;y=5}};
+                  {move_from={x=6;y=2};move_to={x=6;y=4}};
+                  {move_from={x=5;y=7};move_to={x=5;y=6}};
+                  
+                ]
 
 let active_players = ref (init_board ())
 
