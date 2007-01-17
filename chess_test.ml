@@ -2,7 +2,11 @@ type piece_type = Pawn | Rook | Bishop | Knight | Queen | King
 
 type piece = Black of piece_type | White of piece_type
 
-type active_piece = {xpos:int;ypos:int;kind:piece;anim_state:Player.player_anim_state;}
+type location = {x:int;y:int;}
+type move = {move_from:location;move_to:location;}
+
+
+type active_piece = {loc:location;kind:piece;anim_state:Player.player_anim_state;}
 
 
 
@@ -32,48 +36,47 @@ let wr = Md3.load_md3_file "./pak0/models/weapons2/gauntlet/gauntlet.md3";;
 let wg = Md3.load_md3_file "./pak0/models/weapons2/railgun/railgun.md3";;
 
 let init_board () =
-  [{xpos=1;ypos=2;kind=Black Pawn;anim_state=pawn_anim_idle};
-   {xpos=2;ypos=2;kind=Black Pawn;anim_state=pawn_anim_idle};
-   {xpos=3;ypos=2;kind=Black Pawn;anim_state=pawn_anim_idle};
-   {xpos=4;ypos=2;kind=Black Pawn;anim_state=pawn_anim_idle};
-   {xpos=5;ypos=2;kind=Black Pawn;anim_state=pawn_anim_idle};
-   {xpos=6;ypos=2;kind=Black Pawn;anim_state=pawn_anim_idle};
-   {xpos=7;ypos=2;kind=Black Pawn;anim_state=pawn_anim_idle};
-   {xpos=8;ypos=2;kind=Black Pawn;anim_state=pawn_anim_idle};
+  [{loc={x=1;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
+   {loc={x=2;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
+   {loc={x=3;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
+   {loc={x=4;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
+   {loc={x=5;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
+   {loc={x=6;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
+   {loc={x=7;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
+   {loc={x=8;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
 
-   {xpos=1;ypos=1;kind=Black Rook;anim_state=pawn_anim_idle};
-   {xpos=8;ypos=1;kind=Black Rook;anim_state=rook_anim_idle};
+   {loc={x=1;y=1};kind=Black Rook;anim_state=pawn_anim_idle};
+   {loc={x=8;y=1};kind=Black Rook;anim_state=rook_anim_idle};
 
-   {xpos=2;ypos=1;kind=Black Knight;anim_state=knight_anim_idle};
-   {xpos=7;ypos=1;kind=Black Knight;anim_state=knight_anim_idle}
-;
-   {xpos=3;ypos=1;kind=Black Bishop;anim_state=bishop_anim_idle};
-   {xpos=6;ypos=1;kind=Black Bishop;anim_state=bishop_anim_idle};
+   {loc={x=2;y=1};kind=Black Knight;anim_state=knight_anim_idle};
+   {loc={x=7;y=1};kind=Black Knight;anim_state=knight_anim_idle};
 
-   {xpos=4;ypos=1;kind=Black Queen;anim_state=queen_anim_idle};
-   {xpos=5;ypos=1;kind=Black King;
-    anim_state=king_anim_idle};
+   {loc={x=3;y=1};kind=Black Bishop;anim_state=bishop_anim_idle};
+   {loc={x=6;y=1};kind=Black Bishop;anim_state=bishop_anim_idle};
 
-   {xpos=1;ypos=7;kind=White Pawn;anim_state=pawn_anim_idle};
-   {xpos=2;ypos=7;kind=White Pawn;anim_state=pawn_anim_idle};
-   {xpos=3;ypos=7;kind=White Pawn;anim_state=pawn_anim_idle};
-   {xpos=4;ypos=7;kind=White Pawn;anim_state=pawn_anim_idle};
-   {xpos=5;ypos=7;kind=White Pawn;anim_state=pawn_anim_idle};
-   {xpos=6;ypos=7;kind=White Pawn;anim_state=pawn_anim_idle};
-   {xpos=7;ypos=7;kind=White Pawn;anim_state=pawn_anim_idle};
-   {xpos=8;ypos=7;kind=White Pawn;anim_state=pawn_anim_idle};
+   {loc={x=4;y=1};kind=Black Queen;anim_state=queen_anim_idle};
+   {loc={x=5;y=1};kind=Black King;anim_state=king_anim_idle};
 
-   {xpos=1;ypos=8;kind=White Rook;anim_state=rook_anim_idle};
-   {xpos=8;ypos=8;kind=White Rook;anim_state=rook_anim_idle};
+   {loc={x=1;y=7};kind=White Pawn;anim_state=pawn_anim_idle};
+   {loc={x=2;y=7};kind=White Pawn;anim_state=pawn_anim_idle};
+   {loc={x=3;y=7};kind=White Pawn;anim_state=pawn_anim_idle};
+   {loc={x=4;y=7};kind=White Pawn;anim_state=pawn_anim_idle};
+   {loc={x=5;y=7};kind=White Pawn;anim_state=pawn_anim_idle};
+   {loc={x=6;y=7};kind=White Pawn;anim_state=pawn_anim_idle};
+   {loc={x=7;y=7};kind=White Pawn;anim_state=pawn_anim_idle};
+   {loc={x=8;y=7};kind=White Pawn;anim_state=pawn_anim_idle};
 
-   {xpos=2;ypos=8;kind=White Knight;anim_state=knight_anim_idle};
-   {xpos=7;ypos=8;kind=White Knight;anim_state=knight_anim_idle};
+   {loc={x=1;y=8};kind=White Rook;anim_state=rook_anim_idle};
+   {loc={x=8;y=8};kind=White Rook;anim_state=rook_anim_idle};
 
-   {xpos=3;ypos=8;kind=White Bishop;anim_state=bishop_anim_idle};
-   {xpos=6;ypos=8;kind=White Bishop;anim_state=bishop_anim_idle};
+   {loc={x=2;y=8};kind=White Knight;anim_state=knight_anim_idle};
+   {loc={x=7;y=8};kind=White Knight;anim_state=knight_anim_idle};
 
-   {xpos=4;ypos=8;kind=White Queen;anim_state=queen_anim_idle};
-   {xpos=5;ypos=8;kind=White King;anim_state=king_anim_idle};
+   {loc={x=3;y=8};kind=White Bishop;anim_state=bishop_anim_idle};
+   {loc={x=6;y=8};kind=White Bishop;anim_state=bishop_anim_idle};
+
+   {loc={x=4;y=8};kind=White Queen;anim_state=queen_anim_idle};
+   {loc={x=5;y=8};kind=White King;anim_state=king_anim_idle};
   ]
 
 let set_material_color r g b a =
@@ -84,9 +87,9 @@ let set_material_color r g b a =
 
 let square_size = 50.0
 
-let square_center (x,y) =
-  let x_f = float_of_int x in
-  let y_f = float_of_int y in
+let square_center loc =
+  let x_f = float_of_int loc.x in
+  let y_f = float_of_int loc.y in
   let xc = (square_size *. -4.0) +. (square_size *. x_f) -. (square_size /. 2.0) in
   let yc = (square_size *. 4.0) -. (square_size *. y_f) +. (square_size /. 2.0) in
     (xc, yc)
@@ -96,7 +99,7 @@ let draw_squares () =
     for j = 1 to 8 do
       let i_f = float_of_int i in
       let j_f = float_of_int j in
-       let x1 = (-4.0 *. square_size) +. ((i_f -. 1.0) *. square_size) in
+      let x1 = (-4.0 *. square_size) +. ((i_f -. 1.0) *. square_size) in
       let x2 = x1 +. square_size in
       let y1 = (4.0 *. square_size) -. ((j_f -. 1.0) *. square_size) in
       let y2 = y1 -. square_size in
@@ -118,8 +121,8 @@ let draw_squares () =
         done
     done
 
-let draw_player x y model weapon state dir =
-  let x,y = square_center(x,y) in
+let draw_player loc model weapon state dir =
+  let x,y = square_center loc in
     GlMat.push();
     set_material_color 1.0 1.0 1.0 1.0;
     GlMat.translate ~x:x ~y:y ~z:(0.0) ();
@@ -147,32 +150,37 @@ let lighting_init () =
 
   List.iter Gl.enable [`lighting; `light0; `depth_test; `texture_2d];;
 
-
-let draw_active_piece ap =
-  let really_draw x y k a dir =
-    match k with
-        Pawn -> draw_player x y pawn wr a dir
-      | Bishop -> draw_player x y bishop wr a dir
-      | Rook -> draw_player x y rook wr a dir
-      | Knight -> draw_player x y knight wr a dir
-      | King -> draw_player x y king wr a dir
-      | Queen -> draw_player x y queen wr a dir
-  in
-    match ap with
-      {xpos=x;ypos=y;kind=Black k;anim_state=anim_state} ->
-        really_draw x y k anim_state `black
-      | {xpos=x;ypos=y;kind=White k;anim_state=anim_state} ->
-          really_draw x y k anim_state `white
-
 let active_players = ref (init_board ())
 
 let start_anim = Unix.gettimeofday ()
 
-let moving_player_anim = ref queen_anim_walk
+let moving_player_anim = ref pawn_anim_walk
 
-let calc_current_pos (from_x, from_y) (to_x, to_y) = 
-  let start_x, start_y = square_center (from_x,from_y) in
-  let end_x, end_y = square_center(to_x,to_y) in
+let moving_player = ref (None)
+
+let moving_player_pos = ref ( {x=4;y=7},{x=4;y=5} )
+
+let hit_dest = ref false
+
+let draw_active_piece ap =
+  let really_draw loc k a dir =
+    match k with
+        Pawn -> draw_player loc pawn wr a dir
+      | Bishop -> draw_player loc bishop wr a dir
+      | Rook -> draw_player loc rook wr a dir
+      | Knight -> draw_player loc knight wr a dir
+      | King -> draw_player loc king wr a dir
+      | Queen -> draw_player loc queen wr a dir
+  in
+    match ap with
+      {loc=loc;kind=Black k;anim_state=anim_state} ->
+        really_draw loc k anim_state `black
+      | {loc=loc;kind=White k;anim_state=anim_state} ->
+          really_draw loc k anim_state `white
+
+let calc_current_pos start finish = 
+  let start_x, start_y = square_center start in
+  let end_x, end_y = square_center finish in
   let dif_x, dif_y = end_x -. start_x, end_y -. start_y in
   let currenttime = Unix.gettimeofday () in
   let delta = (currenttime -. start_anim) /. 1.0  in
@@ -180,22 +188,22 @@ let calc_current_pos (from_x, from_y) (to_x, to_y) =
   let cur_y = start_y +. (dif_y *. delta) in
     cur_x, cur_y
 
-let draw_moving_player (from_x,from_y) (to_x,to_y) =
-  let cur_x,cur_y = calc_current_pos (from_x,from_y) (to_x, to_y) in
+let draw_moving_player start finish =
+  let cur_x,cur_y = calc_current_pos start finish in
     GlMat.push();
     set_material_color 1.0 1.0 1.0 1.0;
     GlMat.translate ~x:cur_x ~y:cur_y ~z:(0.0) ();
     GlMat.rotate ~angle:90.0 ~z:1.0 ();
-    Player.draw_player queen wr !moving_player_anim;
+    Player.draw_player pawn wr !moving_player_anim;
     GlMat.pop()
 
-let is_at_destination (from_x, from_y) (to_x, to_y) =
-  let cur_x,cur_y = calc_current_pos (from_x,from_y) (to_x,to_y) in
-  let dest_x,dest_y = square_center(to_x, to_y) in
+let is_at_destination start finish =
+  let cur_x,cur_y = calc_current_pos start finish in
+  let dest_x,dest_y = square_center finish in
   let diff_x = dest_x -. cur_x in
   let diff_y = cur_y -. dest_y in
   let distance = sqrt ( (diff_x *. diff_x) +. (diff_y *. diff_y) ) in
-  let epsilon = square_size /. 5.0 in
+  let epsilon = square_size /. 2.5 in
     Printf.printf "%f \n" distance;
     if
       distance <= epsilon
@@ -204,9 +212,22 @@ let is_at_destination (from_x, from_y) (to_x, to_y) =
     else
       false
 
-let moving_player = ref (Some (White Pawn))
-let moving_player_pos = ref ( (4,7),(4,5) )
-let hit_dest = ref false
+
+
+
+
+let extract_piece_from_list lst xpos ypos =
+  let rec ep lst x y acc =
+    match lst with
+        [] -> raise Not_found
+      | h :: t when h.loc.x = x && h.loc.y=y -> h, t @ acc
+      | h :: t -> ep t xpos ypos (h::acc)
+  in
+    ep lst xpos ypos []
+
+let moves = ref [ {move_from={x=4;y=5};move_to={x=4;y=5}} ]
+
+
 
 let display () =
   Gl.enable `cull_face;
@@ -226,31 +247,24 @@ let display () =
 
 
  
-  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-200.0) ();
-  GlMat.rotate ~angle:75.0 ~z:1.0 ~y:1.0 ~x:(-1.0) ();
+  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-250.0) ();
+  (*GlMat.rotate ~angle:75.0 ~z:1.0 ~y:1.0 ~x:(-1.0) ();*)
 
   draw_squares ();
   set_material_color 1.0 0.0 0.0 1.0;
 
   List.iter draw_active_piece !active_players;
 
-  (*match !moving_player with
+  (match !moving_player with
       Some x ->
-        begin
-          let start,finish = !moving_player_pos in
-            (if is_at_destination start finish then moving_player := None);
-            draw_moving_player start finish;
-        end
-    | None -> () ;*)
+          let start,finish =  !moving_player_pos in
+            begin
+              draw_moving_player start finish;
+              (if is_at_destination start finish then moving_player := None);
+            end
+    | None -> ()
+        );
 
-  (if
-      !hit_dest = false
-    then
-      begin
-        hit_dest := (is_at_destination (4,7) (4,5));
-        draw_moving_player (4,7) (4,5);
-      end
-  );
 
   lighting_init(); 
 
