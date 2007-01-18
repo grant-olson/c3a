@@ -6,6 +6,7 @@ let pawn_anim_walk = Player.init_player_anim_state (165,185,165,20) (93,93,93,20
 
 let knight = Player.load_player "./pak0/models/players/hunter/"
 let knight_anim_idle = Player.init_player_anim_state (180,193,180,15) (90,139,90,20)
+let knight_anim_walk = Player.init_player_anim_state (98,114,98,23) (130,135,130,15)
 
 let queen = Player.load_player "./pak0/models/players/mynx/"
 let queen_anim_idle = Player.init_player_anim_state (195,211,195,15) (95,134,95,20)
@@ -13,12 +14,16 @@ let queen_anim_walk = Player.init_player_anim_state (111,117,111,25) (135,140,13
 
 let bishop = Player.load_player "./pak0/models/players/slash/"
 let bishop_anim_idle = Player.init_player_anim_state (160,174,160,15) (70,116,70,15)
+let bishop_anim_walk = Player.init_player_anim_state (80,89,80,14) (117,122,117,15)
 
 let rook = Player.load_player "./pak0/models/players/tankjr/"
 let rook_anim_idle = Player.init_player_anim_state (194, 194, 194, 15) (92, 131, 92, 19)
+let rook_anim_walk = Player.init_player_anim_state (108,129,108,28) (132,137,132,15)
 
 let king = Player.load_player "./pak0/models/players/xaero/"
 let king_anim_idle = Player.init_player_anim_state (193, 193, 193, 15) (117,149, 117, 15)
+let king_anim_walk = Player.init_player_anim_state (125,132,125,20) (150,155,150,15)
+
 
 let wrl = Md3.load_md3_file "./pak0/models/weapons2/rocketl/rocketl_1.md3";;
 let ws = Md3.load_md3_file "./pak0/models/weapons2/shotgun/shotgun.md3";;
@@ -85,8 +90,11 @@ let init_board () =
 (* INIT GLOBALS *)
 let moves = ref [ {move_from={x=4;y=7};move_to={x=4;y=5}};
                   {move_from={x=6;y=2};move_to={x=6;y=4}};
+                  {move_from={x=3;y=8};move_to={x=7;y=4}};
+                  {move_from={x=7;y=1};move_to={x=6;y=3}};
                   {move_from={x=5;y=7};move_to={x=5;y=6}};
-                  
+                  {move_from={x=3;y=2};move_to={x=3;y=3}};
+
                 ]
 
 let active_players = ref (init_board ())
@@ -214,13 +222,28 @@ let draw_active_piece ap =
       | {loc=loc;kind=White k;anim_state=anim_state} ->
           really_draw loc k anim_state `white
 
-let draw_moving_player start finish =
+let draw_moving_player player_type start finish =
   let cur_x,cur_y = calc_current_pos start finish in
+  let model = match player_type with
+      Black Bishop -> bishop
+    | White Bishop -> bishop
+    | Black Pawn -> pawn
+    | White Pawn -> pawn
+    | Black Knight -> knight
+    | White Knight -> knight
+    | Black Rook -> rook
+    | White Rook -> rook
+    | Black King -> king
+    | White King -> king
+    | Black Queen -> queen
+    | White Queen -> queen
+  in
+
     GlMat.push();
     set_material_color 1.0 1.0 1.0 1.0;
     GlMat.translate ~x:cur_x ~y:cur_y ~z:(0.0) ();
     GlMat.rotate ~angle:90.0 ~z:1.0 ();
-    Player.draw_player pawn wr !moving_player_anim;
+    Player.draw_player model wr !moving_player_anim;
     GlMat.pop()
 
 
@@ -257,9 +280,24 @@ let set_next_move () =
         let start_x = h.move_from.x in
         let start_y = h.move_from.y in
         let np, ps = extract_piece_from_list !active_players start_x start_y in
+        let anim = match np.kind with
+            Black Pawn -> pawn_anim_walk
+          | White Pawn -> pawn_anim_walk
+          | Black Rook -> rook_anim_walk
+          | White Rook -> rook_anim_walk
+          | Black Bishop -> bishop_anim_walk
+          | White Bishop -> bishop_anim_walk
+          | Black Knight -> knight_anim_walk
+          | White Knight -> knight_anim_walk
+          | Black Queen -> queen_anim_walk
+          | White Queen -> queen_anim_walk
+          | Black King -> king_anim_walk
+          | White King -> king_anim_walk
+        in
           moves := t;
           moving_player := Some np.kind;
           moving_player_pos := ( h.move_from , h.move_to );
+          moving_player_anim := anim;
           start_anim := Unix.gettimeofday ();
           active_players := ps
 
@@ -281,7 +319,7 @@ let handle_moving_player () =
   match !moving_player with
       Some x ->
           let start,finish =  !moving_player_pos in
-            draw_moving_player start finish;
+            draw_moving_player x start finish;
             is_move_done x start finish
     | None -> set_next_move ()
 
@@ -307,7 +345,7 @@ let display () =
   GlMat.load_identity ();
 
   GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-250.0) ();
-  (*GlMat.rotate ~angle:75.0 ~z:1.0 ~y:1.0 ~x:(-1.0) ();*)
+  GlMat.rotate ~angle:75.0 ~z:1.0 ~y:1.0 ~x:(-1.0) ();
 
   draw_squares ();
 
