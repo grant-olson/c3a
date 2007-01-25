@@ -94,7 +94,8 @@ let moves = ref [ {move_from={x=4;y=7};move_to={x=4;y=5}};
                   {move_from={x=7;y=1};move_to={x=6;y=3}};
                   {move_from={x=5;y=7};move_to={x=5;y=6}};
                   {move_from={x=3;y=2};move_to={x=3;y=3}};
-
+                  {move_from={x=4;y=8};move_to={x=8;y=4}};
+                  {move_from={x=6;y=3};move_to={x=8;y=4}};
                 ]
 
 let active_players = ref (init_board ())
@@ -130,6 +131,11 @@ let calc_current_pos start finish =
   let cur_y = start_y +. (dif_y *. delta) in
     cur_x, cur_y
 
+let calc_grid_pos x y =
+  let x = (x /. square_size) +. 5.0  in
+  let y = (y /. square_size) +. 5.0 in
+   (int_of_float x), (int_of_float y)
+
 let is_at_destination start finish =
   let cur_x,cur_y = calc_current_pos start finish in
   let dest_x,dest_y = square_center finish in
@@ -149,10 +155,11 @@ let is_at_destination start finish =
 
 let set_material_color r g b a =
   GlLight.material `front (`specular (r, g, b, a));
-  GlLight.material `front (`diffuse (r, g, b, a));
-  GlLight.material `front (`ambient (r, g, b, a));;      
+  GlLight.material `front (`diffuse (r *. 0.5, g *. 0.5, b *. 0.5, a));
+  GlLight.material `front (`ambient (r *. 0.5, g *. 0.5, b *. 0.5, a));;      
 
 let draw_squares () =
+  Gl.disable `texture_2d;
   for i = 1 to 8  do
     for j = 1 to 8 do
       let i_f = float_of_int i in
@@ -345,12 +352,13 @@ let display () =
   GlMat.load_identity ();
 
   GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-250.0) ();
-  GlMat.rotate ~angle:75.0 ~z:1.0 ~y:1.0 ~x:(-1.0) ();
+  (*GlMat.rotate ~angle:75.0 ~z:1.0 ~y:1.0 ~x:(-1.0) ();*)
 
   draw_squares ();
 
   set_material_color 1.0 0.0 0.0 1.0;
 
+  Gl.enable `texture_2d;
   List.iter draw_active_piece !active_players;
   handle_moving_player ();
  
@@ -362,11 +370,21 @@ let display () =
   update_anim_states ();
   Glut.postRedisplay ()
 
+exception Mouse_click of (float * float * float)
+
+let mouse ~button ~state ~x ~y =
+  let z_in = 0.92 in
+  let x,y,z = GluMat.unproject ((float_of_int x), (float_of_int y), z_in) in
+  let x,y = calc_grid_pos x y in
+  let text = (string_of_int x)^" "^(string_of_int y)^" " in
+    Glut.setWindowTitle text
+
 let main () =
   ignore(Glut.init Sys.argv);
   Glut.initDisplayMode ~alpha:true ~double_buffer:true ~depth:true () ;
   Glut.initWindowSize ~w:500 ~h:500 ;
   ignore(Glut.createWindow ~title:"lablglut & LablGL");
+  Glut.mouseFunc ~cb:mouse;
   Glut.displayFunc ~cb:display;
 
   Glut.mainLoop()
