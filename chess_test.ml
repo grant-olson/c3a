@@ -39,6 +39,7 @@ type piece = Black of piece_type | White of piece_type
 type location = {x:int;y:int;}
 type move = {move_from:location;move_to:location;}
 
+type state = Waiting | Moving | StartMove of location | EndMove of location * location
 
 type active_piece = {loc:location;kind:piece;anim_state:Player.player_anim_state;}
 
