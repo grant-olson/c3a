@@ -39,7 +39,7 @@ type piece = Black of piece_type | White of piece_type
 type location = {x:int;y:int;}
 type move = {move_from:location;move_to:location;}
 
-type state = Waiting | Moving | StartMove of location | EndMove of location * location
+type state = Waiting | Moving | ClickOne of location | ClickTwo of move
 
 type active_piece = {loc:location;kind:piece;anim_state:Player.player_anim_state;}
 
@@ -110,6 +110,8 @@ let moving_player = ref None
 let moving_player_pos = ref ( {x=4;y=7},{x=4;y=5} )
 
 let hit_dest = ref false
+
+let current_state = ref Waiting
 
 (* TRANSLATE BETWEEN BOARD COORDINATES AND X/Y VALS, COLLISION DETECTION, ETC *)
 
@@ -280,41 +282,38 @@ let add_piece_to_list lst piece x y =
   in
     {loc=loc;kind=piece;anim_state=anim_state} :: lst
 
-let set_next_move () =
-  moving_player := None;
-  match !moves with
-      [] -> ()
-    | h::t ->
-        let start_x = h.move_from.x in
-        let start_y = h.move_from.y in
-        let np, ps = extract_piece_from_list !active_players start_x start_y in
-        let anim = match np.kind with
-            Black Pawn -> pawn_anim_walk
-          | White Pawn -> pawn_anim_walk
-          | Black Rook -> rook_anim_walk
-          | White Rook -> rook_anim_walk
-          | Black Bishop -> bishop_anim_walk
-          | White Bishop -> bishop_anim_walk
-          | Black Knight -> knight_anim_walk
-          | White Knight -> knight_anim_walk
-          | Black Queen -> queen_anim_walk
-          | White Queen -> queen_anim_walk
-          | Black King -> king_anim_walk
-          | White King -> king_anim_walk
-        in
-          moves := t;
-          moving_player := Some np.kind;
-          moving_player_pos := ( h.move_from , h.move_to );
-          moving_player_anim := anim;
-          start_anim := Unix.gettimeofday ();
-          active_players := ps
+let set_move move =
+  let start_x = move.move_from.x in
+  let start_y = move.move_from.y in
+  let np, ps = extract_piece_from_list !active_players start_x start_y in
+  let anim = match np.kind with
+      Black Pawn -> pawn_anim_walk
+    | White Pawn -> pawn_anim_walk
+    | Black Rook -> rook_anim_walk
+    | White Rook -> rook_anim_walk
+    | Black Bishop -> bishop_anim_walk
+    | White Bishop -> bishop_anim_walk
+    | Black Knight -> knight_anim_walk
+    | White Knight -> knight_anim_walk
+    | Black Queen -> queen_anim_walk
+    | White Queen -> queen_anim_walk
+    | Black King -> king_anim_walk
+    | White King -> king_anim_walk
+  in
+    moving_player := Some np.kind;
+    moving_player_pos := ( move.move_from , move.move_to );
+    moving_player_anim := anim;
+    start_anim := Unix.gettimeofday ();
+    active_players := ps;
+    current_state := Moving
 
 let is_move_done piece start finish =
   if
     is_at_destination start finish
   then
     begin
-      set_next_move ();
+      current_state := Waiting;
+      moving_player := None;
       active_players := add_piece_to_list !active_players piece finish.x finish.y;
     end
   else
@@ -329,12 +328,28 @@ let handle_moving_player () =
           let start,finish =  !moving_player_pos in
             draw_moving_player x start finish;
             is_move_done x start finish
-    | None -> set_next_move ()
+    | None -> ()
 
 let update_anim_states () = 
   let new_time = Unix.gettimeofday () in
     active_players := List.map (fun x -> {x with anim_state=(Player.update_player_anim_state new_time x.anim_state)}) !active_players;
     moving_player_anim := Player.update_player_anim_state new_time !moving_player_anim
+
+let update_state () =
+  match !current_state with
+      ClickTwo m ->
+        let move_from, move_to = m.move_from, m.move_to in
+        let from = (string_of_int move_from.x)^" "^(string_of_int move_from.y) in
+        let moveto = (string_of_int move_to.x)^" "^(string_of_int move_to.y) in
+        let text = from^ " => "^moveto in
+          begin
+            try
+              set_move m
+            with Not_found ->
+              Glut.setWindowTitle "BAD MOVE";
+              current_state := Waiting
+          end
+    | _ -> ()
 
 let display () =
   Gl.enable `cull_face;
@@ -359,6 +374,8 @@ let display () =
 
   set_material_color 1.0 0.0 0.0 1.0;
 
+  update_state ();
+
   Gl.enable `texture_2d;
   List.iter draw_active_piece !active_players;
   handle_moving_player ();
@@ -378,7 +395,18 @@ let mouse ~button ~state ~x ~y =
   let x,y,z = GluMat.unproject ((float_of_int x), (float_of_int y), z_in) in
   let x,y = calc_grid_pos x y in
   let text = (string_of_int x)^" "^(string_of_int y)^" " in
-    Glut.setWindowTitle text
+    match state with
+        Glut.DOWN ->
+          begin
+            Glut.setWindowTitle text;
+            match !current_state with
+                Waiting -> current_state := ClickOne {x=x;y=y}
+              | ClickOne a -> current_state := ClickTwo {move_from=a;move_to={x=x;y=y}}
+              | _ -> ()
+          end
+      | _ -> ()
+            
+      
 
 let main () =
   ignore(Glut.init Sys.argv);
