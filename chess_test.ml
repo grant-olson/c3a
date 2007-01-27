@@ -324,6 +324,17 @@ let valid_queen_moves piece pieces =
   let bm = valid_bishop_moves piece pieces in
     rm@bm
 
+let remove_bad_moves move_list side pieces =
+  let minus_invalid = List.filter (fun a ->
+    (a.x >= 1 && a.x <= 8 && a.y >= 1 && a.y <= 8)) move_list in
+  let test_for_conflict side pieces move =
+    match check_for_piece pieces move.x move.y with
+        Some Piece(x,_) when x = side -> false
+      | _ -> true
+  in
+    List.filter (fun a-> test_for_conflict side pieces a) move_list
+    
+
 let valid_king_moves piece pieces =
   let moves = [{x=piece.loc.x+1;y=piece.loc.y};
                {x=piece.loc.x-1;y=piece.loc.y};
@@ -333,12 +344,16 @@ let valid_king_moves piece pieces =
                {x=piece.loc.x+1;y=piece.loc.y-1};
                {x=piece.loc.x-1;y=piece.loc.y+1};
                {x=piece.loc.x-1;y=piece.loc.y-1}] in
-  let minus_invalid = List.filter (fun a -> (a.x >= 1 && a.x <= 8 && a.y >= 1 && a.y <= 8)) moves in
-  let test_for_conflict side pieces x y =
-    match check_for_piece pieces x y with
-      Some Piece(x,_) when x = side -> false
-      | _ -> true in
-    minus_invalid
+  let side = match piece.kind with Piece(x,_) -> x in
+    remove_bad_moves moves side pieces
+
+let valid_knight_moves p pieces =
+  let moves = [{x=p.loc.x+2;y=p.loc.y+1};{x=p.loc.x+2;y=p.loc.y-1};
+               {x=p.loc.x-2;y=p.loc.y+1};{x=p.loc.x-2;y=p.loc.y-1};
+               {x=p.loc.x+1;y=p.loc.y+2};{x=p.loc.x-1;y=p.loc.y+2};
+               {x=p.loc.x+1;y=p.loc.y-2};{x=p.loc.x-1;y=p.loc.x-2}] in
+  let side = match p.kind with Piece(x,_) -> x in
+    remove_bad_moves moves side pieces
 
 let validate_move pieces move =
   let startx,starty = move.move_from.x,move.move_from.y in
@@ -350,7 +365,7 @@ let validate_move pieces move =
     | {kind=Piece(_,Bishop)} -> valid_bishop_moves piece pieces
     | {kind=Piece(_,Queen)} -> valid_queen_moves piece pieces
     | {kind=Piece(_,King)} -> valid_king_moves piece pieces
-    | {kind=Piece(_,_)} -> []
+    | {kind=Piece(_,Knight)} -> valid_knight_moves piece pieces
   in
     List.mem {x=endx;y=endy} valid_moves
 
