@@ -250,6 +250,15 @@ let draw_moving_player player_type start finish =
     GlMat.pop()
 
 
+let rec check_for_piece lst x y =
+  match lst with
+      [] -> None
+    | h :: t when h.loc.x = x && h.loc.y=y -> Some h.kind
+    | h :: t -> check_for_piece t x y 
+
+
+      
+
 let extract_piece_from_list lst xpos ypos =
   let rec ep lst x y acc =
     match lst with
@@ -271,6 +280,79 @@ let add_piece_to_list lst piece x y =
       | Piece(_,King) -> king_anim_idle
   in
     {loc=loc;kind=piece;anim_state=anim_state} :: lst
+
+let valid_pawn_moves piece pieces =
+  let m1x,m1y = match piece.kind with
+      Piece(Black,_) -> piece.loc.x,(piece.loc.y + 1)
+    | Piece(White,_) -> piece.loc.x,(piece.loc.y - 1) in
+  let move1 = check_for_piece pieces m1x m1y in
+    if move1 = None then [{x=m1x;y=m1y}] else []
+
+let rec expand_move piece current_pos movex movey pieces acc =
+  (* Generic expand move.  Move in given direction until
+     we hit end of board, can't move becuase one of our pieces is there
+     or can't move any further because we killed an apponent *)
+  let my_color = match piece.kind with Piece(x,_) -> x in
+  let new_pos = {x=current_pos.x + movex;y=current_pos.y + movey} in
+    match new_pos with
+        location when new_pos.x < 1 -> acc
+      | location when new_pos.x > 8 -> acc
+      | location when new_pos.y < 1 -> acc
+      | location when new_pos.y > 8 -> acc
+      | _ ->
+          match check_for_piece pieces new_pos.x new_pos.y with
+              Some Piece(x,_) when x = my_color -> acc
+            | Some Piece(x,_) -> new_pos :: acc
+            | None -> expand_move piece new_pos movex movey pieces (new_pos::acc)
+
+let valid_rook_moves piece pieces =
+  let left_moves = expand_move piece piece.loc (-1) 0 pieces [] in
+  let up_moves = expand_move piece piece.loc 0 (-1) pieces [] in
+  let right_moves = expand_move piece piece.loc 1 0 pieces [] in
+  let down_moves = expand_move piece piece.loc 0 1 pieces [] in
+    left_moves@up_moves@right_moves@down_moves
+
+let valid_bishop_moves piece pieces =
+  let up_left_moves = expand_move piece piece.loc (-1) 1 pieces [] in
+  let up_right_moves = expand_move piece piece.loc (-1) (-1) pieces [] in
+  let down_left_moves = expand_move piece piece.loc 1 1 pieces [] in
+  let down_right_moves = expand_move piece piece.loc 1 (-1) pieces [] in
+    up_left_moves@up_right_moves@down_right_moves@down_left_moves
+
+let valid_queen_moves piece pieces =
+  let rm = valid_rook_moves piece pieces in
+  let bm = valid_bishop_moves piece pieces in
+    rm@bm
+
+let valid_king_moves piece pieces =
+  let moves = [{x=piece.loc.x+1;y=piece.loc.y};
+               {x=piece.loc.x-1;y=piece.loc.y};
+               {x=piece.loc.x;y=piece.loc.y-1};
+               {x=piece.loc.x;y=piece.loc.y+1};
+               {x=piece.loc.x+1;y=piece.loc.y+1};
+               {x=piece.loc.x+1;y=piece.loc.y-1};
+               {x=piece.loc.x-1;y=piece.loc.y+1};
+               {x=piece.loc.x-1;y=piece.loc.y-1}] in
+  let minus_invalid = List.filter (fun a -> (a.x >= 1 && a.x <= 8 && a.y >= 1 && a.y <= 8)) moves in
+  let test_for_conflict side pieces x y =
+    match check_for_piece pieces x y with
+      Some Piece(x,_) when x = side -> false
+      | _ -> true in
+    minus_invalid
+
+let validate_move pieces move =
+  let startx,starty = move.move_from.x,move.move_from.y in
+  let endx,endy = move.move_to.x,move.move_to.y in
+  let piece,pieces = extract_piece_from_list pieces startx starty in
+  let valid_moves = match piece with
+      {kind=Piece(_,Pawn)} -> valid_pawn_moves piece pieces
+    | {kind=Piece(_,Rook)} -> valid_rook_moves piece pieces
+    | {kind=Piece(_,Bishop)} -> valid_bishop_moves piece pieces
+    | {kind=Piece(_,Queen)} -> valid_queen_moves piece pieces
+    | {kind=Piece(_,King)} -> valid_king_moves piece pieces
+    | {kind=Piece(_,_)} -> []
+  in
+    List.mem {x=endx;y=endy} valid_moves
 
 let set_move move =
   let start_x = move.move_from.x in
@@ -326,13 +408,14 @@ let update_state () =
         let from = (string_of_int move_from.x)^" "^(string_of_int move_from.y) in
         let moveto = (string_of_int move_to.x)^" "^(string_of_int move_to.y) in
         let text = from^ " => "^moveto in
-          begin
-            try
-              set_move m
-            with Not_found ->
+          if validate_move !active_players m
+          then
+            set_move m
+          else
+            begin
               Glut.setWindowTitle "BAD MOVE";
               current_state := Waiting
-          end
+            end
     | _ -> ()
 
 let display () =
