@@ -33,8 +33,9 @@ let wg = Md3.load_md3_file "./pak0/models/weapons2/railgun/railgun.md3";;
 (* TYPES *)
 
 type piece_type = Pawn | Rook | Bishop | Knight | Queen | King
+type side = Black | White
 
-type piece = Black of piece_type | White of piece_type
+type piece = Piece of side * piece_type
 
 type location = {x:int;y:int;}
 type move = {move_from:location;move_to:location;}
@@ -44,47 +45,47 @@ type state = Waiting | Moving | ClickOne of location | ClickTwo of move
 type active_piece = {loc:location;kind:piece;anim_state:Player.player_anim_state;}
 
 let init_board () =
-  [{loc={x=1;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
-   {loc={x=2;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
-   {loc={x=3;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
-   {loc={x=4;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
-   {loc={x=5;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
-   {loc={x=6;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
-   {loc={x=7;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
-   {loc={x=8;y=2;};kind=Black Pawn;anim_state=pawn_anim_idle};
+  [{loc={x=1;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
+   {loc={x=2;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
+   {loc={x=3;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
+   {loc={x=4;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
+   {loc={x=5;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
+   {loc={x=6;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
+   {loc={x=7;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
+   {loc={x=8;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
 
-   {loc={x=1;y=1};kind=Black Rook;anim_state=pawn_anim_idle};
-   {loc={x=8;y=1};kind=Black Rook;anim_state=rook_anim_idle};
+   {loc={x=1;y=1};kind=Piece(Black,Rook);anim_state=pawn_anim_idle};
+   {loc={x=8;y=1};kind=Piece(Black,Rook);anim_state=rook_anim_idle};
 
-   {loc={x=2;y=1};kind=Black Knight;anim_state=knight_anim_idle};
-   {loc={x=7;y=1};kind=Black Knight;anim_state=knight_anim_idle};
+   {loc={x=2;y=1};kind=Piece(Black,Knight);anim_state=knight_anim_idle};
+   {loc={x=7;y=1};kind=Piece(Black,Knight);anim_state=knight_anim_idle};
 
-   {loc={x=3;y=1};kind=Black Bishop;anim_state=bishop_anim_idle};
-   {loc={x=6;y=1};kind=Black Bishop;anim_state=bishop_anim_idle};
+   {loc={x=3;y=1};kind=Piece(Black,Bishop);anim_state=bishop_anim_idle};
+   {loc={x=6;y=1};kind=Piece(Black,Bishop);anim_state=bishop_anim_idle};
 
-   {loc={x=4;y=1};kind=Black Queen;anim_state=queen_anim_idle};
-   {loc={x=5;y=1};kind=Black King;anim_state=king_anim_idle};
+   {loc={x=4;y=1};kind=Piece(Black,Queen);anim_state=queen_anim_idle};
+   {loc={x=5;y=1};kind=Piece(Black,King);anim_state=king_anim_idle};
 
-   {loc={x=1;y=7};kind=White Pawn;anim_state=pawn_anim_idle};
-   {loc={x=2;y=7};kind=White Pawn;anim_state=pawn_anim_idle};
-   {loc={x=3;y=7};kind=White Pawn;anim_state=pawn_anim_idle};
-   {loc={x=4;y=7};kind=White Pawn;anim_state=pawn_anim_idle};
-   {loc={x=5;y=7};kind=White Pawn;anim_state=pawn_anim_idle};
-   {loc={x=6;y=7};kind=White Pawn;anim_state=pawn_anim_idle};
-   {loc={x=7;y=7};kind=White Pawn;anim_state=pawn_anim_idle};
-   {loc={x=8;y=7};kind=White Pawn;anim_state=pawn_anim_idle};
+   {loc={x=1;y=7};kind=Piece(White,Pawn);anim_state=pawn_anim_idle};
+   {loc={x=2;y=7};kind=Piece(White,Pawn);anim_state=pawn_anim_idle};
+   {loc={x=3;y=7};kind=Piece(White,Pawn);anim_state=pawn_anim_idle};
+   {loc={x=4;y=7};kind=Piece(White,Pawn);anim_state=pawn_anim_idle};
+   {loc={x=5;y=7};kind=Piece(White,Pawn);anim_state=pawn_anim_idle};
+   {loc={x=6;y=7};kind=Piece(White,Pawn);anim_state=pawn_anim_idle};
+   {loc={x=7;y=7};kind=Piece(White,Pawn);anim_state=pawn_anim_idle};
+   {loc={x=8;y=7};kind=Piece(White,Pawn);anim_state=pawn_anim_idle};
 
-   {loc={x=1;y=8};kind=White Rook;anim_state=rook_anim_idle};
-   {loc={x=8;y=8};kind=White Rook;anim_state=rook_anim_idle};
+   {loc={x=1;y=8};kind=Piece(White,Rook);anim_state=rook_anim_idle};
+   {loc={x=8;y=8};kind=Piece(White,Rook);anim_state=rook_anim_idle};
 
-   {loc={x=2;y=8};kind=White Knight;anim_state=knight_anim_idle};
-   {loc={x=7;y=8};kind=White Knight;anim_state=knight_anim_idle};
+   {loc={x=2;y=8};kind=Piece(White,Knight);anim_state=knight_anim_idle};
+   {loc={x=7;y=8};kind=Piece(White,Knight);anim_state=knight_anim_idle};
 
-   {loc={x=3;y=8};kind=White Bishop;anim_state=bishop_anim_idle};
-   {loc={x=6;y=8};kind=White Bishop;anim_state=bishop_anim_idle};
+   {loc={x=3;y=8};kind=Piece(White,Bishop);anim_state=bishop_anim_idle};
+   {loc={x=6;y=8};kind=Piece(White,Bishop);anim_state=bishop_anim_idle};
 
-   {loc={x=4;y=8};kind=White Queen;anim_state=queen_anim_idle};
-   {loc={x=5;y=8};kind=White King;anim_state=king_anim_idle};
+   {loc={x=4;y=8};kind=Piece(White,Queen);anim_state=queen_anim_idle};
+   {loc={x=5;y=8};kind=Piece(White,King);anim_state=king_anim_idle};
   ]
 
 
@@ -195,8 +196,8 @@ let draw_player loc model weapon state dir =
     set_material_color 1.0 1.0 1.0 1.0;
     GlMat.translate ~x:x ~y:y ~z:(0.0) ();
     (match dir with
-        `black -> GlMat.rotate ~angle:270.0 ~z:1.0 ()
-      | `white -> GlMat.rotate ~angle:90.0 ~z:1.0 ());
+        Black -> GlMat.rotate ~angle:270.0 ~z:1.0 ()
+      | White -> GlMat.rotate ~angle:90.0 ~z:1.0 ());
     Player.draw_player model weapon state;
     GlMat.pop()
 
@@ -217,38 +218,30 @@ let lighting_init () =
   List.iter Gl.enable [`lighting; `light0; `depth_test; `texture_2d];;
 
 let draw_active_piece ap =
-  let really_draw loc k a dir =
+  let really_draw loc k a =
     match k with
-        Pawn -> draw_player loc pawn wr a dir
-      | Bishop -> draw_player loc bishop wr a dir
-      | Rook -> draw_player loc rook wr a dir
-      | Knight -> draw_player loc knight wr a dir
-      | King -> draw_player loc king wr a dir
-      | Queen -> draw_player loc queen wr a dir
+        Piece(x,Pawn) -> draw_player loc pawn wr a x
+      | Piece(x,Bishop) -> draw_player loc bishop wr a x
+      | Piece(x,Rook) -> draw_player loc rook wr a x
+      | Piece(x,Knight) -> draw_player loc knight wr a x
+      | Piece(x,King) -> draw_player loc king wr a x
+      | Piece(x,Queen) -> draw_player loc queen wr a x
   in
     match ap with
-      {loc=loc;kind=Black k;anim_state=anim_state} ->
-        really_draw loc k anim_state `black
-      | {loc=loc;kind=White k;anim_state=anim_state} ->
-          really_draw loc k anim_state `white
+      {loc=loc;kind=k;anim_state=anim_state} ->
+        really_draw loc k anim_state
+
 
 let draw_moving_player player_type start finish =
   let cur_x,cur_y = calc_current_pos start finish in
   let model = match player_type with
-      Black Bishop -> bishop
-    | White Bishop -> bishop
-    | Black Pawn -> pawn
-    | White Pawn -> pawn
-    | Black Knight -> knight
-    | White Knight -> knight
-    | Black Rook -> rook
-    | White Rook -> rook
-    | Black King -> king
-    | White King -> king
-    | Black Queen -> queen
-    | White Queen -> queen
+      Piece(_,Bishop) -> bishop
+    | Piece(_,Pawn) -> pawn
+    | Piece(_,Knight) -> knight
+    | Piece(_,Rook) -> rook
+    | Piece(_,King) -> king
+    | Piece(_,Queen) -> queen
   in
-
     GlMat.push();
     set_material_color 1.0 1.0 1.0 1.0;
     GlMat.translate ~x:cur_x ~y:cur_y ~z:(0.0) ();
@@ -269,16 +262,13 @@ let extract_piece_from_list lst xpos ypos =
 let add_piece_to_list lst piece x y =
   let loc = {x=x;y=y} in
   let anim_state =
-    let p = match piece with
-        Black x -> x
-      | White x -> x in
-    match p with
-        Pawn -> pawn_anim_idle
-      | Knight -> knight_anim_idle
-      | Bishop -> bishop_anim_idle
-      | Rook -> rook_anim_idle
-      | Queen -> queen_anim_idle
-      | King -> king_anim_idle
+    match piece with
+        Piece(_,Pawn) -> pawn_anim_idle
+      | Piece(_,Knight) -> knight_anim_idle
+      | Piece(_,Bishop) -> bishop_anim_idle
+      | Piece(_,Rook) -> rook_anim_idle
+      | Piece(_,Queen) -> queen_anim_idle
+      | Piece(_,King) -> king_anim_idle
   in
     {loc=loc;kind=piece;anim_state=anim_state} :: lst
 
@@ -287,18 +277,12 @@ let set_move move =
   let start_y = move.move_from.y in
   let np, ps = extract_piece_from_list !active_players start_x start_y in
   let anim = match np.kind with
-      Black Pawn -> pawn_anim_walk
-    | White Pawn -> pawn_anim_walk
-    | Black Rook -> rook_anim_walk
-    | White Rook -> rook_anim_walk
-    | Black Bishop -> bishop_anim_walk
-    | White Bishop -> bishop_anim_walk
-    | Black Knight -> knight_anim_walk
-    | White Knight -> knight_anim_walk
-    | Black Queen -> queen_anim_walk
-    | White Queen -> queen_anim_walk
-    | Black King -> king_anim_walk
-    | White King -> king_anim_walk
+      Piece(_,Pawn) -> pawn_anim_walk
+    | Piece(_,Rook) -> rook_anim_walk
+    | Piece(_,Bishop) -> bishop_anim_walk
+    | Piece(_,Knight) -> knight_anim_walk
+    | Piece(_,Queen) -> queen_anim_walk
+    | Piece(_,King) -> king_anim_walk
   in
     moving_player := Some np.kind;
     moving_player_pos := ( move.move_from , move.move_to );
