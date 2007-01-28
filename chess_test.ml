@@ -367,18 +367,24 @@ let valid_knight_moves p pieces =
     remove_bad_moves moves side pieces
 
 let validate_move pieces move =
-  let startx,starty = move.move_from.x,move.move_from.y in
-  let endx,endy = move.move_to.x,move.move_to.y in
-  let piece,pieces = extract_piece_from_list pieces startx starty in
-  let valid_moves = match piece with
-      {kind=Piece(_,Pawn)} -> valid_pawn_moves piece pieces
-    | {kind=Piece(_,Rook)} -> valid_rook_moves piece pieces
-    | {kind=Piece(_,Bishop)} -> valid_bishop_moves piece pieces
-    | {kind=Piece(_,Queen)} -> valid_queen_moves piece pieces
-    | {kind=Piece(_,King)} -> valid_king_moves piece pieces
-    | {kind=Piece(_,Knight)} -> valid_knight_moves piece pieces
+  let validate_start_and_end_pos pieces move =
+    let startx,starty = move.move_from.x,move.move_from.y in
+    let endx,endy = move.move_to.x,move.move_to.y in
+    let piece,pieces = extract_piece_from_list pieces startx starty in
+    let valid_moves = match piece with
+        {kind=Piece(_,Pawn)} -> valid_pawn_moves piece pieces
+      | {kind=Piece(_,Rook)} -> valid_rook_moves piece pieces
+      | {kind=Piece(_,Bishop)} -> valid_bishop_moves piece pieces
+      | {kind=Piece(_,Queen)} -> valid_queen_moves piece pieces
+      | {kind=Piece(_,King)} -> valid_king_moves piece pieces
+      | {kind=Piece(_,Knight)} -> valid_knight_moves piece pieces
+    in
+      List.mem {x=endx;y=endy} valid_moves
   in
-    List.mem {x=endx;y=endy} valid_moves
+    try
+      validate_start_and_end_pos pieces move
+    with
+        Not_found -> false (* bad starting pos *)
 
 let set_move move =
   let start_x = move.move_from.x in
