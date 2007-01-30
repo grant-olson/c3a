@@ -106,12 +106,12 @@ let moves = ref [ {move_from={x=4;y=7};move_to={x=4;y=5}};
                   {move_from={x=6;y=3};move_to={x=8;y=4}};
                 ]
 
-let active_players = ref (init_board ())
+let active_pieces = ref (init_board ())
 
-let start_anim = ref (Unix.gettimeofday ())
-let moving_player_anim = ref pawn_anim_walk
-let moving_player = ref None
-let moving_player_pos = ref ( {x=4;y=7},{x=4;y=5} )
+let moving_piece_start_anim = ref (Unix.gettimeofday ())
+let moving_piece_anim = ref pawn_anim_walk
+let moving_piece = ref None
+let moving_piece_pos = ref ( {x=4;y=7},{x=4;y=5} )
 
 let hit_dest = ref false
 
@@ -139,7 +139,7 @@ let calc_current_pos start finish =
   let end_x, end_y = square_center finish in
   let dif_x, dif_y = end_x -. start_x, end_y -. start_y in
   let currenttime = Unix.gettimeofday () in
-  let delta = (currenttime -. !start_anim) /. 1.0  in
+  let delta = (currenttime -. !moving_piece_start_anim) /. 1.0  in
   let cur_x = start_x +. (dif_x *. delta) in
   let cur_y = start_y +. (dif_y *. delta) in
     cur_x, cur_y
@@ -293,7 +293,7 @@ let validate_move pieces move =
 let set_move move =
   let start_x = move.move_from.x in
   let start_y = move.move_from.y in
-  let np, ps = extract_piece_from_list !active_players start_x start_y in
+  let np, ps = extract_piece_from_list !active_pieces start_x start_y in
   let anim = match np.kind with
       Piece(_,Pawn) -> pawn_anim_walk
     | Piece(_,Rook) -> rook_anim_walk
@@ -302,11 +302,11 @@ let set_move move =
     | Piece(_,Queen) -> queen_anim_walk
     | Piece(_,King) -> king_anim_walk
   in
-    moving_player := Some np.kind;
-    moving_player_pos := ( move.move_from , move.move_to );
-    moving_player_anim := anim;
-    start_anim := Unix.gettimeofday ();
-    active_players := ps;
+    moving_piece := Some np.kind;
+    moving_piece_pos := ( move.move_from , move.move_to );
+    moving_piece_anim := anim;
+    moving_piece_start_anim := Unix.gettimeofday ();
+    active_pieces := ps;
     current_state := Moving
 
 let is_move_done piece start finish =
@@ -315,15 +315,15 @@ let is_move_done piece start finish =
   then
     begin
       current_state := Waiting;
-      moving_player := None;
-      active_players := add_piece_to_list !active_players piece finish.x finish.y;
+      moving_piece := None;
+      active_pieces := add_piece_to_list !active_pieces piece finish.x finish.y;
     end
   else
     ()
           
 
 let set_death m =
-  let dp,ps = extract_piece_from_list !active_players m.move_to.x m.move_to.y in
+  let dp,ps = extract_piece_from_list !active_pieces m.move_to.x m.move_to.y in
   let kind = dp.kind in
   let anim = match kind with
       Piece(_,Pawn) -> pawn_anim_death
@@ -338,12 +338,12 @@ let set_death m =
     dead_piece_anim := anim;
     dead_piece_pos := m.move_to;
     dead_piece_expires := stop_time;
-    active_players := ps;
+    active_pieces := ps;
     current_state := Dying(m)
 
 
 let set_action m =
-  let piece = check_for_piece !active_players m.move_to.x m.move_to.y in
+  let piece = check_for_piece !active_pieces m.move_to.x m.move_to.y in
     match piece with
         Some x -> set_death m
       | None -> set_move m
@@ -383,7 +383,7 @@ let draw_squares () =
         done
     done
 
-let draw_player loc model weapon state dir =
+let draw_piece loc model weapon state dir =
   let x,y = square_center loc in
     GlMat.push();
     set_material_color 1.0 1.0 1.0 1.0;
@@ -412,12 +412,12 @@ let lighting_init () =
 
 let really_draw loc k a =
   match k with
-      Piece(x,Pawn) -> draw_player loc pawn wr a x
-    | Piece(x,Bishop) -> draw_player loc bishop wr a x
-    | Piece(x,Rook) -> draw_player loc rook wr a x
-    | Piece(x,Knight) -> draw_player loc knight wr a x
-    | Piece(x,King) -> draw_player loc king wr a x
-    | Piece(x,Queen) -> draw_player loc queen wr a x
+      Piece(x,Pawn) -> draw_piece loc pawn wr a x
+    | Piece(x,Bishop) -> draw_piece loc bishop wr a x
+    | Piece(x,Rook) -> draw_piece loc rook wr a x
+    | Piece(x,Knight) -> draw_piece loc knight wr a x
+    | Piece(x,King) -> draw_piece loc king wr a x
+    | Piece(x,Queen) -> draw_piece loc queen wr a x
 
 let draw_active_piece ap =
   match ap with
@@ -427,9 +427,9 @@ let draw_active_piece ap =
 let draw_dead_piece loc kind anim_state =
   really_draw loc kind anim_state
 
-let draw_moving_player player_type start finish =
+let draw_moving_piece piece_type start finish =
   let cur_x,cur_y = calc_current_pos start finish in
-  let model = match player_type with
+  let model = match piece_type with
       Piece(_,Bishop) -> bishop
     | Piece(_,Pawn) -> pawn
     | Piece(_,Knight) -> knight
@@ -441,7 +441,7 @@ let draw_moving_player player_type start finish =
     set_material_color 1.0 1.0 1.0 1.0;
     GlMat.translate ~x:cur_x ~y:cur_y ~z:(0.0) ();
     GlMat.rotate ~angle:90.0 ~z:1.0 ();
-    Player.draw_player model wr !moving_player_anim;
+    Player.draw_player model wr !moving_piece_anim;
     GlMat.pop()
 
 
@@ -449,11 +449,11 @@ let draw_moving_player player_type start finish =
 
 (* MAIN DISPLAY LOOP *)
 
-let handle_moving_player () =
-  match !moving_player with
+let handle_moving_piece () =
+  match !moving_piece with
       Some x ->
-          let start,finish =  !moving_player_pos in
-            draw_moving_player x start finish;
+          let start,finish =  !moving_piece_pos in
+            draw_moving_piece x start finish;
             is_move_done x start finish
     | None -> ()
 
@@ -465,8 +465,8 @@ let handle_dead_piece () =
 
 let update_anim_states () = 
   let new_time = Unix.gettimeofday () in
-    active_players := List.map (fun x -> {x with anim_state=(Player.update_player_anim_state new_time x.anim_state)}) !active_players;
-    moving_player_anim := Player.update_player_anim_state new_time !moving_player_anim;
+    active_pieces := List.map (fun x -> {x with anim_state=(Player.update_player_anim_state new_time x.anim_state)}) !active_pieces;
+    moving_piece_anim := Player.update_player_anim_state new_time !moving_piece_anim;
     dead_piece_anim := Player.update_player_anim_state new_time !dead_piece_anim
 
 let update_state () =
@@ -485,7 +485,7 @@ let update_state () =
         let from = (string_of_int move_from.x)^" "^(string_of_int move_from.y) in
         let moveto = (string_of_int move_to.x)^" "^(string_of_int move_to.y) in
         let text = from^ " => "^moveto in
-          if validate_move !active_players m
+          if validate_move !active_pieces m
           then
             set_action m
           else
@@ -521,8 +521,8 @@ let display () =
   update_state ();
 
   Gl.enable `texture_2d;
-  List.iter draw_active_piece !active_players;
-  handle_moving_player ();
+  List.iter draw_active_piece !active_pieces;
+  handle_moving_piece ();
   handle_dead_piece ();
 
   lighting_init(); 
