@@ -164,111 +164,13 @@ let is_at_destination start finish =
     else
       false
 
-(* OPENGL DRAWING FUNCTIONS *)
-
-let set_material_color r g b a =
-  GlLight.material `front (`specular (r, g, b, a));
-  GlLight.material `front (`diffuse (r *. 0.5, g *. 0.5, b *. 0.5, a));
-  GlLight.material `front (`ambient (r *. 0.5, g *. 0.5, b *. 0.5, a));;      
-
-let draw_squares () =
-  Gl.disable `texture_2d;
-  for i = 1 to 8  do
-    for j = 1 to 8 do
-      let i_f = float_of_int i in
-      let j_f = float_of_int j in
-      let x1 = (-4.0 *. square_size) +. ((i_f -. 1.0) *. square_size) in
-      let x2 = x1 +. square_size in
-      let y1 = (4.0 *. square_size) -. ((j_f -. 1.0) *. square_size) in
-      let y2 = y1 -. square_size in
-      let even_row = (i mod 2) = 0 in
-      let even_column = (j mod 2) = 0 in
-        begin
-          (if (even_row == false && even_column == false) or
-            (even_row == true && even_column == true) then
-              set_material_color 0.8 0.8 0.8 1.0
-            else
-              set_material_color 0.2 0.2 0.2 1.0);
-          GlDraw.begins `quads;       
-          GlDraw.vertex3 (x1, y1, 0.0);
-          GlDraw.vertex3 (x1, y2, 0.0);
-          GlDraw.vertex3 (x2, y2, 0.0);
-          GlDraw.vertex3 (x2, y1, 0.0);
-          GlDraw.ends ();
-        end
-        done
-    done
-
-let draw_player loc model weapon state dir =
-  let x,y = square_center loc in
-    GlMat.push();
-    set_material_color 1.0 1.0 1.0 1.0;
-    GlMat.translate ~x:x ~y:y ~z:(0.0) ();
-    (match dir with
-        Black -> GlMat.rotate ~angle:270.0 ~z:1.0 ()
-      | White -> GlMat.rotate ~angle:90.0 ~z:1.0 ());
-    Player.draw_player model weapon state;
-    GlMat.pop()
-
-let lighting_init () =
-  let light_ambient = 0.1, 0.1, 0.1, 1.0
-  and light_diffuse = 0.2, 0.2, 0.2, 1.0
-  and light_specular = 0.25, 0.25, 0.25, 1.0
-  (*  light_position is NOT default value	*)
-  and light_position = -25.0, 0.0, 50.0, 0.0
-  in
-  GlDraw.shade_model `smooth;
-
-  GlLight.light ~num:0 (`ambient light_ambient);
-  GlLight.light ~num:0 (`diffuse light_diffuse);
-  GlLight.light ~num:0 (`specular light_specular);
-  GlLight.light ~num:0 (`position light_position);
-
-  List.iter Gl.enable [`lighting; `light0; `depth_test; `texture_2d];;
-
-let really_draw loc k a =
-  match k with
-      Piece(x,Pawn) -> draw_player loc pawn wr a x
-    | Piece(x,Bishop) -> draw_player loc bishop wr a x
-    | Piece(x,Rook) -> draw_player loc rook wr a x
-    | Piece(x,Knight) -> draw_player loc knight wr a x
-    | Piece(x,King) -> draw_player loc king wr a x
-    | Piece(x,Queen) -> draw_player loc queen wr a x
-
-let draw_active_piece ap =
-  match ap with
-    {loc=loc;kind=k;anim_state=anim_state} ->
-      really_draw loc k anim_state
-
-let draw_dead_piece loc kind anim_state =
-  really_draw loc kind anim_state
-
-let draw_moving_player player_type start finish =
-  let cur_x,cur_y = calc_current_pos start finish in
-  let model = match player_type with
-      Piece(_,Bishop) -> bishop
-    | Piece(_,Pawn) -> pawn
-    | Piece(_,Knight) -> knight
-    | Piece(_,Rook) -> rook
-    | Piece(_,King) -> king
-    | Piece(_,Queen) -> queen
-  in
-    GlMat.push();
-    set_material_color 1.0 1.0 1.0 1.0;
-    GlMat.translate ~x:cur_x ~y:cur_y ~z:(0.0) ();
-    GlMat.rotate ~angle:90.0 ~z:1.0 ();
-    Player.draw_player model wr !moving_player_anim;
-    GlMat.pop()
- 
+(* Various Predicates and tests *)
 
 let rec check_for_piece lst x y =
   match lst with
       [] -> None
     | h :: t when h.loc.x = x && h.loc.y=y -> Some h.kind
-    | h :: t -> check_for_piece t x y 
-
-
-      
+    | h :: t -> check_for_piece t x y    
 
 let extract_piece_from_list lst xpos ypos =
   let rec ep lst x y acc =
@@ -291,6 +193,8 @@ let add_piece_to_list lst piece x y =
       | Piece(_,King) -> king_anim_idle
   in
     {loc=loc;kind=piece;anim_state=anim_state} :: lst
+
+(* CALCULATE VALID MOVES FOR A GIVEN PIECE *)
 
 let valid_pawn_moves piece pieces =
   let m1x,m1y = match piece.kind with
@@ -444,6 +348,104 @@ let set_action m =
         Some x -> set_death m
       | None -> set_move m
 
+(* OPENGL DRAWING FUNCTIONS *)
+
+let set_material_color r g b a =
+  GlLight.material `front (`specular (r, g, b, a));
+  GlLight.material `front (`diffuse (r *. 0.5, g *. 0.5, b *. 0.5, a));
+  GlLight.material `front (`ambient (r *. 0.5, g *. 0.5, b *. 0.5, a));;      
+
+let draw_squares () =
+  Gl.disable `texture_2d;
+  for i = 1 to 8  do
+    for j = 1 to 8 do
+      let i_f = float_of_int i in
+      let j_f = float_of_int j in
+      let x1 = (-4.0 *. square_size) +. ((i_f -. 1.0) *. square_size) in
+      let x2 = x1 +. square_size in
+      let y1 = (4.0 *. square_size) -. ((j_f -. 1.0) *. square_size) in
+      let y2 = y1 -. square_size in
+      let even_row = (i mod 2) = 0 in
+      let even_column = (j mod 2) = 0 in
+        begin
+          (if (even_row == false && even_column == false) or
+            (even_row == true && even_column == true) then
+              set_material_color 0.8 0.8 0.8 1.0
+            else
+              set_material_color 0.2 0.2 0.2 1.0);
+          GlDraw.begins `quads;       
+          GlDraw.vertex3 (x1, y1, 0.0);
+          GlDraw.vertex3 (x1, y2, 0.0);
+          GlDraw.vertex3 (x2, y2, 0.0);
+          GlDraw.vertex3 (x2, y1, 0.0);
+          GlDraw.ends ();
+        end
+        done
+    done
+
+let draw_player loc model weapon state dir =
+  let x,y = square_center loc in
+    GlMat.push();
+    set_material_color 1.0 1.0 1.0 1.0;
+    GlMat.translate ~x:x ~y:y ~z:(0.0) ();
+    (match dir with
+        Black -> GlMat.rotate ~angle:270.0 ~z:1.0 ()
+      | White -> GlMat.rotate ~angle:90.0 ~z:1.0 ());
+    Player.draw_player model weapon state;
+    GlMat.pop()
+
+let lighting_init () =
+  let light_ambient = 0.1, 0.1, 0.1, 1.0
+  and light_diffuse = 0.2, 0.2, 0.2, 1.0
+  and light_specular = 0.25, 0.25, 0.25, 1.0
+  (*  light_position is NOT default value	*)
+  and light_position = -25.0, 0.0, 50.0, 0.0
+  in
+  GlDraw.shade_model `smooth;
+
+  GlLight.light ~num:0 (`ambient light_ambient);
+  GlLight.light ~num:0 (`diffuse light_diffuse);
+  GlLight.light ~num:0 (`specular light_specular);
+  GlLight.light ~num:0 (`position light_position);
+
+  List.iter Gl.enable [`lighting; `light0; `depth_test; `texture_2d];;
+
+let really_draw loc k a =
+  match k with
+      Piece(x,Pawn) -> draw_player loc pawn wr a x
+    | Piece(x,Bishop) -> draw_player loc bishop wr a x
+    | Piece(x,Rook) -> draw_player loc rook wr a x
+    | Piece(x,Knight) -> draw_player loc knight wr a x
+    | Piece(x,King) -> draw_player loc king wr a x
+    | Piece(x,Queen) -> draw_player loc queen wr a x
+
+let draw_active_piece ap =
+  match ap with
+    {loc=loc;kind=k;anim_state=anim_state} ->
+      really_draw loc k anim_state
+
+let draw_dead_piece loc kind anim_state =
+  really_draw loc kind anim_state
+
+let draw_moving_player player_type start finish =
+  let cur_x,cur_y = calc_current_pos start finish in
+  let model = match player_type with
+      Piece(_,Bishop) -> bishop
+    | Piece(_,Pawn) -> pawn
+    | Piece(_,Knight) -> knight
+    | Piece(_,Rook) -> rook
+    | Piece(_,King) -> king
+    | Piece(_,Queen) -> queen
+  in
+    GlMat.push();
+    set_material_color 1.0 1.0 1.0 1.0;
+    GlMat.translate ~x:cur_x ~y:cur_y ~z:(0.0) ();
+    GlMat.rotate ~angle:90.0 ~z:1.0 ();
+    Player.draw_player model wr !moving_player_anim;
+    GlMat.pop()
+
+
+(* END OPEN GL FUNCTIONS *) 
 
 (* MAIN DISPLAY LOOP *)
 
