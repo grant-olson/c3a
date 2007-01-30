@@ -437,10 +437,14 @@ let draw_moving_piece piece_type start finish =
     | Piece(_,King) -> king
     | Piece(_,Queen) -> queen
   in
+  let angle = match piece_type with
+      Piece(Black,_) -> 270.0
+    | Piece(White,_) -> 90.0
+  in
     GlMat.push();
     set_material_color 1.0 1.0 1.0 1.0;
     GlMat.translate ~x:cur_x ~y:cur_y ~z:(0.0) ();
-    GlMat.rotate ~angle:90.0 ~z:1.0 ();
+    GlMat.rotate ~angle:angle ~z:1.0 ();
     Player.draw_player model wr !moving_piece_anim;
     GlMat.pop()
 
