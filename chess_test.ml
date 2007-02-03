@@ -50,6 +50,7 @@ type state = Waiting |Dying of move | Moving | ClickOne of location | ClickTwo o
 
 type active_piece = {loc:location;kind:piece;anim_state:Player.player_anim_state;}
 
+
 let init_board () =
   [{loc={x=1;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
    {loc={x=2;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
@@ -122,6 +123,7 @@ let dead_piece_anim = ref pawn_anim_death
 let dead_piece_expires = ref 0.0
 
 let current_state = ref Waiting
+let current_player = ref White
 
 (* TRANSLATE BETWEEN BOARD COORDINATES AND X/Y VALS, COLLISION DETECTION, ETC *)
 
@@ -275,6 +277,8 @@ let validate_move pieces move =
     let startx,starty = move.move_from.x,move.move_from.y in
     let endx,endy = move.move_to.x,move.move_to.y in
     let piece,pieces = extract_piece_from_list pieces startx starty in
+    let start_color = match piece.kind with
+        Piece(x,_) -> x in
     let valid_moves = match piece with
         {kind=Piece(_,Pawn)} -> valid_pawn_moves piece pieces
       | {kind=Piece(_,Rook)} -> valid_rook_moves piece pieces
@@ -283,7 +287,12 @@ let validate_move pieces move =
       | {kind=Piece(_,King)} -> valid_king_moves piece pieces
       | {kind=Piece(_,Knight)} -> valid_knight_moves piece pieces
     in
-      List.mem {x=endx;y=endy} valid_moves
+      if
+        start_color == !current_player
+      then
+        List.mem {x=endx;y=endy} valid_moves
+      else
+        false
   in
     try
       validate_start_and_end_pos pieces move
@@ -317,6 +326,9 @@ let is_move_done piece start finish =
       current_state := Waiting;
       moving_piece := None;
       active_pieces := add_piece_to_list !active_pieces piece finish.x finish.y;
+      current_player := match !current_player with
+          Black -> White
+        | White -> Black
     end
   else
     ()
