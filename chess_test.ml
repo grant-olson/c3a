@@ -202,8 +202,37 @@ let valid_pawn_moves piece pieces =
   let m1x,m1y = match piece.kind with
       Piece(Black,_) -> piece.loc.x,(piece.loc.y + 1)
     | Piece(White,_) -> piece.loc.x,(piece.loc.y - 1) in
-  let move1 = check_for_piece pieces m1x m1y in
-    if move1 = None then [{x=m1x;y=m1y}] else []
+  let pos1 = check_for_piece pieces m1x m1y in
+  let move1 = 
+    if pos1 = None then [{x=m1x;y=m1y}] else [] in
+  let m2x,m2y = match piece.kind with
+      Piece(Black,_) -> piece.loc.x,(piece.loc.y + 2)
+    | Piece(White,_) -> piece.loc.x,(piece.loc.y - 2) in
+  let pos2 = check_for_piece pieces m2x m2y in
+  let starting_pos = match piece.kind with
+      Piece(Black,_) -> piece.loc.y == 2
+    | Piece(White,_) -> piece.loc.y == 7 in
+  let move2 =
+    if (move1 != []) && (pos2 = None) && starting_pos
+    then [{x=m2x;y=m2y;}] else [] in
+  let active_piece_color = match piece.kind with
+      Piece(x,_) -> x in
+  let m3x,m3y = match piece.kind with
+      Piece(Black,_) -> (piece.loc.x + 1),(piece.loc.y + 1)
+    | Piece(White,_) -> (piece.loc.x + 1),(piece.loc.y - 1) in
+  let pos3 = check_for_piece pieces m3x m3y in
+  let move3 = match pos3 with
+      Some Piece(x,_) when x != active_piece_color -> [{x=m3x;y=m3y}]
+    | _ -> [] in
+  let m4x,m4y = match piece.kind with
+      Piece(Black,_) -> (piece.loc.x - 1),(piece.loc.y + 1)
+    | Piece(White,_) -> (piece.loc.x - 1),(piece.loc.y - 1) in
+  let pos4 = check_for_piece pieces m4x m4y in
+  let move4 = match pos4 with
+      Some Piece(x,_) when x != active_piece_color -> [{x=m4x;y=m4y}]
+    | _ -> [] in
+    
+    move1@move2@move3@move4
 
 let rec expand_move piece current_pos movex movey pieces acc =
   (* Generic expand move.  Move in given direction until
