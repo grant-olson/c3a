@@ -199,39 +199,32 @@ let add_piece_to_list lst piece x y =
 (* CALCULATE VALID MOVES FOR A GIVEN PIECE *)
 
 let valid_pawn_moves piece pieces =
-  let m1x,m1y = match piece.kind with
-      Piece(Black,_) -> piece.loc.x,(piece.loc.y + 1)
-    | Piece(White,_) -> piece.loc.x,(piece.loc.y - 1) in
-  let pos1 = check_for_piece pieces m1x m1y in
-  let move1 = 
-    if pos1 = None then [{x=m1x;y=m1y}] else [] in
-  let m2x,m2y = match piece.kind with
-      Piece(Black,_) -> piece.loc.x,(piece.loc.y + 2)
-    | Piece(White,_) -> piece.loc.x,(piece.loc.y - 2) in
-  let pos2 = check_for_piece pieces m2x m2y in
+  let check_normal_move offset =
+    let mx,my = match piece.kind with
+        Piece(Black,_) -> piece.loc.x,(piece.loc.y + offset)
+      | Piece(White,_) -> piece.loc.x,(piece.loc.y - offset) in
+    let pos = check_for_piece pieces mx my in
+      if pos = None then [{x=mx;y=my}] else []
+  in
+  let check_kill_move offset color =
+    let mx,my = match piece.kind with
+        Piece(Black,_) -> (piece.loc.x + offset),(piece.loc.y + 1)
+      | Piece(White,_) -> (piece.loc.x + offset),(piece.loc.y - 1) in
+    let pos = check_for_piece pieces mx my in
+      match pos with
+          Some Piece(x,_) when x != color -> [{x=mx;y=my}]
+        | _ -> []
+  in
+  let move1 = check_normal_move 1 in
   let starting_pos = match piece.kind with
       Piece(Black,_) -> piece.loc.y == 2
     | Piece(White,_) -> piece.loc.y == 7 in
   let move2 =
-    if (move1 != []) && (pos2 = None) && starting_pos
-    then [{x=m2x;y=m2y;}] else [] in
-  let active_piece_color = match piece.kind with
-      Piece(x,_) -> x in
-  let m3x,m3y = match piece.kind with
-      Piece(Black,_) -> (piece.loc.x + 1),(piece.loc.y + 1)
-    | Piece(White,_) -> (piece.loc.x + 1),(piece.loc.y - 1) in
-  let pos3 = check_for_piece pieces m3x m3y in
-  let move3 = match pos3 with
-      Some Piece(x,_) when x != active_piece_color -> [{x=m3x;y=m3y}]
-    | _ -> [] in
-  let m4x,m4y = match piece.kind with
-      Piece(Black,_) -> (piece.loc.x - 1),(piece.loc.y + 1)
-    | Piece(White,_) -> (piece.loc.x - 1),(piece.loc.y - 1) in
-  let pos4 = check_for_piece pieces m4x m4y in
-  let move4 = match pos4 with
-      Some Piece(x,_) when x != active_piece_color -> [{x=m4x;y=m4y}]
-    | _ -> [] in
-    
+    if (move1 != []) && starting_pos
+    then check_normal_move 2 else [] in
+  let active_piece_color = match piece.kind with Piece(x,_) -> x in
+  let move3 = check_kill_move 1 active_piece_color in
+  let move4 = check_kill_move (-1) active_piece_color in
     move1@move2@move3@move4
 
 let rec expand_move piece current_pos movex movey pieces acc =
