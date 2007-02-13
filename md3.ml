@@ -292,17 +292,17 @@ let draw_triangle surface frame triangle =
     GlDraw.normal3 (v1.nx, v1.ny, v1.nz);
     GlDraw.vertex3 (v1.vx, v1.vy, v1.vz); 
 
-    GlDraw.ends ();;
+    GlDraw.ends ()
 
 let draw_frame_triangles surface frame_no color style =
   let triangles = surface.triangles in
   let frame = Array.get surface.vertexes frame_no in
-  Array.iter (fun x -> draw_triangle surface frame_no x) triangles;;
+  Array.iter (fun x -> draw_triangle surface frame_no x) triangles
 
 let draw_surface surface frame_no color style =
   let tex = Array.get surface.shaders 0 in
     Texture.set_current_texture tex.shader_name;
-    draw_frame_triangles surface frame_no color style;;
+    draw_frame_triangles surface frame_no color style
 
 let draw_surfaces md3 frame_no color style =
   Array.iter (fun x -> draw_surface x frame_no color style) md3.surfaces;;
@@ -311,13 +311,26 @@ let draw_surfaces md3 frame_no color style =
 let draw_md3 md3 frame_no =
     GlMat.push();
     draw_surfaces md3 frame_no (0.0,1.0,1.0) `triangles;
-    GlMat.pop();;
+    GlMat.pop()
 
 let load_md3_file fname =
   let f = open_in_bin(fname) in
   let md3 = readfile f in
   let _ = close_in f in
-    md3;;
+    md3
 
 
-
+let reskin_md3 assoc_list md3 =
+  let new_surface surface =
+    let sn = surface.surface_name in
+    let new_shaders =
+      try
+        let shader  = List.assoc sn assoc_list in
+              Texture.load_texture_from_file shader;
+          [| {shader_name=shader;shader_index=0}|]
+      with
+          Not_found ->  surface.shaders
+    in
+      {surface with shaders=new_shaders}
+  in
+    {md3 with surfaces=(Array.map new_surface md3.surfaces)}

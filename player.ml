@@ -86,3 +86,8 @@ let update_player_anim_state cur_time cur_state =
   let torso_state = update_anim_state cur_time cur_state.torso in
     {leg=leg_state;torso=torso_state;};;
 
+let reskin_player assoc_list player =
+  let new_lower = Md3.reskin_md3 assoc_list player.lower in
+  let new_upper = Md3.reskin_md3 assoc_list player.upper in
+  let new_head = Md3.reskin_md3 assoc_list player.head in
+    {lower=new_lower;upper=new_upper;head=new_head}
