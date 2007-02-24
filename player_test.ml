@@ -98,7 +98,7 @@ let display () =
   GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-15.0) ();
 
   draw_axes ();
-  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(30.0) ();
+
   GlMat.push();
   GlMat.translate ~x:(!xpos) ~y:(-25.0) ~z:(0.0) ();
   if !xdir = true then GlMat.rotate ~angle:180.0 ~z:(1.0) ();
