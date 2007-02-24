@@ -65,6 +65,20 @@ let in_cms f =
      color_map_length=color_map_length;
      color_map_entry_size=color_map_entry_size};;
 
+let flip_array a =
+  let len = Array.length a in
+    for i = 0 to (len / 2) do
+      let tmp = a.(i) in
+        a.(i) <- a.(len - i - 1);
+        a.(len - i - 1) <- tmp
+    done
+
+let flip_rows aa =
+  flip_array aa
+
+let flip_columns aa =
+  Array.iter flip_array aa
+
 let read_tga_file f =
   let tga_id = in_char f in
   let color_map_type = in_char f in
@@ -72,6 +86,8 @@ let read_tga_file f =
   let cms = in_cms f in
   let spec = in_spec f in
   let rgb_data = in_array_array f spec.height spec.width (fun x -> in_color_data x spec) in
+    (*flip_rows rgb_data;*)
+    (*flip_columns rgb_data;*)
     {tga_id=tga_id;
      color_map_type=color_map_type;
      image_type=image_type;
