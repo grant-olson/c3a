@@ -673,18 +673,14 @@ let update_state () =
             end
           else ()
     | ClickTwo m ->
-        let move_from, move_to = m.move_from, m.move_to in
-        let from = (string_of_int move_from.x)^" "^(string_of_int move_from.y) in
-        let moveto = (string_of_int move_to.x)^" "^(string_of_int move_to.y) in
-        let text = from^ " => "^moveto in
-          if validate_move !active_pieces m
-          then
-            set_action m
-          else
-            begin
-              Glut.setWindowTitle "BAD MOVE";
-              current_state := Waiting
-            end
+        if validate_move !active_pieces m
+        then
+          set_action m
+        else
+          begin
+            Glut.setWindowTitle "BAD MOVE";
+            current_state := Waiting
+          end
     | _ -> ()
 
 let display () =
