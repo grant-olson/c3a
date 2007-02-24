@@ -121,7 +121,6 @@ let in_frame f =
 
 
 let in_tag f =
-  let cur_pos = pos_in f in
   let name = read_path f in
   let origin = in_vector f in
   let axis1 = in_vector f in
@@ -296,7 +295,6 @@ let draw_triangle surface frame triangle =
 
 let draw_frame_triangles surface frame_no color style =
   let triangles = surface.triangles in
-  let frame = Array.get surface.vertexes frame_no in
   Array.iter (fun x -> draw_triangle surface frame_no x) triangles
 
 let draw_surface surface frame_no color style =
