@@ -33,7 +33,7 @@ let propb_space_width = 12.0
 let propb_height = 36.0
 
 type tex_point = {x:float;y:float}
-type tex_box = {top_left:tex_point;bottom_right:tex_point}
+type tex_box = {top_left:tex_point;bottom_right:tex_point;width:float}
 
 let ascii x = int_of_char x
 
@@ -53,12 +53,12 @@ let char_coords char =
   let right =(col +. width) /. 256.0 in
   let bottom = (row +. propb_height) /. 256.0 in
   let bottomright = {x=right;y=bottom} in
-    {top_left=topleft;bottom_right=bottomright}
+    {top_left=topleft;bottom_right=bottomright;width=width}
     
                       
 let tex = Texture.load_texture_from_file "menu/art/font2_prop.tga" 
 
-let draw_char startx starty endx endy char =
+let draw_char startx starty screen_height char =
   let tex_coords = char_coords char in
   let top_left = tex_coords.top_left in
   let bottom_right = tex_coords.bottom_right in
@@ -66,6 +66,9 @@ let draw_char startx starty endx endy char =
   let startt = top_left.y in
   let ends =  bottom_right.x in
   let endt = bottom_right.y in
+  let conversion_factor = screen_height /. propb_height in
+  let endy = starty -. screen_height in
+  let endx = startx +. (conversion_factor *. tex_coords.width) in
     Texture.set_current_texture "menu/art/font2_prop.tga";
 
 
@@ -86,4 +89,25 @@ let draw_char startx starty endx endy char =
     GlTex.coord2(starts,endt);
     GlDraw.vertex2 (startx,endy);
 
-    GlDraw.ends ()
+    GlDraw.ends ();
+    endx +. (propb_gap_width *. conversion_factor)
+
+let rec draw_string startx starty height str =
+  let strlen = String.length str in
+    if strlen == 0
+    then
+      ()
+    else
+      begin
+        let first = str.[0] in
+        let rest = String.sub str 1 (strlen - 1) in
+        if first == ' '
+        then
+          let conversion_factor = height /. propb_height in
+          let newx = startx +. (propb_space_width *. conversion_factor) in
+            draw_string newx starty height rest
+        else
+          let newx = draw_char startx starty height first in
+            draw_string newx starty height rest
+      end
+      
