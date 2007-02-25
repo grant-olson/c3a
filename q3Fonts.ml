@@ -62,10 +62,10 @@ let draw_char startx starty endx endy char =
   let tex_coords = char_coords char in
   let top_left = tex_coords.top_left in
   let bottom_right = tex_coords.bottom_right in
-  let starts = 1.0 -. top_left.x in
-  let startt = 1.0 -. top_left.y in
-  let ends = 1.0 -. bottom_right.x in
-  let endt = 1.0 -. bottom_right.y in
+  let starts = top_left.x in
+  let startt = top_left.y in
+  let ends =  bottom_right.x in
+  let endt = bottom_right.y in
     Texture.set_current_texture "menu/art/font2_prop.tga";
 
 
@@ -74,12 +74,15 @@ let draw_char startx starty endx endy char =
     GlTex.coord2 (starts,startt);
     GlDraw.vertex2 ( startx,starty);
     
+
     GlTex.coord2 (ends,startt);
     GlDraw.vertex2 (endx,starty);
-    
+
+
     GlTex.coord2 (ends,endt);
     GlDraw.vertex2 (endx,endy);
     
+
     GlTex.coord2(starts,endt);
     GlDraw.vertex2 (startx,endy);
 

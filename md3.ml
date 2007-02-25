@@ -89,8 +89,8 @@ let in_triangle f =
     {a=a;b=b;c=c};;
 
 let in_st f =
-  let t = in_single f in
   let s = in_single f in
+  let t = in_single f in
     {s=s;t=t};;
 
 let in_vertex f =

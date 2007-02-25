@@ -18,25 +18,25 @@ let display () =
 
   Gl.enable `texture_2d;
   Texture.set_current_texture "menu/art/font2_prop.tga";
-  (*GlDraw.begins `quads;
+  GlDraw.begins `quads;
   GlTex.coord2 (0.0,0.0);
+  GlDraw.vertex2 ( (-0.5),(0.5));
+  GlTex.coord2 (0.0,1.0);
   GlDraw.vertex2 ( (-0.5),(-0.5));
-  GlTex.coord2 (1.0,0.0);
+  GlTex.coord2(1.0,1.0);
   GlDraw.vertex2 (0.5,(-0.5));
-  GlTex.coord2 (1.0,1.0);
+  GlTex.coord2(1.0,0.0);
   GlDraw.vertex2 (0.5,0.5);
-  GlTex.coord2(0.0,1.0);
-  GlDraw.vertex2 ((-0.5),0.5);
   GlDraw.ends ();
-  *)
+  
 
   Q3Fonts.draw_char (-1.0) 1.0 0.0 0.0 'A';
-  Q3Fonts.draw_char 0.0 1.0 1.0 0.0 'Z';
+  Q3Fonts.draw_char 0.0 1.0 1.0 0.0 'K';
   Q3Fonts.draw_char (-1.0) 0.0 0.0 (-1.0) 'B';
-  Q3Fonts.draw_char (0.0) 0.0 1.0 (-1.0) 'X';
+  Q3Fonts.draw_char (0.0) 0.0 1.0 (-1.0) 'Z';
   GlMat.mode `projection;
   GlMat.load_identity ();
-
+  
 
   Gl.flush ();
 

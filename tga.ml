@@ -86,8 +86,9 @@ let read_tga_file f =
   let cms = in_cms f in
   let spec = in_spec f in
   let rgb_data = in_array_array f spec.height spec.width (fun x -> in_color_data x spec) in
-    (*flip_rows rgb_data;*)
-    (*flip_columns rgb_data;*)
+    (if (spec.image_descriptor land 32) != 0 then flip_rows rgb_data);
+    flip_rows rgb_data;
+    (if (spec.image_descriptor land 16) != 0 then flip_columns rgb_data);
     {tga_id=tga_id;
      color_map_type=color_map_type;
      image_type=image_type;

@@ -562,7 +562,7 @@ let draw_squares () =
 let draw_piece loc model weapon state dir =
   let x,y = square_center loc in
     GlMat.push();
-    set_material_color 1.0 1.0 1.0 1.0;
+    set_material_color 1.5 1.5 1.5 1.0;
     GlMat.translate ~x:x ~y:y ~z:(0.0) ();
     (match dir with
         Black -> GlMat.rotate ~angle:270.0 ~z:1.0 ()
@@ -695,11 +695,14 @@ let display () =
   GlMat.load_identity ();
   
   GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
+  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-250.0) ();
+  (*GlMat.rotate ~angle:75.0 ~x:(-1.0) ~y:0.0 ~z:0.0 ();*)
+  (*GlMat.rotate ~angle:90.0 ~x:0.0 ~y:0.0 ~z:90.0 ();*)
   GlMat.mode `modelview;
 
   GlMat.load_identity ();
 
-  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-250.0) ();
+  (*GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-250.0) ();*)
   (*GlMat.rotate ~angle:75.0 ~z:1.0 ~y:1.0 ~x:(-1.0) ();*)
 
   draw_squares ();
