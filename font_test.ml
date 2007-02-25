@@ -2,6 +2,8 @@
 let display () =
   (* Gl.enable `cull_face; *)
   Gl.enable `texture_2d;
+  Gl.enable `blend;
+  GlFunc.blend_func ~src:`src_alpha ~dst:`one_minus_src_alpha;
   (* GlDraw.cull_face `back; *)
   GlClear.color (0.25, 0.25, 0.25);
   GlClear.clear [`color];

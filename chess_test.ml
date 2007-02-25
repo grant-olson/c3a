@@ -630,7 +630,7 @@ let draw_moving_piece piece_type start finish =
     | Piece(White,_) -> 90.0
   in
     GlMat.push();
-    set_material_color 1.0 1.0 1.0 1.0;
+    set_material_color 1.5 1.5 1.5 1.0;
     GlMat.translate ~x:cur_x ~y:cur_y ~z:(0.0) ();
     GlMat.rotate ~angle:angle ~z:1.0 ();
     Player.draw_player model wr !moving_piece_anim;
@@ -706,8 +706,6 @@ let display () =
   (*GlMat.rotate ~angle:75.0 ~z:1.0 ~y:1.0 ~x:(-1.0) ();*)
 
   draw_squares ();
-
-  set_material_color 1.0 0.0 0.0 1.0;
 
   update_state ();
 
