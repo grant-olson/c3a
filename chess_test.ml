@@ -21,7 +21,7 @@ let pawn_white = Player.reskin_player  [
   ] pawn
 
 let pawn_anim_idle = Player.init_player_anim_state (165,185,165,20) (93,93,93,20)
-let pawn_anim_walk = Player.init_player_anim_state (165,185,165,20) (93,93,93,20)
+let pawn_anim_walk = Player.init_player_anim_state (100,111,100,20) (93,93,93,20)
 let pawn_anim_death = Player.init_player_anim_state (0,32,32,20) (0,32,32,20)
 
 let knight = Player.load_player "./pak0/models/players/hunter/"
@@ -42,7 +42,7 @@ let knight_white = Player.reskin_player [
 
 let queen = Player.load_player "./pak0/models/players/mynx/"
 let queen_anim_idle = Player.init_player_anim_state (195,211,195,15) (95,134,95,20)
-let queen_anim_walk = Player.init_player_anim_state (111,117,111,25) (135,140,135,15)
+let queen_anim_walk = Player.init_player_anim_state (111,117,111,25) (111,127,11,25)
 let queen_anim_death = Player.init_player_anim_state (62,94,94,20) (62,94,94,20)
 let queen_black = Player.reskin_player [
     ("h_glasses","models/players/mynx/red_s.tga");
@@ -173,10 +173,12 @@ type piece = Piece of side * piece_type
 type location = {x:int;y:int;}
 type move = {move_from:location;move_to:location;}
 
-type state = Waiting |Dying of move | Moving | ClickOne of location | ClickTwo of move
+type state = Waiting |Dying of move | Moving | ClickOne of location | ClickTwo of move | PauseUntil of float
 
 type active_piece = {loc:location;kind:piece;anim_state:Player.player_anim_state;}
 
+
+type quadrants = TopLeft | TopRight | BottomLeft | BottomRight
 
 let init_board () =
   [{loc={x=1;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
@@ -252,6 +254,8 @@ let dead_piece_expires = ref 0.0
 let current_state = ref Waiting
 let current_player = ref White
 
+let current_view = ref (fun () -> ())
+
 (* TRANSLATE BETWEEN BOARD COORDINATES AND X/Y VALS, COLLISION DETECTION, ETC *)
 
 let square_size = 50.0
@@ -268,7 +272,7 @@ let calc_current_pos start finish =
   let end_x, end_y = square_center finish in
   let dif_x, dif_y = end_x -. start_x, end_y -. start_y in
   let currenttime = Unix.gettimeofday () in
-  let delta = (currenttime -. !moving_piece_start_anim) /. 1.0  in
+  let delta = (currenttime -. !moving_piece_start_anim) /. 2.5 in
   let cur_x = start_x +. (dif_x *. delta) in
   let cur_y = start_y +. (dif_y *. delta) in
     cur_x, cur_y
@@ -284,7 +288,7 @@ let is_at_destination start finish =
   let diff_x = dest_x -. cur_x in
   let diff_y = cur_y -. dest_y in
   let distance = sqrt ( (diff_x *. diff_x) +. (diff_y *. diff_y) ) in
-  let epsilon = square_size /. 1.0 in
+  let epsilon = square_size /. 5.0 in
     Printf.printf "%f \n" distance;
     if
       distance <= epsilon
@@ -498,21 +502,7 @@ let set_move move =
     active_pieces := ps;
     current_state := Moving
 
-let is_move_done piece start finish =
-  if
-    is_at_destination start finish
-  then
-    begin
-      current_state := Waiting;
-      moving_piece := None;
-      active_pieces := add_piece_to_list !active_pieces piece finish.x finish.y;
-      current_player := match !current_player with
-          Black -> White
-        | White -> Black
-    end
-  else
-    ()
-          
+         
 
 let set_death m =
   let dp,ps = extract_piece_from_list !active_pieces m.move_to.x m.move_to.y in
@@ -540,6 +530,13 @@ let set_action m =
         Some x -> set_death m
       | None -> set_move m
 
+
+let vect_to_angle x y =
+  let pi = 3.1415926535897931 in
+  let two_pi = pi *. 2.0 in
+  let rads = atan2 x y in
+    rads /. two_pi *. 360.0
+
 (* OPENGL DRAWING FUNCTIONS *)
 
 let set_material_color r g b a =
@@ -562,9 +559,9 @@ let draw_squares () =
         begin
           (if (even_row == false && even_column == false) or
             (even_row == true && even_column == true) then
-              set_material_color 0.8 0.8 0.8 1.0
+              set_material_color 1.0 0.2 0.2 1.0
             else
-              set_material_color 0.2 0.2 0.2 1.0);
+              set_material_color 0.95 0.95 1.2 1.0);
           GlDraw.begins `quads;       
           GlDraw.vertex3 (x1, y1, 0.0);
           GlDraw.vertex3 (x1, y2, 0.0);
@@ -641,9 +638,10 @@ let draw_moving_piece piece_type start finish =
     | Piece(Black,Queen) -> queen_black
     | Piece(White,Queen) -> queen_white
   in
-  let angle = match piece_type with
-      Piece(Black,_) -> 270.0
-    | Piece(White,_) -> 90.0
+  let x = float_of_int (finish.x - start.x) in
+  let y = float_of_int (finish.y - start.y) in
+  let orig_angle = vect_to_angle x y in
+  let angle = orig_angle -. 90.0 
   in
     GlMat.push();
     set_material_color 1.5 1.5 1.5 1.0;
@@ -652,10 +650,74 @@ let draw_moving_piece piece_type start finish =
     Player.draw_player model wr !moving_piece_anim;
     GlMat.pop()
 
+let overhead_view () =
+  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
+    GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-250.0) ()
+
+let top_left_view () =
+  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
+  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-75.0) ();
+  GlMat.rotate ~angle:45.0 ~x:(-1.0) ();
+  GlMat.translate ~y:(40.0) ~x:(100.0) ()
+
+let top_right_view () =
+  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
+  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-75.0) ();
+  GlMat.rotate ~angle:45.0 ~x:(-1.0) ();
+  GlMat.translate ~y:(40.0) ~x:(-100.0) ()
+
+let bottom_right_view () =
+  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
+  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-75.0) ();
+  GlMat.rotate ~angle:45.0 ~x:(-1.0) ();
+  GlMat.rotate ~angle:180.0 ~z:(1.0) ();
+  GlMat.translate ~y:(-40.0) ~x:(-100.0) ()
+
+let bottom_left_view () =
+  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
+  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-75.0) ();
+  GlMat.rotate ~angle:45.0 ~x:(-1.0) ();
+  GlMat.rotate ~angle:180.0 ~z:(1.0) ();
+  GlMat.translate ~y:(-40.0) ~x:(100.0) ()
+
+
+
+let set_camera m =
+  let calc_quad pos =
+    match pos with
+        {x=x;y=y} when (x <= 4) && (y <= 4) -> TopLeft
+      | {x=x;y=y} when (x > 4) && (y <= 4) -> TopRight
+      | {x=x;y=y} when (x <= 4) && (y > 4) -> BottomLeft
+      | _ -> BottomRight
+  in
+  let start_pos = calc_quad m.move_from in
+  let end_pos = calc_quad m.move_to in
+    current_view := match start_pos, end_pos with
+        TopLeft,TopLeft -> top_left_view
+      | TopRight,TopRight -> top_right_view
+      | BottomLeft,BottomLeft -> bottom_left_view
+      | BottomRight,BottomRight -> bottom_right_view
+      | _,_ -> overhead_view
 
 (* END OPEN GL FUNCTIONS *) 
 
 (* MAIN DISPLAY LOOP *)
+
+let is_move_done piece start finish =
+  if
+    is_at_destination start finish
+  then
+    begin
+      let now = Unix.gettimeofday() in
+        current_state := PauseUntil (now +. 2.0) ;
+        moving_piece := None;
+        active_pieces := add_piece_to_list !active_pieces piece finish.x finish.y;
+        current_player := match !current_player with
+            Black -> White
+          | White -> Black
+    end
+  else
+    ()
 
 let handle_moving_piece () =
   match !moving_piece with
@@ -691,15 +753,30 @@ let update_state () =
     | ClickTwo m ->
         if validate_move !active_pieces m
         then
-          set_action m
+          begin
+            set_camera m;
+            set_action m
+          end
         else
           begin
             Glut.setWindowTitle "BAD MOVE";
             current_state := Waiting
           end
+    | PauseUntil t ->
+        let current_time = Unix.gettimeofday () in
+          if current_time > t
+          then
+            begin
+              current_state := Waiting;
+              current_view := overhead_view
+            end
     | _ -> ()
 
+
+
 let display () =
+  update_state ();
+
   Gl.enable `cull_face;
   GlDraw.cull_face `back;
   GlClear.color (0.25, 0.25, 0.25);
@@ -710,10 +787,8 @@ let display () =
   GlMat.mode `projection;
   GlMat.load_identity ();
   
-  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
-  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-250.0) ();
-  (*GlMat.rotate ~angle:75.0 ~x:(-1.0) ~y:0.0 ~z:0.0 ();*)
-  (*GlMat.rotate ~angle:90.0 ~x:0.0 ~y:0.0 ~z:90.0 ();*)
+  
+  !current_view ();
   GlMat.mode `modelview;
 
   GlMat.load_identity ();
@@ -723,7 +798,7 @@ let display () =
 
   draw_squares ();
 
-  update_state ();
+
 
   Gl.enable `texture_2d;
   List.iter draw_active_piece !active_pieces;
@@ -759,12 +834,14 @@ let mouse ~button ~state ~x ~y =
       
 
 let main () =
+  current_view := overhead_view;
   ignore(Glut.init Sys.argv);
   Glut.initDisplayMode ~alpha:true ~double_buffer:true ~depth:true () ;
   Glut.initWindowSize ~w:500 ~h:500 ;
   ignore(Glut.createWindow ~title:"lablglut & LablGL");
   Glut.mouseFunc ~cb:mouse;
   Glut.displayFunc ~cb:display;
+  
 
   Glut.mainLoop()
 
