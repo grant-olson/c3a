@@ -173,7 +173,7 @@ type piece = Piece of side * piece_type
 type location = {x:int;y:int;}
 type move = {move_from:location;move_to:location;}
 
-type state = Waiting |Dying of move | Moving | ClickOne of location | ClickTwo of move | PauseUntil of float
+type state = Introduction | Waiting |Dying of move | Moving | ClickOne of location | ClickTwo of move | PauseUntil of float
 
 type active_piece = {loc:location;kind:piece;anim_state:Player.player_anim_state;}
 
@@ -236,6 +236,7 @@ let moves = ref [ {move_from={x=4;y=7};move_to={x=4;y=5}};
                   {move_from={x=6;y=3};move_to={x=8;y=4}};
                 ]
 
+
 let active_pieces = ref (init_board ())
 
 let moving_piece_start_anim = ref (Unix.gettimeofday ())
@@ -251,7 +252,7 @@ let dead_piece_pos = ref {x=1;y=1}
 let dead_piece_anim = ref pawn_anim_death
 let dead_piece_expires = ref 0.0
 
-let current_state = ref Waiting
+let current_state = ref Introduction
 let current_player = ref White
 
 let current_view = ref (fun () -> ())
@@ -654,28 +655,47 @@ let overhead_view () =
   GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
     GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-250.0) ()
 
+let intro_view () =
+  let seconds = 10.0 in
+  let ct = Unix.gettimeofday () in
+  let time = mod_float ct seconds in
+  let pct = time /. seconds in
+  let xdist = (pct *. (-200.0)) +. 150.0 in
+  let blueside = (mod_float ct 20.0) > 10.0 in
+    GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
+    GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-75.0) ();
+    GlMat.rotate ~angle:60.0 ~x:(-1.0) ();
+    if blueside
+    then
+      begin
+        GlMat.rotate ~angle:180.0 ~z:1.0 ();
+        GlMat.translate ~y:(80.0) ~x:(-.xdist) ()
+      end
+    else
+        GlMat.translate ~y:(-80.0) ~x:(xdist)  ()
+
 let top_left_view () =
   GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
-  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-75.0) ();
+  GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-75.0) ();
   GlMat.rotate ~angle:45.0 ~x:(-1.0) ();
   GlMat.translate ~y:(40.0) ~x:(100.0) ()
 
 let top_right_view () =
   GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
-  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-75.0) ();
+  GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-75.0) ();
   GlMat.rotate ~angle:45.0 ~x:(-1.0) ();
   GlMat.translate ~y:(40.0) ~x:(-100.0) ()
 
 let bottom_right_view () =
   GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
-  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-75.0) ();
+  GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-75.0) ();
   GlMat.rotate ~angle:45.0 ~x:(-1.0) ();
   GlMat.rotate ~angle:180.0 ~z:(1.0) ();
   GlMat.translate ~y:(-40.0) ~x:(-100.0) ()
 
 let bottom_left_view () =
   GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
-  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-75.0) ();
+  GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-75.0) ();
   GlMat.rotate ~angle:45.0 ~x:(-1.0) ();
   GlMat.rotate ~angle:180.0 ~z:(1.0) ();
   GlMat.translate ~y:(-40.0) ~x:(100.0) ()
@@ -827,6 +847,8 @@ let mouse ~button ~state ~x ~y =
             match !current_state with
                 Waiting -> current_state := ClickOne {x=x;y=y}
               | ClickOne a -> current_state := ClickTwo {move_from=a;move_to={x=x;y=y}}
+              | Introduction -> current_state := Waiting;
+                  current_view := overhead_view
               | _ -> ()
           end
       | _ -> ()
@@ -834,7 +856,7 @@ let mouse ~button ~state ~x ~y =
       
 
 let main () =
-  current_view := overhead_view;
+  current_view := intro_view;
   ignore(Glut.init Sys.argv);
   Glut.initDisplayMode ~alpha:true ~double_buffer:true ~depth:true () ;
   Glut.initWindowSize ~w:500 ~h:500 ;
