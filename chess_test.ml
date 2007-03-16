@@ -813,7 +813,7 @@ let display_title_text () =
   Texture.set_current_texture "menu/art/font2_prop.tga";
   
   Q3Fonts.draw_string (-0.4) 0.9 0.175 "CHESS";
-  Q3Fonts.draw_string (-0.15) 0.7 0.175 "III";
+  Q3Fonts.draw_string (-0.125) 0.7 0.175 "III";
   Q3Fonts.draw_string (-0.4) 0.5 0.175 "ARENA";
 
   Gl.flush ()
