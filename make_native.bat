@@ -1,4 +1,5 @@
 del *.cmx*
+del player.exe c3a.exe fonts.exe
 
 if NOT "%VCINSTALLDIR%" == "" GOTO COMPILE
 

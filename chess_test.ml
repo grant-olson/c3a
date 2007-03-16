@@ -598,7 +598,7 @@ let lighting_init () =
   GlLight.light ~num:0 (`specular light_specular);
   GlLight.light ~num:0 (`position light_position);
 
-  List.iter Gl.enable [`lighting; `light0; `depth_test; `texture_2d];;
+  List.iter Gl.enable [`lighting; `light0; `depth_test; `texture_2d]
 
 let really_draw loc k a =
   match k with
@@ -611,7 +611,7 @@ let really_draw loc k a =
     | Piece(White,Knight) -> draw_piece loc knight_white wr a White
     | Piece(Black,Knight) -> draw_piece loc knight_black wr a Black
     | Piece(Black,King) -> draw_piece loc king_black wr a Black
-    | Piece(White,King) -> draw_piece loc king_white wr a Black
+    | Piece(White,King) -> draw_piece loc king_white wr a White
     | Piece(Black,Queen) -> draw_piece loc queen_black wr a Black
     | Piece(White,Queen) -> draw_piece loc queen_white wr a White
 
@@ -792,7 +792,36 @@ let update_state () =
             end
     | _ -> ()
 
+let display_title_text () =
+  (* FONTS *)
 
+  GlMat.mode `projection;
+  GlMat.load_identity ();
+
+  GlMat.mode `modelview;
+  GlMat.load_identity ();
+
+  Gl.enable `texture_2d;
+  Gl.enable `blend;
+  GlFunc.blend_func ~src:`src_alpha ~dst:`one_minus_src_alpha;
+  GlDraw.cull_face `front;
+  GlClear.color (0.25, 0.25, 0.25);
+  GlClear.clear [`depth];
+  GlDraw.color (1.5, 1.5, 1.5);
+
+  Gl.enable `texture_2d;
+  Texture.set_current_texture "menu/art/font2_prop.tga";
+  
+  Q3Fonts.draw_string (-0.4) 0.9 0.175 "CHESS";
+  Q3Fonts.draw_string (-0.15) 0.7 0.175 "III";
+  Q3Fonts.draw_string (-0.4) 0.5 0.175 "ARENA";
+
+  Gl.flush ()
+
+let display_text () =
+  match !current_state with
+      Introduction -> display_title_text ()
+    | _ -> ()
 
 let display () =
   update_state ();
@@ -813,12 +842,8 @@ let display () =
 
   GlMat.load_identity ();
 
-  (*GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-250.0) ();*)
-  (*GlMat.rotate ~angle:75.0 ~z:1.0 ~y:1.0 ~x:(-1.0) ();*)
 
   draw_squares ();
-
-
 
   Gl.enable `texture_2d;
   List.iter draw_active_piece !active_pieces;
@@ -828,9 +853,14 @@ let display () =
   lighting_init(); 
 
   Gl.flush ();
+
+  display_text ();
+
+
   Glut.swapBuffers ();
 
   update_anim_states ();
+
   Glut.postRedisplay ()
 
 exception Mouse_click of (float * float * float)
