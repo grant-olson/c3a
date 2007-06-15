@@ -3,7 +3,7 @@ del player.exe c3a.exe fonts.exe
 
 if NOT "%VCINSTALLDIR%" == "" GOTO COMPILE
 
-call "C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\bin\vcvars32.bat"
+call "C:\Program Files\Microsoft Visual Studio 8\VC\bin\vcvars32.bat"
 
 
 :: for glut32.lib, where should we really get it?

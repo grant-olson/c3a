@@ -177,6 +177,7 @@ type state = Introduction | Waiting |Dying of move | Moving | ClickOne of locati
 
 type active_piece = {loc:location;kind:piece;anim_state:Player.player_anim_state;}
 
+type notification = Check | Checkmate | Fragged | Intro
 
 type quadrants = TopLeft | TopRight | BottomLeft | BottomRight
 
@@ -254,6 +255,8 @@ let dead_piece_expires = ref 0.0
 
 let current_state = ref Introduction
 let current_player = ref White
+let current_notification = ref (Some Intro)
+
 
 let current_view = ref (fun () -> ())
 
@@ -522,7 +525,8 @@ let set_death m =
     dead_piece_pos := m.move_to;
     dead_piece_expires := stop_time;
     active_pieces := ps;
-    current_state := Dying(m)
+    current_state := Dying(m);
+    current_notification := Some Fragged
 
 
 let set_action m =
@@ -732,6 +736,8 @@ let is_move_done piece start finish =
         current_state := PauseUntil (now +. 2.0) ;
         moving_piece := None;
         active_pieces := add_piece_to_list !active_pieces piece finish.x finish.y;
+        (if check_for_check !current_player !active_pieces
+          then current_notification := Some Check);
         current_player := match !current_player with
             Black -> White
           | White -> Black
@@ -767,6 +773,7 @@ let update_state () =
           then
             begin
               dead_piece := None;
+              current_notification := None;
               set_move m
             end
           else ()
@@ -787,41 +794,58 @@ let update_state () =
           if current_time > t
           then
             begin
+              current_notification := None;
               current_state := Waiting;
               current_view := overhead_view
             end
     | _ -> ()
 
-let display_title_text () =
-  (* FONTS *)
-
-  GlMat.mode `projection;
-  GlMat.load_identity ();
-
-  GlMat.mode `modelview;
-  GlMat.load_identity ();
-
-  Gl.enable `texture_2d;
-  Gl.enable `blend;
-  GlFunc.blend_func ~src:`src_alpha ~dst:`one_minus_src_alpha;
-  GlDraw.cull_face `front;
-  GlClear.color (0.25, 0.25, 0.25);
-  GlClear.clear [`depth];
-  GlDraw.color (1.5, 1.5, 1.5);
-
-  Gl.enable `texture_2d;
-  Texture.set_current_texture "menu/art/font2_prop.tga";
-  
+let display_intro_text () =
   Q3Fonts.draw_string (-0.4) 0.9 0.175 "CHESS";
   Q3Fonts.draw_string (-0.125) 0.7 0.175 "III";
-  Q3Fonts.draw_string (-0.4) 0.5 0.175 "ARENA";
+  Q3Fonts.draw_string (-0.4) 0.5 0.175 "ARENA"
 
-  Gl.flush ()
+let display_check_text () =
+  Q3Fonts.draw_string (-0.4) 0.9 0.175 "CHECK"
+
+let display_fragged_text () =
+  Q3Fonts.draw_string (-0.6) 0.9 0.175 "FRAGGED"
 
 let display_text () =
-  match !current_state with
-      Introduction -> display_title_text ()
+
+  (* FONTS *)
+  let run_display display_func =
+    (* For some reason, running this screws up the resolution of clicking
+       on a given square, so we only want to run it when a person can't move
+       I suppose we could figure out how to push and pop all the matricies,
+       but why bother?
+    *)
+    GlMat.mode `projection;
+    GlMat.load_identity ();
+
+    GlMat.mode `modelview;
+    GlMat.load_identity ();
+
+    Gl.enable `texture_2d;
+    Gl.enable `blend;
+    GlFunc.blend_func ~src:`src_alpha ~dst:`one_minus_src_alpha;
+    GlDraw.cull_face `front;
+    GlClear.color (0.25, 0.25, 0.25);
+    GlClear.clear [`depth];
+    GlDraw.color (1.5, 1.5, 1.5);
+
+    Gl.enable `texture_2d;
+    Texture.set_current_texture "menu/art/font2_prop.tga";
+
+    display_func ();
+    Gl.flush () in
+
+  match !current_notification with
+      Some Intro -> run_display display_intro_text
+    | Some Check -> run_display display_check_text
+    | Some Fragged -> run_display display_fragged_text
     | _ -> ()
+
 
 let display () =
   update_state ();
@@ -878,6 +902,7 @@ let mouse ~button ~state ~x ~y =
                 Waiting -> current_state := ClickOne {x=x;y=y}
               | ClickOne a -> current_state := ClickTwo {move_from=a;move_to={x=x;y=y}}
               | Introduction -> current_state := Waiting;
+                  current_notification := None;
                   current_view := overhead_view
               | _ -> ()
           end
