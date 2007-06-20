@@ -318,6 +318,14 @@ let extract_piece_from_list lst xpos ypos =
   in
     ep lst xpos ypos []
 
+let remove_piece_from_list lst xpos ypos =
+  (* if it is there to begin with *)
+  try
+    let _, newList = extract_piece_from_list lst xpos ypos in
+      newList
+  with Not_found ->
+    lst
+
 let add_piece_to_list lst piece x y =
   let loc = {x=x;y=y} in
   let anim_state =
@@ -447,26 +455,6 @@ let valid_move_list piece pieces = match piece with
   | {kind=Piece(_,King)} -> valid_king_moves piece pieces
   | {kind=Piece(_,Knight)} -> valid_knight_moves piece pieces
 
-let validate_move pieces move =
-  let validate_start_and_end_pos pieces move =
-    let startx,starty = move.move_from.x,move.move_from.y in
-    let endx,endy = move.move_to.x,move.move_to.y in
-    let piece,pieces = extract_piece_from_list pieces startx starty in
-    let start_color = match piece.kind with
-        Piece(x,_) -> x in
-    let valid_moves = valid_move_list piece pieces in
-      if
-        start_color == !current_player
-      then
-        List.mem {x=endx;y=endy} valid_moves
-      else
-        false
-  in
-    try
-      validate_start_and_end_pos pieces move
-    with
-        Not_found -> false (* bad starting pos *)
-
 let check_for_check color pieces =
   let rec test_individual_piece my_pieces all_pieces =
     match my_pieces with
@@ -486,6 +474,42 @@ let check_for_check color pieces =
   in
   let my_pieces = get_players_pieces color pieces in
     test_individual_piece my_pieces pieces
+
+let validate_move pieces move =
+  let validate_start_and_end_pos pieces move =
+    let startx,starty = move.move_from.x,move.move_from.y in
+    let endx,endy = move.move_to.x,move.move_to.y in
+    let piece,pieces = extract_piece_from_list pieces startx starty in
+    let start_color = match piece.kind with
+        Piece(x,_) -> x in
+    let valid_moves = valid_move_list piece pieces in
+      if
+        start_color == !current_player
+      then
+        List.mem {x=endx;y=endy} valid_moves
+      else
+        false
+  in
+  let check_if_checked_self pieces move color =
+    let pieces = remove_piece_from_list pieces move.move_to.x move.move_to.y in
+    let mp, pieces = extract_piece_from_list pieces move.move_from.x move.move_from.y in
+    let new_pos = {mp with loc=move.move_to} in
+    let new_list = new_pos :: pieces in
+    let other_color = match color with
+        Black -> White
+      | White -> Black
+    in
+      not (check_for_check other_color new_list)
+  in
+    
+    try
+        (if validate_start_and_end_pos pieces move
+          then
+            check_if_checked_self pieces move !current_player
+          else
+            false)
+    with
+        Not_found -> false (* bad starting pos *)
 
 let set_move move =
   let start_x = move.move_from.x in
