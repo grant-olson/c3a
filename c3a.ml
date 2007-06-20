@@ -85,8 +85,6 @@ let dead_piece_expires = ref 0.0
 let current_state = ref Introduction
 let current_player = ref White
 let current_notification = ref (Some Intro)
-
-
 let current_view = ref (fun () -> ())
 
 (* TRANSLATE BETWEEN BOARD COORDINATES AND X/Y VALS, COLLISION DETECTION, ETC *)
@@ -389,13 +387,13 @@ let set_action m =
       | None -> set_move m
 
 
+(* OPENGL DRAWING FUNCTIONS *)
+
 let vect_to_angle x y =
   let pi = 3.1415926535897931 in
   let two_pi = pi *. 2.0 in
   let rads = atan2 x y in
     rads /. two_pi *. 360.0
-
-(* OPENGL DRAWING FUNCTIONS *)
 
 let set_material_color r g b a =
   GlLight.material `front (`specular (r, g, b, a));
