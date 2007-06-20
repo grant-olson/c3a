@@ -66,16 +66,6 @@ let init_board () =
 
 
 (* INIT GLOBALS *)
-let moves = ref [ {move_from={x=4;y=7};move_to={x=4;y=5}};
-                  {move_from={x=6;y=2};move_to={x=6;y=4}};
-                  {move_from={x=3;y=8};move_to={x=7;y=4}};
-                  {move_from={x=7;y=1};move_to={x=6;y=3}};
-                  {move_from={x=5;y=7};move_to={x=5;y=6}};
-                  {move_from={x=3;y=2};move_to={x=3;y=3}};
-                  {move_from={x=4;y=8};move_to={x=8;y=4}};
-                  {move_from={x=6;y=3};move_to={x=8;y=4}};
-                ]
-
 
 let active_pieces = ref (init_board ())
 
