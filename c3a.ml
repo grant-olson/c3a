@@ -8,6 +8,20 @@ type piece_type = Pawn | Rook | Bishop | Knight | Queen | King
 type side = Black | White
 
 type piece = Piece of side * piece_type
+let repr_piece p =
+  let color = match p with
+      Piece(Black,_) -> "Black"
+    | Piece(White,_) -> "White"
+  in
+  let kind = match p with
+      Piece(_,Pawn) -> "Pawn"
+    | Piece(_,Rook) -> "Rook"
+    | Piece(_,Bishop) -> "Bishop"
+    | Piece(_,Knight) -> "Knight"
+    | Piece(_,Queen) -> "Queen"
+    | Piece(_,King) -> "King"
+  in
+    color ^ " " ^ kind
 
 type location = {x:int;y:int;}
 type move = {move_from:location;move_to:location;}
@@ -120,7 +134,6 @@ let is_at_destination start finish =
   let diff_y = cur_y -. dest_y in
   let distance = sqrt ( (diff_x *. diff_x) +. (diff_y *. diff_y) ) in
   let epsilon = square_size /. 5.0 in
-    Printf.printf "%f \n" distance;
     if
       distance <= epsilon
     then
@@ -244,7 +257,7 @@ let valid_queen_moves piece pieces =
     rm@bm
 
 let remove_bad_moves move_list side pieces =
-  let minus_invalid = List.filter (fun a ->
+  let move_list = List.filter (fun a ->
     (a.x >= 1 && a.x <= 8 && a.y >= 1 && a.y <= 8)) move_list in
   let test_for_conflict side pieces move =
     match check_for_piece pieces move.x move.y with
@@ -302,6 +315,19 @@ let check_for_check color pieces =
   let my_pieces = get_players_pieces color pieces in
     test_individual_piece my_pieces pieces
 
+let check_if_checked_self pieces move color =
+  let pieces = remove_piece_from_list pieces move.move_to.x move.move_to.y in
+  let mp, pieces = extract_piece_from_list pieces move.move_from.x move.move_from.y in
+  let new_pos = {mp with loc=move.move_to} in
+  let new_list = new_pos :: pieces in
+  let other_color = match color with
+      Black -> White
+    | White -> Black
+  in
+    check_for_check other_color new_list
+
+
+
 let validate_move pieces move =
   let validate_start_and_end_pos pieces move =
     let startx,starty = move.move_from.x,move.move_from.y in
@@ -317,26 +343,44 @@ let validate_move pieces move =
       else
         false
   in
-  let check_if_checked_self pieces move color =
-    let pieces = remove_piece_from_list pieces move.move_to.x move.move_to.y in
-    let mp, pieces = extract_piece_from_list pieces move.move_from.x move.move_from.y in
-    let new_pos = {mp with loc=move.move_to} in
-    let new_list = new_pos :: pieces in
-    let other_color = match color with
-        Black -> White
-      | White -> Black
-    in
-      not (check_for_check other_color new_list)
-  in
     
     try
         (if validate_start_and_end_pos pieces move
           then
-            check_if_checked_self pieces move !current_player
+            not (check_if_checked_self pieces move !current_player)
           else
             false)
     with
         Not_found -> false (* bad starting pos *)
+
+let check_for_checkmate pieces current_color =
+  let check_piece pieces piece =
+    let rec test_moves pieces loc end_poses =
+      let other_color = match current_color with
+          Black -> White
+        | White -> Black in
+      match end_poses with
+          h :: t ->
+            let move = {move_from=loc;move_to=h} in
+            let checked_self = check_if_checked_self pieces move other_color
+              in
+                (if checked_self then test_moves pieces loc t else false)
+        | [] -> true
+    in
+    let end_poses = valid_move_list piece pieces in
+      test_moves pieces piece.loc end_poses
+  in
+  let rec check_pieces pieces other_pieces =
+    match other_pieces with
+        h :: t ->
+          (if check_piece pieces h then check_pieces pieces t else false)
+      | [] -> true
+  in
+  let is_other_color x = match x.kind with
+    Piece(x,_) -> x != current_color in
+  let other_pieces = List.filter is_other_color pieces in
+    check_pieces pieces other_pieces 
+  
 
 let set_move move =
   let start_x = move.move_from.x in
@@ -588,7 +632,12 @@ let is_move_done piece start finish =
         moving_piece := None;
         active_pieces := add_piece_to_list !active_pieces piece finish.x finish.y;
         (if check_for_check !current_player !active_pieces
-          then current_notification := Some Check);
+          then
+            (if check_for_checkmate !active_pieces !current_player
+              then
+                current_notification := Some Checkmate
+              else
+                current_notification := Some Check));
         current_player := match !current_player with
             Black -> White
           | White -> Black
@@ -637,7 +686,7 @@ let update_state () =
           end
         else
           begin
-            Glut.setWindowTitle "BAD MOVE";
+            Glut.setWindowTitle "c3a - Invalid Move - Try Again";
             current_state := Waiting
           end
     | PauseUntil t ->
@@ -658,6 +707,9 @@ let display_intro_text () =
 
 let display_check_text () =
   Q3Fonts.draw_string (-0.4) 0.9 0.175 "CHECK"
+
+let display_checkmate_text () =
+  Q3Fonts.draw_string (-0.8) 0.9 0.175 "CHECKMATE"
 
 let display_fragged_text () =
   Q3Fonts.draw_string (-0.6) 0.9 0.175 "FRAGGED"
@@ -694,6 +746,7 @@ let display_text () =
   match !current_notification with
       Some Intro -> run_display display_intro_text
     | Some Check -> run_display display_check_text
+    | Some Checkmate -> run_display display_checkmate_text
     | Some Fragged -> run_display display_fragged_text
     | _ -> ()
 
@@ -744,11 +797,9 @@ let mouse ~button ~state ~x ~y =
   let z_in = 0.92 in
   let x,y,z = GluMat.unproject ((float_of_int x), (float_of_int y), z_in) in
   let x,y = calc_grid_pos x y in
-  let text = (string_of_int x)^" "^(string_of_int y)^" " in
     match state with
         Glut.DOWN ->
           begin
-            Glut.setWindowTitle text;
             match !current_state with
                 Waiting -> current_state := ClickOne {x=x;y=y}
               | ClickOne a -> current_state := ClickTwo {move_from=a;move_to={x=x;y=y}}
@@ -766,7 +817,7 @@ let main () =
   ignore(Glut.init Sys.argv);
   Glut.initDisplayMode ~alpha:true ~double_buffer:true ~depth:true () ;
   Glut.initWindowSize ~w:500 ~h:500 ;
-  ignore(Glut.createWindow ~title:"lablglut & LablGL");
+  ignore(Glut.createWindow ~title:"c3a");
   Glut.mouseFunc ~cb:mouse;
   Glut.displayFunc ~cb:display;
   

@@ -161,4 +161,3 @@ let wrl = Md3.load_md3_file "./pak0/models/weapons2/rocketl/rocketl_1.md3";;
 let ws = Md3.load_md3_file "./pak0/models/weapons2/shotgun/shotgun.md3";;
 let wr = Md3.load_md3_file "./pak0/models/weapons2/gauntlet/gauntlet.md3";;
 let wg = Md3.load_md3_file "./pak0/models/weapons2/railgun/railgun.md3";;
-
