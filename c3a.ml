@@ -6,12 +6,14 @@ open C3aModels
 
 type piece_type = Pawn | Rook | Bishop | Knight | Queen | King
 type side = Black | White
+let repr_side s = match s with
+    Black -> "Black"
+  | White -> "White"
 
 type piece = Piece of side * piece_type
 let repr_piece p =
   let color = match p with
-      Piece(Black,_) -> "Black"
-    | Piece(White,_) -> "White"
+      Piece(s,_) -> repr_side s
   in
   let kind = match p with
       Piece(_,Pawn) -> "Pawn"
@@ -326,32 +328,35 @@ let check_if_checked_self pieces move color =
   in
     check_for_check other_color new_list
 
-
+let validate_move_start pieces loc =
+  try
+    let startx,starty = loc.x,loc.y in
+    let piece,_ = extract_piece_from_list pieces startx starty in
+    let start_color = match piece.kind with
+        Piece(x,_) -> x in
+      if start_color == !current_player then true else false
+  with
+      Not_found -> false
+        
 
 let validate_move pieces move =
-  let validate_start_and_end_pos pieces move =
+  let validate_end_pos pieces move =
     let startx,starty = move.move_from.x,move.move_from.y in
     let endx,endy = move.move_to.x,move.move_to.y in
     let piece,pieces = extract_piece_from_list pieces startx starty in
-    let start_color = match piece.kind with
-        Piece(x,_) -> x in
     let valid_moves = valid_move_list piece pieces in
-      if
-        start_color == !current_player
-      then
         List.mem {x=endx;y=endy} valid_moves
-      else
-        false
   in
-    
-    try
-        (if validate_start_and_end_pos pieces move
+    if validate_move_start pieces move.move_from then
+      
+        (if validate_end_pos pieces move
           then
             not (check_if_checked_self pieces move !current_player)
           else
             false)
-    with
-        Not_found -> false (* bad starting pos *)
+    else
+      false
+ 
 
 let check_for_checkmate pieces current_color =
   let check_piece pieces piece =
@@ -665,6 +670,26 @@ let update_anim_states () =
     moving_piece_anim := Player.update_player_anim_state new_time !moving_piece_anim;
     dead_piece_anim := Player.update_player_anim_state new_time !dead_piece_anim
 
+let rec set_current_state new_state =
+  current_state := new_state;
+  match new_state with
+      Waiting ->
+        let color = repr_side !current_player in
+        let text = color ^ "'s move" in
+          Glut.setWindowTitle text
+    | ClickOne(loc) ->
+        if validate_move_start !active_pieces loc then
+           let color = repr_side !current_player in
+           let piece , _ = extract_piece_from_list !active_pieces loc.x loc.y in
+           let piece_desc = repr_piece piece.kind in
+           let text = color ^ " selected " ^ piece_desc in
+             Glut.setWindowTitle text
+          else
+            current_state := Waiting
+
+      
+    | _ -> ()
+
 let update_state () =
   match !current_state with
       Dying m ->
@@ -687,7 +712,7 @@ let update_state () =
         else
           begin
             Glut.setWindowTitle "c3a - Invalid Move - Try Again";
-            current_state := Waiting
+            set_current_state Waiting
           end
     | PauseUntil t ->
         let current_time = Unix.gettimeofday () in
@@ -695,7 +720,7 @@ let update_state () =
           then
             begin
               current_notification := None;
-              current_state := Waiting;
+              set_current_state Waiting;
               current_view := overhead_view
             end
     | _ -> ()
@@ -801,9 +826,9 @@ let mouse ~button ~state ~x ~y =
         Glut.DOWN ->
           begin
             match !current_state with
-                Waiting -> current_state := ClickOne {x=x;y=y}
+                Waiting ->  set_current_state (ClickOne {x=x;y=y})
               | ClickOne a -> current_state := ClickTwo {move_from=a;move_to={x=x;y=y}}
-              | Introduction -> current_state := Waiting;
+              | Introduction -> set_current_state Waiting;
                   current_notification := None;
                   current_view := overhead_view
               | _ -> ()
