@@ -16,4 +16,4 @@ ocamlopt -o quaketools.cmxa -a binfile.cmx tga.cmx texture.cmx md3.cmx player.cm
 
 ocamlopt -o c3a.exe -I +lablGL lablgl.cmxa lablglut.cmxa unix.cmxa quaketools.cmxa c3aModels.ml c3a.ml
 ocamlopt -o player.exe -I +lablGL lablgl.cmxa lablglut.cmxa unix.cmxa quaketools.cmxa player_test.ml
-ocamlopt -o fonts.exe -I +lablgl lablgl.cmxa lablglut.cmxa unix.cmxa quaketools.cmxa font_test.ml
+ocamlopt -o fonts.exe -I +lablGL lablgl.cmxa lablglut.cmxa unix.cmxa quaketools.cmxa font_test.ml
