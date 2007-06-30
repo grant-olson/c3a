@@ -1,0 +1,8 @@
+TODO List
+
+- Weapons are jpegs, not tiffs.  Need to be able to read those files.
+- OpenGL is cross-cutting the logic.  Can I break the GL out into GL only files?
+- Smart clipping.
+- More camera angles during move.
+- extract_piece_from_list should take location, not coordinates
+- Acutally read animation config files for models instead of hardcoding.
