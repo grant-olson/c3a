@@ -130,18 +130,19 @@ let calc_grid_pos x y =
    (int_of_float x), (int_of_float y)
 
 let is_at_destination start finish =
-  let cur_x,cur_y = calc_current_pos start finish in
+  let distance start_x start_y end_x end_y =
+    (* calc distance via pythagorean *)
+    let diff_x = end_x -. start_x in
+    let diff_y = end_y -. start_y in
+      sqrt ( (diff_x *. diff_x) +. (diff_y *. diff_y) ) in
+  let start_x,start_y = square_center start in
   let dest_x,dest_y = square_center finish in
-  let diff_x = dest_x -. cur_x in
-  let diff_y = cur_y -. dest_y in
-  let distance = sqrt ( (diff_x *. diff_x) +. (diff_y *. diff_y) ) in
-  let epsilon = square_size /. 5.0 in
-    if
-      distance <= epsilon
-    then
-      true
-    else
-      false
+  let distance_to_dest = distance start_x start_y dest_x dest_y in
+  let cur_x,cur_y = calc_current_pos start finish in
+  let distance_travelled = distance start_x start_y cur_x cur_y in
+    if distance_travelled > distance_to_dest
+    then true (* we've passed the dest *)
+    else false (* not there yet *)
 
 (* Various Predicates and tests *)
 
