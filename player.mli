@@ -1,3 +1,6 @@
+(* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
+   and conditions *)
+
 type player = { lower : Md3.md3; upper : Md3.md3; head : Md3.md3; }
 type anim_state = {
   time_to_advance : float;

@@ -1,3 +1,6 @@
+(* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
+   and conditions *)
+
 val int32_of_int : int -> int32
 val in_char_as_int32 : in_channel -> int32
 val in_char : in_channel -> int

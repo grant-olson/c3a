@@ -1,3 +1,6 @@
+(* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
+   and conditions *)
+
 (* tga parsing *)
 
 exception Unknown_tga_format;;

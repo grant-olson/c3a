@@ -1,3 +1,6 @@
+(* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
+   and conditions *)
+
 val pawn : Player.player
 val pawn_black : Player.player
 val pawn_white : Player.player

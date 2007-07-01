@@ -1,3 +1,5 @@
+(* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
+   and conditions *)
 
 let display () =
   (* Gl.enable `cull_face; *)

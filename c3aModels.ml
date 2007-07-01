@@ -1,3 +1,5 @@
+(* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
+   and conditions *)
 
 let pawn = Player.load_player "./pak0/models/players/orbb/"
 let pawn_black = Player.reskin_player [

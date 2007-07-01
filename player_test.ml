@@ -1,5 +1,5 @@
-
-
+(* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
+   and conditions *)
 
 let m = Player.load_player "./pak0/models/players/mynx/";;
 let m_state = ref (Player.init_player_anim_state (111,128,111,20)

@@ -1,3 +1,6 @@
+(* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
+   and conditions *)
+
 (*
 Player model is build up of 3 md3s.  THis will probably be a class (once I learn how classes work!)
 *)

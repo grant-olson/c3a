@@ -1,3 +1,6 @@
+(* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
+   and conditions *)
+
 let prop_map_b  = [|(11, 12, 33);
                   (49, 12, 31);
                   (85, 12, 31);

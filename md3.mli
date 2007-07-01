@@ -1,3 +1,6 @@
+(* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
+   and conditions *)
+
 exception Invalid_md3_format
 type vector = { x : float; y : float; z : float; }
 val print_vector : vector -> unit

@@ -1,3 +1,6 @@
+(* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
+   and conditions *)
+
 exception Unknown_tga_format
 type rgba = { r : int; g : int; b : int; a : int; }
 type color_map_spec = {
