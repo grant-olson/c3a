@@ -31,3 +31,5 @@ del /S camlprog.exe
 
 cd ..
 zip c3a-bin-%DATESTAMP%.zip c3a/*
+
+rmdir /S /Q c3a
