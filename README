@@ -2,3 +2,99 @@
 CHESS III ARENA
 ===============
 
+Chess III Arena is a simple chess game that utilizes the Quake III
+Arena characters.  It was written as my first (allegedly) non- trivial
+ocaml application so I could see what I thought about the language.
+But more about that later.  Most normal people are probably just
+interested in playing the game.  At the moment it is for human players
+only, there is no computer opponent; it is basically just a virtual
+chess board.  A computer opponent and/or playing remote opponents may
+or may not appear in future versions.
+
+------------ 
+Installation
+------------ 
+
+Windows
+=======
+
+  - Download the executable in zip format.
+
+  - Extract the files.  [Right- click, choose Extract All, Next your
+    way through the wizard.]
+
+  - Either:
+  
+      + Insert your Quake 3 CD and open it via Windows
+        Explorer. [Right click on Drive letter and choose explore.]
+
+      - Navigate to the installation directory if Quake 3 is aready
+        installed.
+
+  - Navigate to the Quake3/baseq3 directory.
+
+  - Copy the file pak0.pk3 to the c3a directory created when you
+    extracted c3a.  Note: If you are copying from a local install, you
+    must copy and paste the file. [Right- Click copy, Right- Click
+    paste in the destination directory.]  If you drag- and- drop, it
+    will move the file and break your Quake 3 install.
+
+  - Rename the file pak0.pk3 to pak0.zip.  [Right- click, select rename]
+
+  - Extract the contents.  [Right- click, choose Extract All.  Next
+    your way through the wizard
+
+  - Verify that the files are in the right place.  From the c3a
+    directory, you should be able to navigate to the following
+    directory: pak0/models/players
+
+  - Double-click on c3a.exe and enjoy!
+
+Linux
+=====
+
+Note: Although the program should run on any OpenGL implementation,
+you're really going to need some sort of hardware acceleration for
+reasonable rendering performance.
+
+    - Install OCaml 3.09 or greater and the accompanying LablGL
+      library, however that is done on your distro.
+
+    - Grab the source .tgz, extract it somewhere.
+
+    - Within the new c3a directory, create a subdirectory called pak0
+
+    - Locate the file pak0.pk3 from either your Quake 3 installation
+      or the Quake 3 CD.  It is located under the subdirectory
+      Quake3/baseq3 on the CD
+
+    - Rename the file to pak0.pk3 [mv pak0.pak pak0.zip]
+
+    - Unzip the contents. [unzip pak0.zip]
+
+    - Verify that the files are in the right place.  From the c3a
+      directory, you should be able to navigate to the following
+      directory: pak0/models/players
+
+    - Go back to the original c3a directory.
+
+    - run ./make_native.sh
+
+    - Right now there is no 'install', you run out of the working directory
+
+    - Run ./c3a.exe and enjoy!
+
+----------------
+Playing the Game
+----------------
+
+When you run the game, you should initially see a title screen.  Click
+anywhere on the screen to start the game.  You will see an overhead
+view of the board.  Blue is "white" and Red is "black", so Blue goes
+first.  Click on the piece you want to move.  Click on where you want
+to move it.  If you want to change pieces (that is, you haven't 'taken
+your hand off the piece yet') simply click on a square that is in
+invalid move location, such as the piece itself.  Repeat for red.
+Repeat until someone checkmates.
+
+Copyright (C) 2007, Grant T. Olson.  See LICENSE file for terms
