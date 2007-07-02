@@ -66,8 +66,9 @@ SUCH DAMAGE.
 =========================================================================
 
 The OCaml runtime is licensed under the LGPL with a special exception
-that removes clause 6.  I think that means I don't need to include the
-LGPL copyright notice.  Here is a link to a license summary:
+that removes clause 6 in some cases.  I believe that means I don't
+need to include the LGPL copyright notice.  If I am in error here,
+please let me know.  Here is a link to a license summary:
 
 http://caml.inria.fr/pub/old_caml_site/ocaml/LICENSE.html
 
