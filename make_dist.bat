@@ -26,3 +26,8 @@ del /S fonts.exe
 del /S player.exe
 del /S *.sh
 del /S camlprog.exe
+
+:: and zip it.
+
+cd ..
+zip c3a-bin-%DATESTAMP%.zip c3a/*
