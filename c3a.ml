@@ -31,7 +31,9 @@ let repr_piece p =
 type location = {x:int;y:int;}
 type move = {move_from:location;move_to:location;}
 
-type state = Introduction | Waiting |Dying of move | Moving | ClickOne of location | ClickTwo of move | PauseUntil of float
+type player_type = Human | Computer
+
+type state = Introduction | Waiting | Dying of move | Moving | ClickOne of location | ClickTwo of move | PauseUntil of float
 
 type active_piece = {loc:location;kind:piece;anim_state:Player.player_anim_state;}
 
@@ -86,6 +88,10 @@ let init_board () =
 
 (* INIT GLOBALS *)
 
+let start_time = ref 1000000.0
+let last_fps = ref !start_time
+let frames = ref 0
+
 let active_pieces = ref (init_board ())
 
 let moving_piece_start_anim = ref (Unix.gettimeofday ())
@@ -105,6 +111,17 @@ let current_state = ref Introduction
 let current_player = ref White
 let current_notification = ref (Some Intro)
 let current_view = ref (fun () -> ())
+
+let white_player_type = Human
+let black_player_type = Computer
+
+let computerized_opponent =
+  if
+    white_player_type != black_player_type
+  then
+    Some (CompOpponent.init_opponent "gnuchess507 -x")
+  else
+    None
 
 (* TRANSLATE BETWEEN BOARD COORDINATES AND X/Y VALS, COLLISION DETECTION, ETC *)
 
@@ -147,7 +164,62 @@ let is_at_destination start finish =
     then true (* we've passed the dest *)
     else false (* not there yet *)
 
+let algebraic_of_loc loc =
+  (* Turn a location struct into the equivilent Chess Algebraic Notation *)
+  let xchar = match loc.x with
+      1 -> "a"
+    | 2 -> "b"
+    | 3 -> "c"
+    | 4 -> "d"
+    | 5 -> "e"
+    | 6 -> "f"
+    | 7 -> "g"
+    | 8 -> "h"
+    | _ -> raise Not_found in
+  let ychar = string_of_int (9 - loc.y) in
+    xchar ^ ychar
+
+let loc_of_algebraic alg =
+  let xcoord = match alg.[0] with
+      'a' -> 1
+    | 'b' -> 2
+    | 'c' -> 3
+    | 'd' -> 4
+    | 'e' -> 5
+    | 'f' -> 6
+    | 'g' -> 7
+    | 'h' -> 8
+    | _ -> raise Not_found in
+  let ycoord = match alg.[1] with
+      '1' -> 8
+    | '2' -> 7
+    | '3' -> 6
+    | '4' -> 5
+    | '5' -> 4
+    | '6' -> 3
+    | '7' -> 2
+    | '8' -> 1
+    | _ -> raise Not_found
+  in
+    {x=xcoord;y=ycoord}
+
+let algebraic_of_move m =
+  let move_from = algebraic_of_loc m.move_from in
+  let move_to = algebraic_of_loc m.move_to in
+    move_from ^ move_to
+
+let move_of_algebraic alg =
+  let move_from = loc_of_algebraic (String.sub alg 0 2) in
+  let move_to = loc_of_algebraic (String.sub alg 2 2) in
+    {move_from=move_from;move_to=move_to}
+  
+
 (* Various Predicates and tests *)
+
+let get_player_type p =
+  match p with
+      Black -> black_player_type
+    | White -> white_player_type
 
 let rec check_for_piece lst x y =
   match lst with
@@ -694,6 +766,13 @@ let rec set_current_state new_state =
       
     | _ -> ()
 
+let send_move m =
+  match computerized_opponent with
+      None -> ()
+    | Some co ->
+        let alg = algebraic_of_move m in
+          CompOpponent.issue_move co  alg
+
 let update_state () =
   match !current_state with
       Dying m ->
@@ -710,6 +789,7 @@ let update_state () =
         if validate_move !active_pieces m
         then
           begin
+            (if (get_player_type !current_player) == Human then send_move m);
             set_camera m;
             set_action m
           end
@@ -727,7 +807,38 @@ let update_state () =
               set_current_state Waiting;
               current_view := overhead_view
             end
+    | Waiting ->
+        let player_type = get_player_type !current_player in
+          if player_type == Computer
+          then
+            let move = CompOpponent.get_opponents_move (match computerized_opponent with Some x -> x) in
+              match move with
+                  None -> ()
+                | Some x ->
+                    let m = move_of_algebraic x in
+                      current_state := ClickTwo(m)
+          else
+            ()
+        
     | _ -> ()
+
+let update_frame_counts () =
+  let current_time = Unix.gettimeofday() in
+  let delta = current_time -. !last_fps in
+    frames := !frames + 1;
+    if delta > 10.0
+    then
+      begin
+        let total_time = current_time -. !start_time in
+        let f_frames = float_of_int (!frames) in
+        let fps = f_frames /. total_time in
+          Printf.printf "%f fps (%d total %f elapsed time)\n" fps (!frames) total_time;
+          flush stdout;
+          last_fps := current_time
+      end
+    else
+      ()
+      
 
 let display_intro_text () =
   Q3Fonts.draw_string (-0.4) 0.9 0.175 "CHESS";
@@ -818,6 +929,8 @@ let display () =
 
   update_anim_states ();
 
+  update_frame_counts ();  
+
   Glut.postRedisplay ()
 
 exception Mouse_click of (float * float * float)
@@ -830,10 +943,19 @@ let mouse ~button ~state ~x ~y =
         Glut.DOWN ->
           begin
             match !current_state with
-                Waiting ->  set_current_state (ClickOne {x=x;y=y})
+                Waiting ->
+                  let pt = get_player_type !current_player in
+                    if pt = Human
+                    then
+                      set_current_state (ClickOne {x=x;y=y})
+                    else
+                      ()
               | ClickOne a -> current_state := ClickTwo {move_from=a;move_to={x=x;y=y}}
               | Introduction -> set_current_state Waiting;
                   current_notification := None;
+                  start_time := Unix.gettimeofday();
+                  last_fps := !start_time;
+                  frames := 0;
                   current_view := overhead_view
               | _ -> ()
           end
