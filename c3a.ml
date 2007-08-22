@@ -33,7 +33,7 @@ type move = {move_from:location;move_to:location;}
 
 type player_type = Human | Computer
 
-type state = Introduction | Waiting | Dying of move | Moving | ClickOne of location | ClickTwo of move | PauseUntil of float
+type state = Introduction | Waiting | Dying of location * move | Moving | ClickOne of location | ClickTwo of move | PauseUntil of float
 
 type active_piece = {loc:location;kind:piece;anim_state:Player.player_anim_state;}
 
@@ -113,7 +113,9 @@ let current_notification = ref (Some Intro)
 let current_view = ref (fun () -> ())
 
 let white_player_type = Human
-let black_player_type = Computer
+let black_player_type = Human
+
+let move_history = ref []
 
 let computerized_opponent =
   if
@@ -221,6 +223,12 @@ let get_player_type p =
       Black -> black_player_type
     | White -> white_player_type
 
+let get_other_player_type p =
+  match p with
+      Black -> white_player_type
+    | White -> black_player_type
+
+
 let rec check_for_piece lst x y =
   match lst with
       [] -> None
@@ -286,7 +294,30 @@ let valid_pawn_moves piece pieces =
           Some Piece(x,_) when x != color -> [{x=mx;y=my}]
         | _ -> []
   in
-  let move1 = check_normal_move 1 in
+  let check_pawn_en_passant offset color =
+    let mx,my =  (piece.loc.x + offset),(piece.loc.y) in
+    let dir = match piece.kind with
+        Piece(Black,_) -> 1
+      | Piece(White,_) -> -1
+    in
+    let is_piece_pawn = match check_for_piece pieces mx my with
+        Some Piece(x,Pawn) when x != color -> true
+      | _ -> false
+    in
+    let last_move = match !move_history with
+        h :: t -> Some h
+      | [] -> None
+    in
+    let was_last_move = match last_move with
+        Some {move_from=_;move_to={x=x;y=y}} when x == mx && y == my -> true
+      | _ -> false
+    in
+      if is_piece_pawn && was_last_move then
+        [{x=mx;y=my+dir}]
+      else
+        []
+  in
+   let move1 = check_normal_move 1 in
   let starting_pos = match piece.kind with
       Piece(Black,_) -> piece.loc.y == 2
     | Piece(White,_) -> piece.loc.y == 7 in
@@ -296,7 +327,9 @@ let valid_pawn_moves piece pieces =
   let active_piece_color = match piece.kind with Piece(x,_) -> x in
   let move3 = check_kill_move 1 active_piece_color in
   let move4 = check_kill_move (-1) active_piece_color in
-    move1@move2@move3@move4
+  let move5 = check_pawn_en_passant 1 active_piece_color in
+  let move6 = check_pawn_en_passant (-1) active_piece_color in
+    move1@move2@move3@move4@move5@move6
 
 let rec expand_move piece current_pos movex movey pieces acc =
   (* Generic expand move.  Move in given direction until
@@ -361,7 +394,7 @@ let valid_knight_moves p pieces =
   let moves = [{x=p.loc.x+2;y=p.loc.y+1};{x=p.loc.x+2;y=p.loc.y-1};
                {x=p.loc.x-2;y=p.loc.y+1};{x=p.loc.x-2;y=p.loc.y-1};
                {x=p.loc.x+1;y=p.loc.y+2};{x=p.loc.x-1;y=p.loc.y+2};
-               {x=p.loc.x+1;y=p.loc.y-2};{x=p.loc.x-1;y=p.loc.x-2}] in
+               {x=p.loc.x+1;y=p.loc.y-2};{x=p.loc.x-1;y=p.loc.y-2}] in
   let side = match p.kind with Piece(x,_) -> x in
     remove_bad_moves moves side pieces
 
@@ -475,6 +508,7 @@ let set_move move =
     | Piece(_,Queen) -> queen_anim_walk
     | Piece(_,King) -> king_anim_walk
   in
+    move_history := move :: !move_history;
     moving_piece := Some np.kind;
     moving_piece_pos := ( move.move_from , move.move_to );
     moving_piece_anim := anim;
@@ -484,8 +518,8 @@ let set_move move =
 
          
 
-let set_death m =
-  let dp,ps = extract_piece_from_list !active_pieces m.move_to.x m.move_to.y in
+let set_death x m =
+  let dp,ps = extract_piece_from_list !active_pieces x.x x.y in
   let kind = dp.kind in
   let anim = match kind with
       Piece(_,Pawn) -> pawn_anim_death
@@ -501,14 +535,39 @@ let set_death m =
     dead_piece_pos := m.move_to;
     dead_piece_expires := stop_time;
     active_pieces := ps;
-    current_state := Dying(m);
+    current_state := Dying(x,m);
     current_notification := Some Fragged
+
+let check_for_kill m =
+  let normal_kill = match check_for_piece !active_pieces m.move_to.x m.move_to.y with
+      Some x -> Some m.move_to
+    | _ -> None
+  in
+  let is_move_pawn_kill move =
+    let pawn = match check_for_piece !active_pieces m.move_from.x m.move_from.y with
+        Some Piece(_,Pawn) -> true
+      | _ -> false
+    in
+      (if pawn then
+        (* Going diagonal means we're killing something *)
+        (if m.move_from.x != m.move_to.x then true else false)
+      else false)
+  in
+  let pawn_en_passant move =
+    if is_move_pawn_kill m then
+      (Some {x=m.move_to.x;y=m.move_from.y})
+    else None
+  in
+    match normal_kill with
+        Some x -> Some x
+      | None -> pawn_en_passant m
+          
 
 
 let set_action m =
-  let piece = check_for_piece !active_pieces m.move_to.x m.move_to.y in
-    match piece with
-        Some x -> set_death m
+  let dead_piece = check_for_kill m in
+    match dead_piece with
+        Some x -> set_death x m
       | None -> set_move m
 
 
@@ -775,7 +834,7 @@ let send_move m =
 
 let update_state () =
   match !current_state with
-      Dying m ->
+      Dying(_,m) ->
         let t = Unix.gettimeofday () in
           if t > !dead_piece_expires
           then
@@ -789,12 +848,14 @@ let update_state () =
         if validate_move !active_pieces m
         then
           begin
-            (if (get_player_type !current_player) == Human then send_move m);
+            (if ((get_player_type !current_player) == Human) && ((get_other_player_type !current_player) == Computer) then send_move m);
             set_camera m;
             set_action m
           end
         else
           begin
+            Printf.printf "rejected move %s\n" (algebraic_of_move m);
+            flush stdout;
             Glut.setWindowTitle "c3a - Invalid Move - Try Again";
             set_current_state Waiting
           end
@@ -832,8 +893,8 @@ let update_frame_counts () =
         let total_time = current_time -. !start_time in
         let f_frames = float_of_int (!frames) in
         let fps = f_frames /. total_time in
-          Printf.printf "%f fps (%d total %f elapsed time)\n" fps (!frames) total_time;
-          flush stdout;
+          (*Printf.printf "%f fps (%d total %f elapsed time)\n" fps (!frames) total_time;
+          flush stdout;*)
           last_fps := current_time
       end
     else
