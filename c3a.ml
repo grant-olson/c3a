@@ -33,7 +33,7 @@ type move = {move_from:location;move_to:location;}
 
 type player_type = Human | Computer
 
-type state = Introduction | Waiting | Dying of location * move | Moving | ClickOne of location | ClickTwo of move | PauseUntil of float
+type state = Introduction | Waiting | Dying of location * move | Moving | Castling of move | ClickOne of location | ClickTwo of move | PauseUntil of float
 
 type active_piece = {loc:location;kind:piece;anim_state:Player.player_anim_state;}
 
@@ -378,8 +378,40 @@ let remove_bad_moves move_list side pieces =
     List.filter (fun a-> test_for_conflict side pieces a) move_list
     
 
-let valid_king_moves piece pieces =
-  let moves = [{x=piece.loc.x+1;y=piece.loc.y};
+let valid_king_moves (piece : active_piece) (pieces : active_piece list) =
+  let validate_castle_move (move : move) (pieces : active_piece list) : (location list) =
+(*    let king,pieces = extract_piece_from_list pieces move.move_from.x move.move_from.y in *)
+    let rec check_move_list piece_pos (moves : move list) =
+      match moves with
+          h :: t -> (if h.move_from.x == piece_pos.x && h.move_from.y == piece_pos.y
+            then true
+            else check_move_list piece_pos t)
+        | [] -> false
+    in 
+    let is_home_pos = match piece.kind with
+        Piece(Black,King) -> move.move_from.y == 1 && move.move_from.x == 5
+      | Piece(White,King) -> move.move_from.y == 8 && move.move_from.x == 5
+      | _ -> raise Not_found
+    in
+    let did_king_move loc =
+      check_move_list loc !move_history
+    in
+    let get_rook_pos move =
+      let x_pos = (if move.y == 3 then 1 else 8) in
+        {move with x=x_pos}
+    in
+    let did_rook_move loc =
+      check_move_list loc !move_history
+    in
+      if not is_home_pos then []
+      else
+        (if did_king_move move.move_from then []
+          else
+            let rp = get_rook_pos move.move_to in
+              if did_rook_move rp then []
+                else [move.move_to])
+  in      
+  let normal_moves : location list = [{x=piece.loc.x+1;y=piece.loc.y};
                {x=piece.loc.x-1;y=piece.loc.y};
                {x=piece.loc.x;y=piece.loc.y-1};
                {x=piece.loc.x;y=piece.loc.y+1};
@@ -387,6 +419,12 @@ let valid_king_moves piece pieces =
                {x=piece.loc.x+1;y=piece.loc.y-1};
                {x=piece.loc.x-1;y=piece.loc.y+1};
                {x=piece.loc.x-1;y=piece.loc.y-1}] in
+  let castle_moves =
+    let m1 = {x=piece.loc.x-2;y=piece.loc.y} in
+    let m2 = {x=piece.loc.x+2;y=piece.loc.y} in
+      (validate_castle_move {move_from=piece.loc;move_to=m1} pieces) @
+        (validate_castle_move {move_from=piece.loc;move_to=m2} pieces) in
+  let moves = (castle_moves) @ normal_moves in
   let side = match piece.kind with Piece(x,_) -> x in
     remove_bad_moves moves side pieces
 
@@ -506,7 +544,19 @@ let set_move move =
     | Piece(_,Bishop) -> bishop_anim_walk
     | Piece(_,Knight) -> knight_anim_walk
     | Piece(_,Queen) -> queen_anim_walk
-    | Piece(_,King) -> king_anim_walk
+    | Piece(_,King) -> king_anim_walk in
+  let is_castle_move = match np.kind with
+    | Piece(_,King) ->(if abs (move.move_from.x - move.move_to.x) == 2
+      then true
+      else false)
+    | _ -> false in
+  let rook_move p =
+    if move.move_to.x == 3
+    then
+      {move_from={move.move_from with x=1};move_to={move.move_to with x=4}}
+    else
+      {move_from={move.move_from with x=8};move_to={move.move_to with x=6}}
+      
   in
     move_history := move :: !move_history;
     moving_piece := Some np.kind;
@@ -514,7 +564,9 @@ let set_move move =
     moving_piece_anim := anim;
     moving_piece_start_anim := Unix.gettimeofday ();
     active_pieces := ps;
-    current_state := Moving
+    (if is_castle_move then
+        current_state := Castling(rook_move np)
+      else current_state := Moving)
 
          
 
@@ -562,7 +614,6 @@ let check_for_kill m =
         Some x -> Some x
       | None -> pawn_en_passant m
           
-
 
 let set_action m =
   let dead_piece = check_for_kill m in
@@ -762,25 +813,32 @@ let set_camera m =
 
 (* MAIN DISPLAY LOOP *)
 
+let finalize_move () =
+  let now = Unix.gettimeofday() in
+  current_state := PauseUntil (now +. 2.0) ;
+
+  (if check_for_check !current_player !active_pieces
+     then
+       (if check_for_checkmate !active_pieces !current_player
+        then
+            current_notification := Some Checkmate
+         else
+        current_notification := Some Check));
+   current_player := match !current_player with
+        Black -> White
+      | White -> Black
+  
+
 let is_move_done piece start finish =
   if
     is_at_destination start finish
   then
     begin
-      let now = Unix.gettimeofday() in
-        current_state := PauseUntil (now +. 2.0) ;
-        moving_piece := None;
-        active_pieces := add_piece_to_list !active_pieces piece finish.x finish.y;
-        (if check_for_check !current_player !active_pieces
-          then
-            (if check_for_checkmate !active_pieces !current_player
-              then
-                current_notification := Some Checkmate
-              else
-                current_notification := Some Check));
-        current_player := match !current_player with
-            Black -> White
-          | White -> Black
+      moving_piece := None;
+      active_pieces := add_piece_to_list !active_pieces piece finish.x finish.y;
+      match !current_state with
+          Castling(m) -> set_move m
+        | _ -> finalize_move ()
     end
   else
     ()
