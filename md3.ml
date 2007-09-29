@@ -314,6 +314,16 @@ let draw_md3 md3 frame_no =
     draw_surfaces md3 frame_no (0.0,1.0,1.0) `triangles;
     GlMat.pop()
 
+let draw_md3 =
+  let m = Hashtbl.create 1 in
+  fun x y ->
+    try GlList.call(Hashtbl.find m (x, y)) with Not_found ->
+      let list = GlList.create `compile in
+      draw_md3 x y;
+      GlList.ends();
+      GlList.call list;
+      Hashtbl.add m (x, y) list
+
 let load_md3_file fname =
   let f = open_in_bin(fname) in
   let md3 = readfile f in
