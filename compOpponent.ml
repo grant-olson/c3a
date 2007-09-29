@@ -10,12 +10,11 @@ let accumulate_input_text opp =
     
 let send_output_text opp text =
   let s_with_linefeed = text ^ "\r\n" in
-    Printf.printf "OUTPUT: %s" s_with_linefeed;
+    Printf.printf "%s\n" text;
     output_string opp.out_chan s_with_linefeed;
     flush opp.out_chan
 
 let get_move s =
-  Printf.printf "GET_MOVE: %s" s;
   flush stdout;
   Scanf.sscanf s
     "%i. %s\r\n%i. ... %s\r\nMy move is: %s\r\n"
@@ -29,6 +28,8 @@ let get_opponents_move opp =
   try
     let white_move,black_move = get_move opp.text_acc in
       opp.text_acc <- "";
+      Printf.printf "... %s\n" black_move;
+      flush stdout;
       Some black_move
   with
     End_of_file -> None
