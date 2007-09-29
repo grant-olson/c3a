@@ -112,18 +112,12 @@ let current_player = ref White
 let current_notification = ref (Some Intro)
 let current_view = ref (fun () -> ())
 
-let white_player_type = Human
-let black_player_type = Human
+let white_player_type = ref Human
+let black_player_type = ref Human
 
 let move_history = ref []
 
-let computerized_opponent =
-  if
-    white_player_type != black_player_type
-  then
-    Some (CompOpponent.init_opponent "gnuchess507 -x")
-  else
-    None
+let computerized_opponent = ref None
 
 (* TRANSLATE BETWEEN BOARD COORDINATES AND X/Y VALS, COLLISION DETECTION, ETC *)
 
@@ -220,14 +214,13 @@ let move_of_algebraic alg =
 
 let get_player_type p =
   match p with
-      Black -> black_player_type
-    | White -> white_player_type
+      Black -> !black_player_type
+    | White -> !white_player_type
 
 let get_other_player_type p =
   match p with
-      Black -> white_player_type
-    | White -> black_player_type
-
+      Black -> !white_player_type
+    | White -> !black_player_type
 
 let rec check_for_piece lst x y =
   match lst with
@@ -884,7 +877,7 @@ let rec set_current_state new_state =
     | _ -> ()
 
 let send_move m =
-  match computerized_opponent with
+  match !computerized_opponent with
       None -> ()
     | Some co ->
         let alg = algebraic_of_move m in
@@ -930,7 +923,7 @@ let update_state () =
         let player_type = get_player_type !current_player in
           if player_type == Computer
           then
-            let move = CompOpponent.get_opponents_move (match computerized_opponent with Some x -> x) in
+            let move = CompOpponent.get_opponents_move (match !computerized_opponent with Some x -> x) in
               match move with
                   None -> ()
                 | Some x ->
@@ -1093,6 +1086,19 @@ let main () =
   
 
   Glut.mainLoop()
+
+(* parse command line args *)
+
+let comp cmd =
+  black_player_type := Computer;
+  computerized_opponent := Some (CompOpponent.init_opponent cmd)
+
+let anon x =
+  ()
+
+
+let _ = Arg.parse [("-comp",Arg.String (comp),"Specify a program for computer players")] anon "This is a test this is only a test"
+
 
 let _ = main ()
 
