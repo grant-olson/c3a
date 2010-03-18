@@ -48,7 +48,7 @@ let load_texture_from_file filename =
   let is_loaded = Hashtbl.mem textures filename in
     if is_loaded = false then
       try
-        let tga_file = make_image_from_tga_file ("./pak0/" ^ filename) in
+        let tga_file = make_image_from_tga_file (filename) in
           Hashtbl.add textures filename tga_file
       with
           Sys_error a -> () ;; (* TODO: Better handling *)
