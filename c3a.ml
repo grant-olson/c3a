@@ -925,8 +925,7 @@ let update_state () =
           then
             let move = CompOpponent.get_opponents_move (match !computerized_opponent with Some x -> x) in
               match move with
-                  None -> ()
-                | Some x ->
+                x ->
                     let m = move_of_algebraic x in
                       current_state := ClickTwo(m)
           else

@@ -4,5 +4,5 @@ type computer_opponent = {
   mutable text_acc : string;
 }
 val issue_move : computer_opponent -> string -> unit
-val get_opponents_move : computer_opponent -> string option
+val get_opponents_move : computer_opponent -> string
 val init_opponent : string -> computer_opponent
