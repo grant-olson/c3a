@@ -10,8 +10,8 @@ open C3aModels
 type piece_type = Pawn | Rook | Bishop | Knight | Queen | King
 type side = Black | White
 let repr_side s = match s with
-    Black -> "Black"
-  | White -> "White"
+    Black -> "Red"
+  | White -> "Blue"
 
 type piece = Piece of side * piece_type
 let repr_piece p =
