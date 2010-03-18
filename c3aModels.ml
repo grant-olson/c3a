@@ -9,16 +9,12 @@
 let quake_to_my_format x =
   let start, len, speed = x in
   let stop = start + len - 1 in
-    Printf.printf "OUT %i %i %i %i\n" start stop start speed;
     start, stop, start, speed
 
 let set_anim legs torso last_dead last_torso =
   let fix_leg_anim last_dead last_head leg_anim =
     let offset = last_head - last_dead in
     let a,b,c,d = leg_anim in
-      Printf.printf "fixing %i %i %i %i\n" a b c d;
-      Printf.printf "fixed %i %i %i %i\n" (a - offset) (b - offset) (c - offset) d;
-      flush stdout;
       a - offset, b - offset, c - offset , d
   in
   let legs = quake_to_my_format legs in
