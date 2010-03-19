@@ -1,4 +1,4 @@
-Copyright (c) 2007, Grant T. Olson
+Copyright (c) 2007,2010 Grant T. Olson
 
 All rights reserved.
 
@@ -73,3 +73,7 @@ please let me know.  Here is a link to a license summary:
 http://caml.inria.fr/pub/old_caml_site/ocaml/LICENSE.html
 
 
+=========================================================================
+
+The windows binary distribution includes glut32.dll.  See
+glut-README-win32.txt for license details.

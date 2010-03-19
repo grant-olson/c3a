@@ -6,10 +6,7 @@ Chess III Arena is a simple chess game that utilizes the Quake III
 Arena characters.  It was written as my first (allegedly) non- trivial
 ocaml application so I could see what I thought about the language.
 But more about that later.  Most normal people are probably just
-interested in playing the game.  At the moment it is for human players
-only, there is no computer opponent; it is basically just a virtual
-chess board.  A computer opponent and/or playing remote opponents may
-or may not appear in future versions.
+interested in playing the game.
 
 ------------ 
 Installation
@@ -84,9 +81,20 @@ reasonable rendering performance.
 
     - Run ./c3a.exe and enjoy!
 
+Building on Windows
+===================
+
+I'm compiling on the MSVC version of Ocaml.  In addition to the base
+install, you'll need to install LablGL and flexdll.  If everything is
+working, you should be able to run make_native.bat from the source
+directory.
+
 ----------------
 Playing the Game
 ----------------
+
+Simply double-click on the file c3a.exe in windows, or run ./c3a on
+linux.
 
 When you run the game, you should initially see a title screen.  Click
 anywhere on the screen to start the game.  You will see an overhead
@@ -97,4 +105,17 @@ your hand off the piece yet') simply click on a square that is in
 invalid move location, such as the piece itself.  Repeat for red.
 Repeat until someone checkmates.
 
-Copyright (C) 2007, Grant T. Olson.  See LICENSE file for terms
+Chess III Arena will act as a front end to gnuchess.  If you have
+gnuchess installed, simply start with the command:
+
+c3a -red gnuchess
+
+to have the computer play red with you going first, or:
+
+c3a -white gnuchess
+
+to have the computer start first.
+
+-Grant (kgo at grant-olson dot net)
+
+Copyright (C) 2007,2010 Grant T. Olson.  See LICENSE file for terms.
