@@ -1113,7 +1113,7 @@ let _ = Arg.parse [
   ("-red",Arg.String (black_comp),
    "Specify computer back-end to play red '-red gnuchess'");
   ("-blue",Arg.String (white_comp),
-   "Specify computer back-end to play blue '-blue gnuchess'")] anon "c3a - Chess III Arena Copyright 2007,2010 Grant T Olson\n\nBlue is 'white' and goes first.\n"
+   "Specify computer back-end to play blue '-blue gnuchess'")] anon "c3a - Chess III Arena v0.6 (Copyright 2007,2010 Grant T Olson)\n\nBlue is 'white' and goes first.\n"
 
 
 let _ = main ()
