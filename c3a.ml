@@ -856,6 +856,12 @@ let update_anim_states () =
     moving_piece_anim := Player.update_player_anim_state new_time !moving_piece_anim;
     dead_piece_anim := Player.update_player_anim_state new_time !dead_piece_anim
 
+let set_computer_move_state move =
+  match move with
+      x ->
+	let m = move_of_algebraic x in
+	  current_state := ClickTwo(m)
+
 let rec set_current_state new_state =
   current_state := new_state;
   match new_state with
@@ -924,10 +930,7 @@ let update_state () =
           if player_type == Computer
           then
             let move = CompOpponent.get_opponents_move (match !computerized_opponent with Some x -> x) in
-              match move with
-                x ->
-                    let m = move_of_algebraic x in
-                      current_state := ClickTwo(m)
+              set_computer_move_state move
           else
             ()
         
@@ -1062,12 +1065,18 @@ let mouse ~button ~state ~x ~y =
                     else
                       ()
               | ClickOne a -> current_state := ClickTwo {move_from=a;move_to={x=x;y=y}}
-              | Introduction -> set_current_state Waiting;
-                  current_notification := None;
-                  start_time := Unix.gettimeofday();
-                  last_fps := !start_time;
-                  frames := 0;
-                  current_view := overhead_view
+              | Introduction ->
+		  (if (get_player_type !current_player) == Computer
+		   then
+		     let move = CompOpponent.get_opponents_first_move_if_white (match !computerized_opponent with Some x -> x) in
+		       set_computer_move_state move
+		   else
+		     set_current_state Waiting;
+                     current_notification := None;
+                     start_time := Unix.gettimeofday();
+                     last_fps := !start_time;
+                     frames := 0;
+                     current_view := overhead_view)
               | _ -> ()
           end
       | _ -> ()
@@ -1088,15 +1097,23 @@ let main () =
 
 (* parse command line args *)
 
-let comp cmd =
+let white_comp cmd =
+  white_player_type := Computer;
+  computerized_opponent := Some (CompOpponent.init_opponent cmd false)
+
+let black_comp cmd =
   black_player_type := Computer;
-  computerized_opponent := Some (CompOpponent.init_opponent cmd)
+  computerized_opponent := Some (CompOpponent.init_opponent cmd true)
 
 let anon x =
   ()
 
 
-let _ = Arg.parse [("-comp",Arg.String (comp),"Specify a program for computer players")] anon "This is a test this is only a test"
+let _ = Arg.parse [
+  ("-red",Arg.String (black_comp),
+   "Specify computer back-end to play red '-red gnuchess'");
+  ("-blue",Arg.String (white_comp),
+   "Specify computer back-end to play blue '-blue gnuchess'")] anon "c3a - Chess III Arena Copyright 2007,2010 Grant T Olson\n\nBlue is 'white' and goes first.\n"
 
 
 let _ = main ()
