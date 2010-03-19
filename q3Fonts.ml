@@ -72,7 +72,7 @@ let draw_char startx starty screen_height char =
   let conversion_factor = screen_height /. propb_height in
   let endy = starty -. screen_height in
   let endx = startx +. (conversion_factor *. tex_coords.width) in
-    Texture.set_current_texture "./openarena/menu/art/font2_prop.tga";
+    Texture.set_current_texture "./pak0/menu/art/font2_prop.tga";
 
 
     GlDraw.begins `quads;
