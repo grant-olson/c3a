@@ -21,7 +21,7 @@ let issue_move opp move =
 
 let get_opponents_first_move_if_white opp =
   let l2 = input_line opp.in_chan in
-  let l3 = input_line opp.in_chan in
+  let _ = input_line opp.in_chan in
   let computer_move = get_computer_move l2 in
       (*Printf.printf "Comp: %s\n%s\n" computer_move l3;
       flush stdout;*)
@@ -30,8 +30,8 @@ let get_opponents_first_move_if_white opp =
 let get_opponents_move opp =
   let l1 = input_line opp.in_chan in
   let l2 = input_line opp.in_chan in
-  let l3 = input_line opp.in_chan in
-  let human_move = get_human_move l1 in
+  let _ = input_line opp.in_chan in
+  let _ = get_human_move l1 in
   let computer_move = get_computer_move l2 in
       (*Printf.printf "Comp: %s\n%s\n" computer_move l3;
       flush stdout;*)
