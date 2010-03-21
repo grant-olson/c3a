@@ -32,6 +32,7 @@ type location = {x:int;y:int;}
 type move = {move_from:location;move_to:location;}
 
 type player_type = Human | Computer
+exception UninitializedCompOpponent
 
 type state = Introduction | Waiting | Dying of location * move | Moving | Castling of move | ClickOne of location | ClickTwo of move | PauseUntil of float
 
@@ -885,6 +886,15 @@ let send_move m =
         let alg = algebraic_of_move m in
           CompOpponent.issue_move co  alg
 
+(* We don't initialize gnuchess if you're not playing the computer,
+   so it's an option type.  But this code should only get called when
+   we know a computer exists.  It should never raise an error, but
+   we don't want a compiler warning either. *)
+let unwrap_comp_opponent () =
+  match !computerized_opponent with 
+      Some x -> x
+    | None -> raise (UninitializedCompOpponent)
+
 let update_state () =
   match !current_state with
       Dying(_,m) ->
@@ -925,7 +935,7 @@ let update_state () =
         let player_type = get_player_type !current_player in
           if player_type == Computer
           then
-            let move = CompOpponent.get_opponents_move (match !computerized_opponent with Some x -> x) in
+            let move = CompOpponent.get_opponents_move (unwrap_comp_opponent ()) in
               set_computer_move_state move
           else
             ()
@@ -1041,7 +1051,7 @@ let mouse ~button ~state ~x ~y =
               | Introduction ->
 		  (if (get_player_type !current_player) == Computer
 		   then
-		     let move = CompOpponent.get_opponents_first_move_if_white (match !computerized_opponent with Some x -> x) in
+		     let move = CompOpponent.get_opponents_first_move_if_white (unwrap_comp_opponent ()) in
 		       set_computer_move_state move
 		   else
 		     set_current_state Waiting;
