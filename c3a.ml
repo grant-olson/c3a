@@ -88,10 +88,6 @@ let init_board () =
 
 (* INIT GLOBALS *)
 
-let start_time = ref 1000000.0
-let last_fps = ref !start_time
-let frames = ref 0
-
 let active_pieces = ref (init_board ())
 
 let moving_piece_start_anim = ref (Unix.gettimeofday ())
@@ -935,23 +931,6 @@ let update_state () =
             ()
         
     | _ -> ()
-
-let update_frame_counts () =
-  let current_time = Unix.gettimeofday() in
-  let delta = current_time -. !last_fps in
-    frames := !frames + 1;
-    if delta > 10.0
-    then
-      begin
-        let total_time = current_time -. !start_time in
-        let f_frames = float_of_int (!frames) in
-        let fps = f_frames /. total_time in
-          (*Printf.printf "%f fps (%d total %f elapsed time)\n" fps (!frames) total_time;
-          flush stdout;*)
-          last_fps := current_time
-      end
-    else
-      ()
       
 
 let display_intro_text () =
@@ -1043,8 +1022,6 @@ let display () =
 
   update_anim_states ();
 
-  update_frame_counts ();  
-
   Glut.postRedisplay ()
 
 exception Mouse_click of (float * float * float)
@@ -1073,9 +1050,6 @@ let mouse ~button ~state ~x ~y =
 		   else
 		     set_current_state Waiting;
                      current_notification := None;
-                     start_time := Unix.gettimeofday();
-                     last_fps := !start_time;
-                     frames := 0;
                      current_view := overhead_view)
               | _ -> ()
           end
