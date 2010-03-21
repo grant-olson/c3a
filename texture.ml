@@ -1,7 +1,7 @@
 (* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
    and conditions *)
 
-open Tga;;
+open Tga
 
 let basepath = "./openarena/"
 
