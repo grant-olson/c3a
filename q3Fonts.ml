@@ -49,12 +49,12 @@ let char_index char =
 let char_coords char =
   let idx = char_index char in
   let (col,row,width) = prop_map_b.(idx) in
-  let col = float_of_int col in
-  let row = float_of_int row in
+  let col = (float_of_int col) in
+  let row = 256.0 -. (float_of_int row) in
   let width = float_of_int width in
   let topleft = {x=(col /. 256.0);y=(row /. 256.0)} in
   let right =(col +. width) /. 256.0 in
-  let bottom = (row +. propb_height) /. 256.0 in
+  let bottom = (row -. propb_height) /. 256.0 in
   let bottomright = {x=right;y=bottom} in
     {top_left=topleft;bottom_right=bottomright;width=width}
     

@@ -156,8 +156,11 @@ let read_tga_file f =
   let cms = in_cms f in
   let spec = in_spec f in
   let rgb_data = read_rgb_data image_type spec f in
-    (if (spec.image_descriptor land 32) != 0 then flip_rows rgb_data);
-    flip_rows rgb_data;
+    (*let row_desc = spec.image_descriptor land 32 in
+    let col_desc = spec.image_descriptor land 16 in
+    Printf.printf "image_desc: %i rows: %i , columns %i\n" spec.image_descriptor row_desc col_desc;
+    flush stdout;*)
+    (if (spec.image_descriptor land 8) != 0 then () else flip_rows rgb_data);
     (if (spec.image_descriptor land 16) != 0 then flip_columns rgb_data);
     {tga_id=tga_id;
      color_map_type=color_map_type;
