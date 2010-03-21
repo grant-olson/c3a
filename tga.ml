@@ -7,6 +7,11 @@ exception Unknown_tga_format;;
 
 open Binfile;;
 
+let debug_print f d =
+  Printf.printf f d;
+  flush stdout
+
+let debug_print f d = ()
 
 type rgba = {r:int;g:int;b:int;a:int};;
 
@@ -62,8 +67,11 @@ let in_spec f =
 
 let in_cms f =
   let first_index = in_word f in
+  debug_print "color map First index %i\n" first_index;
   let color_map_length = in_word f in
+  debug_print "Color Map Length %i\n" color_map_length;
   let color_map_entry_size = in_char f in
+    debug_print "Color map entry size %i\n" color_map_entry_size;
     {first_index=first_index;
      color_map_length=color_map_length;
      color_map_entry_size=color_map_entry_size};;
@@ -82,13 +90,72 @@ let flip_rows aa =
 let flip_columns aa =
   Array.iter flip_array aa
 
+let read_run_length_encoded spec f =
+  let a = Array.make_matrix spec.height spec.width {r=128;b=128;g=128;a=128} in
+  let in_func = match spec.px_depth with
+      32 -> in_rgba
+    | _ -> in_rgb
+  in
+  let get_single_value () =
+    let run_length = in_char f in
+    let is_raw = (if run_length > 128 then false else true) in
+    let run_length = (if run_length > 128 then run_length - 128 else run_length) in
+    let run_length = run_length + 1 in
+    let rgb = in_func f in
+      is_raw,run_length,rgb
+  in
+  let expand_run_length_packet current_index current_row run_length color =
+    for i = current_index to (current_index + run_length - 1) do
+      a.(current_row).(i) <- color
+    done
+  in
+  let expand_raw_length_packet current_index current_row run_length color =
+    a.(current_row).(current_index) <- color;
+    for i = (current_index + 1) to (current_index + run_length - 1) do
+      let next_color = in_func f in
+        a.(current_row).(i) <- next_color
+    done
+  in
+  let rec expand_run_length_encoding row current_index =
+    if current_index >= spec.width
+    then
+      ()
+    else
+      let is_raw, run_length, color = get_single_value () in
+        (if is_raw then
+          expand_raw_length_packet current_index row run_length color
+        else
+          expand_run_length_packet current_index row run_length color);
+          (*debug_print "%s\n" "";*)
+          expand_run_length_encoding row (current_index + run_length)      
+  in
+  let set_row row =
+    debug_print "Setting row %i\n" row;
+    expand_run_length_encoding row 0
+  in
+    debug_print "width %i\n" spec.width;
+    debug_print "height %i\n" spec.height;
+    for row = 0 to (spec.height - 1) do
+      set_row row
+    done;
+    a
+
+let read_rgb_data image_type spec f =
+  match image_type with
+      2 ->  in_array_array f spec.height spec.width (fun x -> in_color_data x spec)
+    | 10 -> read_run_length_encoded spec f
+    | _ -> raise Unknown_tga_format
+
 let read_tga_file f =
   let tga_id = in_char f in
+  debug_print "TGA ID %i\n" tga_id;
   let color_map_type = in_char f in
+  debug_print "COLOR MAP %i\n" color_map_type;
   let image_type = in_char f in
+  debug_print "IMAGE TYPE %i\n" image_type;
   let cms = in_cms f in
   let spec = in_spec f in
-  let rgb_data = in_array_array f spec.height spec.width (fun x -> in_color_data x spec) in
+  let rgb_data = read_rgb_data image_type spec f in
     (if (spec.image_descriptor land 32) != 0 then flip_rows rgb_data);
     flip_rows rgb_data;
     (if (spec.image_descriptor land 16) != 0 then flip_columns rgb_data);
