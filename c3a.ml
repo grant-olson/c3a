@@ -997,13 +997,10 @@ let display () =
   GlMat.mode `projection;
   GlMat.load_identity ();
   
-  
   !current_view ();
   GlMat.mode `modelview;
 
   GlMat.load_identity ();
-
-
   draw_squares ();
 
   Gl.enable `texture_2d;
@@ -1016,7 +1013,6 @@ let display () =
   Gl.flush ();
 
   display_text ();
-
 
   Glut.swapBuffers ();
 

@@ -3,6 +3,8 @@
 
 open Tga;;
 
+let basepath = "./openarena/"
+
 let image_height = 64
 and image_width = 64
 
@@ -37,6 +39,13 @@ let make_image_from_tga tga =
   image
 
 let make_image_from_tga_file filename =
+  let filename = basepath ^ filename in
+  let strlen = String.length filename in
+  let ext = String.sub filename (strlen - 4) 4 in
+  let has_tga_ext = String.compare ext ".tga" in
+  let filename = (if has_tga_ext == 0 then filename else filename ^ ".tga") in
+  (*Printf.printf "Loading %s with ext %s\n" filename ext;
+  flush stdout;*)
   let tga = Tga.load_tga_file filename in
     make_image_from_tga tga;;
 
