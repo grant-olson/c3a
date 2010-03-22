@@ -38,24 +38,24 @@ let set_dead_anim a =
 
 let arachna = Player.load_player "./openarena/models/players/arachna/"
 let arachna_black = Player.reskin_player [
-    ("h_head","models/players/arachna/torsored.tga");
-    ("h_ears","models/players/arachna/torsored.tga");
+    ("h_head","models/players/arachna/TorsoRed.tga");
+    ("h_ears","models/players/arachna/TorsoRed.tga");
     ("h_hair","models/players/arachna/hairred.tga");
-    ("u_body","models/players/arachna/torsored.tga");
-    ("u_body1","models/players/arachna/torsored.tga");
-    ("u_ears","models/players/arachna/torsored.tga");
+    ("u_body","models/players/arachna/TorsoRed.tga");
+    ("u_body1","models/players/arachna/TorsoRed.tga");
+    ("u_ears","models/players/arachna/TorsoRed.tga");
     ("u_jewelry","models/players/arachna/jewelry3.tga");
     ("u_hair","models/players/arachna/hairred.tga");
     ("l_spider","models/players/arachna/redspider.tga");
 ] arachna
 
 let arachna_white = Player.reskin_player [
-    ("h_head","models/players/arachna/torsoblue.tga");
-    ("h_ears","models/players/arachna/torsoblue.tga");
+    ("h_head","models/players/arachna/TorsoBlue.tga");
+    ("h_ears","models/players/arachna/TorsoBlue.tga");
     ("h_hair","models/players/arachna/hair.tga");
-    ("u_body","models/players/arachna/torsoblue.tga");
-    ("u_body1","models/players/arachna/torsoblue.tga");
-    ("u_ears","models/players/arachna/torsoblue.tga");
+    ("u_body","models/players/arachna/TorsoBlue.tga");
+    ("u_body1","models/players/arachna/TorsoBlue.tga");
+    ("u_ears","models/players/arachna/TorsoBlue.tga");
     ("u_jewelry","models/players/arachna/jewelry3.tga");
     ("u_hair","models/players/arachna/hair.tga");
     ("l_spider","models/players/arachna/bluespider.tga");
@@ -343,5 +343,5 @@ let king_white = kyonshi_white
 
 let wrl = Md3.load_md3_file "./openarena/models/weapons2/rocketl/rocketl.md3"
 let ws = Md3.load_md3_file "./openarena/models/weapons2/shotgun/shotgun.md3"
-let wr = Md3.load_md3_file "./openarena/models/weapons2/gauntlet/gauntlet.md3"
-let wg = Md3.load_md3_file "./openarena/models/weapons2/railgun/railgun.md3"
+let wg = Md3.load_md3_file "./openarena/models/weapons2/gauntlet/gauntlet.md3"
+let wr = Md3.load_md3_file "./openarena/models/weapons2/railgun/railgun.md3"
