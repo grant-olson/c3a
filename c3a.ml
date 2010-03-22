@@ -43,47 +43,47 @@ type notification = Check | Checkmate | Fragged | Intro
 type quadrants = TopLeft | TopRight | BottomLeft | BottomRight
 
 let init_board () =
-  [{loc={x=1;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
-   {loc={x=2;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
-   {loc={x=3;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
-   {loc={x=4;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
-   {loc={x=5;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
-   {loc={x=6;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
-   {loc={x=7;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
-   {loc={x=8;y=2;};kind=Piece(Black,Pawn);anim_state=pawn_anim_idle};
+  [{loc={x=1;y=2;};kind=Piece(Black,Pawn);anim_state=pawn.animation.idle};
+   {loc={x=2;y=2;};kind=Piece(Black,Pawn);anim_state=pawn.animation.idle};
+   {loc={x=3;y=2;};kind=Piece(Black,Pawn);anim_state=pawn.animation.idle};
+   {loc={x=4;y=2;};kind=Piece(Black,Pawn);anim_state=pawn.animation.idle};
+   {loc={x=5;y=2;};kind=Piece(Black,Pawn);anim_state=pawn.animation.idle};
+   {loc={x=6;y=2;};kind=Piece(Black,Pawn);anim_state=pawn.animation.idle};
+   {loc={x=7;y=2;};kind=Piece(Black,Pawn);anim_state=pawn.animation.idle};
+   {loc={x=8;y=2;};kind=Piece(Black,Pawn);anim_state=pawn.animation.idle};
 
-   {loc={x=1;y=1};kind=Piece(Black,Rook);anim_state=pawn_anim_idle};
-   {loc={x=8;y=1};kind=Piece(Black,Rook);anim_state=rook_anim_idle};
+   {loc={x=1;y=1};kind=Piece(Black,Rook);anim_state=pawn.animation.idle};
+   {loc={x=8;y=1};kind=Piece(Black,Rook);anim_state=rook.animation.idle};
 
-   {loc={x=2;y=1};kind=Piece(Black,Knight);anim_state=knight_anim_idle};
-   {loc={x=7;y=1};kind=Piece(Black,Knight);anim_state=knight_anim_idle};
+   {loc={x=2;y=1};kind=Piece(Black,Knight);anim_state=knight.animation.idle};
+   {loc={x=7;y=1};kind=Piece(Black,Knight);anim_state=knight.animation.idle};
 
-   {loc={x=3;y=1};kind=Piece(Black,Bishop);anim_state=bishop_anim_idle};
-   {loc={x=6;y=1};kind=Piece(Black,Bishop);anim_state=bishop_anim_idle};
+   {loc={x=3;y=1};kind=Piece(Black,Bishop);anim_state=bishop.animation.idle};
+   {loc={x=6;y=1};kind=Piece(Black,Bishop);anim_state=bishop.animation.idle};
 
-   {loc={x=4;y=1};kind=Piece(Black,Queen);anim_state=queen_anim_idle};
-   {loc={x=5;y=1};kind=Piece(Black,King);anim_state=king_anim_idle};
+   {loc={x=4;y=1};kind=Piece(Black,Queen);anim_state=queen.animation.idle};
+   {loc={x=5;y=1};kind=Piece(Black,King);anim_state=king.animation.idle};
 
-   {loc={x=1;y=7};kind=Piece(White,Pawn);anim_state=pawn_anim_idle};
-   {loc={x=2;y=7};kind=Piece(White,Pawn);anim_state=pawn_anim_idle};
-   {loc={x=3;y=7};kind=Piece(White,Pawn);anim_state=pawn_anim_idle};
-   {loc={x=4;y=7};kind=Piece(White,Pawn);anim_state=pawn_anim_idle};
-   {loc={x=5;y=7};kind=Piece(White,Pawn);anim_state=pawn_anim_idle};
-   {loc={x=6;y=7};kind=Piece(White,Pawn);anim_state=pawn_anim_idle};
-   {loc={x=7;y=7};kind=Piece(White,Pawn);anim_state=pawn_anim_idle};
-   {loc={x=8;y=7};kind=Piece(White,Pawn);anim_state=pawn_anim_idle};
+   {loc={x=1;y=7};kind=Piece(White,Pawn);anim_state=pawn.animation.idle};
+   {loc={x=2;y=7};kind=Piece(White,Pawn);anim_state=pawn.animation.idle};
+   {loc={x=3;y=7};kind=Piece(White,Pawn);anim_state=pawn.animation.idle};
+   {loc={x=4;y=7};kind=Piece(White,Pawn);anim_state=pawn.animation.idle};
+   {loc={x=5;y=7};kind=Piece(White,Pawn);anim_state=pawn.animation.idle};
+   {loc={x=6;y=7};kind=Piece(White,Pawn);anim_state=pawn.animation.idle};
+   {loc={x=7;y=7};kind=Piece(White,Pawn);anim_state=pawn.animation.idle};
+   {loc={x=8;y=7};kind=Piece(White,Pawn);anim_state=pawn.animation.idle};
 
-   {loc={x=1;y=8};kind=Piece(White,Rook);anim_state=rook_anim_idle};
-   {loc={x=8;y=8};kind=Piece(White,Rook);anim_state=rook_anim_idle};
+   {loc={x=1;y=8};kind=Piece(White,Rook);anim_state=rook.animation.idle};
+   {loc={x=8;y=8};kind=Piece(White,Rook);anim_state=rook.animation.idle};
 
-   {loc={x=2;y=8};kind=Piece(White,Knight);anim_state=knight_anim_idle};
-   {loc={x=7;y=8};kind=Piece(White,Knight);anim_state=knight_anim_idle};
+   {loc={x=2;y=8};kind=Piece(White,Knight);anim_state=knight.animation.idle};
+   {loc={x=7;y=8};kind=Piece(White,Knight);anim_state=knight.animation.idle};
 
-   {loc={x=3;y=8};kind=Piece(White,Bishop);anim_state=bishop_anim_idle};
-   {loc={x=6;y=8};kind=Piece(White,Bishop);anim_state=bishop_anim_idle};
+   {loc={x=3;y=8};kind=Piece(White,Bishop);anim_state=bishop.animation.idle};
+   {loc={x=6;y=8};kind=Piece(White,Bishop);anim_state=bishop.animation.idle};
 
-   {loc={x=4;y=8};kind=Piece(White,Queen);anim_state=queen_anim_idle};
-   {loc={x=5;y=8};kind=Piece(White,King);anim_state=king_anim_idle};
+   {loc={x=4;y=8};kind=Piece(White,Queen);anim_state=queen.animation.idle};
+   {loc={x=5;y=8};kind=Piece(White,King);anim_state=king.animation.idle};
   ]
 
 
@@ -92,7 +92,7 @@ let init_board () =
 let active_pieces = ref (init_board ())
 
 let moving_piece_start_anim = ref (Unix.gettimeofday ())
-let moving_piece_anim = ref pawn_anim_walk
+let moving_piece_anim = ref pawn.animation.walk
 let moving_piece = ref None
 let moving_piece_pos = ref ( {x=4;y=7},{x=4;y=5} )
 
@@ -101,7 +101,7 @@ let hit_dest = ref false
 
 let dead_piece = ref None
 let dead_piece_pos = ref {x=1;y=1}
-let dead_piece_anim = ref pawn_anim_death
+let dead_piece_anim = ref pawn.animation.death
 let dead_piece_expires = ref 0.0
 
 let current_state = ref Introduction
@@ -246,12 +246,12 @@ let add_piece_to_list lst piece x y =
   let loc = {x=x;y=y} in
   let anim_state =
     match piece with
-        Piece(_,Pawn) -> pawn_anim_idle
-      | Piece(_,Knight) -> knight_anim_idle
-      | Piece(_,Bishop) -> bishop_anim_idle
-      | Piece(_,Rook) -> rook_anim_idle
-      | Piece(_,Queen) -> queen_anim_idle
-      | Piece(_,King) -> king_anim_idle
+        Piece(_,Pawn) -> pawn.animation.idle
+      | Piece(_,Knight) -> knight.animation.idle
+      | Piece(_,Bishop) -> bishop.animation.idle
+      | Piece(_,Rook) -> rook.animation.idle
+      | Piece(_,Queen) -> queen.animation.idle
+      | Piece(_,King) -> king.animation.idle
   in
     {loc=loc;kind=piece;anim_state=anim_state} :: lst
 
@@ -529,12 +529,12 @@ let set_move move =
   let start_y = move.move_from.y in
   let np, ps = extract_piece_from_list !active_pieces start_x start_y in
   let anim = match np.kind with
-      Piece(_,Pawn) -> pawn_anim_walk
-    | Piece(_,Rook) -> rook_anim_walk
-    | Piece(_,Bishop) -> bishop_anim_walk
-    | Piece(_,Knight) -> knight_anim_walk
-    | Piece(_,Queen) -> queen_anim_walk
-    | Piece(_,King) -> king_anim_walk in
+      Piece(_,Pawn) -> pawn.animation.walk
+    | Piece(_,Rook) -> rook.animation.walk
+    | Piece(_,Bishop) -> bishop.animation.walk
+    | Piece(_,Knight) -> knight.animation.walk
+    | Piece(_,Queen) -> queen.animation.walk
+    | Piece(_,King) -> king.animation.walk in
   let is_castle_move = match np.kind with
     | Piece(_,King) ->(if abs (move.move_from.x - move.move_to.x) == 2
       then true
@@ -564,12 +564,12 @@ let set_death x m =
   let dp,ps = extract_piece_from_list !active_pieces x.x x.y in
   let kind = dp.kind in
   let anim = match kind with
-      Piece(_,Pawn) -> pawn_anim_death
-    | Piece(_,Rook) -> rook_anim_death
-    | Piece(_,Bishop) -> bishop_anim_death
-    | Piece(_,Knight) -> knight_anim_death
-    | Piece(_,King) -> king_anim_death
-    | Piece(_,Queen) -> queen_anim_death
+      Piece(_,Pawn) -> pawn.animation.death
+    | Piece(_,Rook) -> rook.animation.death
+    | Piece(_,Bishop) -> bishop.animation.death
+    | Piece(_,Knight) -> knight.animation.death
+    | Piece(_,King) -> king.animation.death
+    | Piece(_,Queen) -> queen.animation.death
   in
   let stop_time = 3.0 +. Unix.gettimeofday () in
     dead_piece := Some kind;
@@ -681,19 +681,18 @@ let lighting_init () =
   List.iter Gl.enable [`lighting; `light0; `depth_test; `texture_2d]
 
 let really_draw loc k a =
-  match k with
-      Piece(Black,Pawn) -> draw_piece loc pawn_black wr a Black
-    | Piece(White,Pawn) -> draw_piece loc pawn_white wr a White
-    | Piece(Black,Bishop) -> draw_piece loc bishop_black wr a Black
-    | Piece(White,Bishop) -> draw_piece loc bishop_white wr a White
-    | Piece(Black,Rook) -> draw_piece loc rook_black wr a Black
-    | Piece(White,Rook) -> draw_piece loc rook_white wr a White
-    | Piece(White,Knight) -> draw_piece loc knight_white wr a White
-    | Piece(Black,Knight) -> draw_piece loc knight_black wr a Black
-    | Piece(Black,King) -> draw_piece loc king_black wr a Black
-    | Piece(White,King) -> draw_piece loc king_white wr a White
-    | Piece(Black,Queen) -> draw_piece loc queen_black wr a Black
-    | Piece(White,Queen) -> draw_piece loc queen_white wr a White
+  let model = match k with
+      Piece(_,Pawn) -> pawn
+    | Piece(_,Bishop) -> bishop
+    | Piece(_,Rook) -> rook
+    | Piece(_,Knight) -> knight
+    | Piece(_,King) -> king
+    | Piece(_,Queen) -> queen in
+  let skin,color = match k with
+      Piece(Black,_) -> model.black_skin,Black
+    | Piece(White,_) -> model.white_skin,White
+  in
+    draw_piece loc skin model.weapon a color
 
 let draw_active_piece ap =
   match ap with
@@ -706,18 +705,16 @@ let draw_dead_piece loc kind anim_state =
 let draw_moving_piece piece_type start finish =
   let cur_x,cur_y = calc_current_pos start finish in
   let model = match piece_type with
-      Piece(Black,Bishop) -> bishop_black
-    | Piece(White,Bishop) -> bishop_white
-    | Piece(Black,Pawn) -> pawn_black
-    | Piece(White,Pawn) -> pawn_white
-    | Piece(Black,Knight) -> knight_black
-    | Piece(White,Knight) -> knight_white
-    | Piece(Black,Rook) -> rook_black
-    | Piece(White,Rook) -> rook_white
-    | Piece(Black,King) -> king_black
-    | Piece(White,King) -> king_white
-    | Piece(Black,Queen) -> queen_black
-    | Piece(White,Queen) -> queen_white
+      Piece(_,Bishop) -> bishop
+    | Piece(_,Pawn) -> pawn
+    | Piece(_,Knight) -> knight
+    | Piece(_,Rook) -> rook
+    | Piece(_,Queen) -> queen
+    | Piece(_,King) -> king
+  in
+  let skin = match piece_type with
+      Piece(Black,_) -> model.black_skin
+    | Piece(White,_) -> model.white_skin
   in
   let x = float_of_int (finish.x - start.x) in
   let y = float_of_int (finish.y - start.y) in
@@ -728,7 +725,8 @@ let draw_moving_piece piece_type start finish =
     set_material_color 1.5 1.5 1.5 1.0;
     GlMat.translate ~x:cur_x ~y:cur_y ~z:(0.0) ();
     GlMat.rotate ~angle:angle ~z:1.0 ();
-    Player.draw_player model wr !moving_piece_anim;
+    (* FIXME *)
+    Player.draw_player skin model.weapon !moving_piece_anim;
     GlMat.pop()
 
 let overhead_view () =
