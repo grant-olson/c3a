@@ -1,0 +1,1 @@
+let basepath = "./openarena/"
