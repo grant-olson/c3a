@@ -1,43 +1,18 @@
 (* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
    and conditions *)
 
-val pawn : Player.player
-val pawn_black : Player.player
-val pawn_white : Player.player
-val pawn_anim_idle : Player.player_anim_state
-val pawn_anim_walk : Player.player_anim_state
-val pawn_anim_death : Player.player_anim_state
-val knight : Player.player
-val knight_anim_idle : Player.player_anim_state
-val knight_anim_walk : Player.player_anim_state
-val knight_anim_death : Player.player_anim_state
-val knight_black : Player.player
-val knight_white : Player.player
-val queen : Player.player
-val queen_anim_idle : Player.player_anim_state
-val queen_anim_walk : Player.player_anim_state
-val queen_anim_death : Player.player_anim_state
-val queen_black : Player.player
-val queen_white : Player.player
-val bishop : Player.player
-val bishop_anim_idle : Player.player_anim_state
-val bishop_anim_walk : Player.player_anim_state
-val bishop_anim_death : Player.player_anim_state
-val bishop_black : Player.player
-val bishop_white : Player.player
-val rook : Player.player
-val rook_anim_idle : Player.player_anim_state
-val rook_anim_walk : Player.player_anim_state
-val rook_anim_death : Player.player_anim_state
-val rook_black : Player.player
-val rook_white : Player.player
-val king : Player.player
-val king_anim_idle : Player.player_anim_state
-val king_anim_walk : Player.player_anim_state
-val king_anim_death : Player.player_anim_state
-val king_black : Player.player
-val king_white : Player.player
-val wrl : Md3.md3
-val ws : Md3.md3
-val wr : Md3.md3
-val wg : Md3.md3
+type anims = {idle:Player.player_anim_state;
+              walk:Player.player_anim_state;
+              death:Player.player_anim_state}
+
+type player_models = {white_skin:Player.player;
+                      black_skin:Player.player;
+                      weapon:Md3.md3;
+                      animation:anims}
+
+val pawn : player_models
+val knight : player_models
+val queen : player_models
+val bishop : player_models
+val rook : player_models
+val king : player_models

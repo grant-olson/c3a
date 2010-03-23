@@ -1,32 +1,17 @@
 (* Copyright 2007,2010 Grant T. Olson.  See LICENSE file for license terms 
    and conditions *)
 
-(* Utility routines to change info from the quake animation.cfg files
-   to the format I use.  Notably, the numbers for legs are off.  They
-   must be calculated by subtracting the last frame of the torso
-   animation and adding the last frame of the death animations. *)
+type anims = {idle:Player.player_anim_state;
+              walk:Player.player_anim_state;
+              death:Player.player_anim_state}
 
-let quake_to_my_format x =
-  (* I probably should write a parser, but the animation.cfg files
-     are a little weird.  For now, I've just coded the values in. *)
-  let start, len, speed = x in
-  let stop = start + len - 1 in
-    start, stop, start, speed
+type player_models = {white_skin:Player.player;
+                      black_skin:Player.player;
+                      weapon:Md3.md3;
+                      animation:anims}
 
-let set_anim legs torso last_dead last_torso =
-  let fix_leg_anim last_dead last_head leg_anim =
-    let offset = last_head - last_dead in
-    let a,b,c,d = leg_anim in
-      a - offset, b - offset, c - offset , d
-  in
-  let legs = quake_to_my_format legs in
-  let legs = fix_leg_anim last_dead last_torso legs in
-  let torso = quake_to_my_format torso in
-    Player.init_player_anim_state legs torso
 
-let set_dead_anim a =
-  let fixed = quake_to_my_format a in
-    Player.init_player_anim_state fixed fixed
+open C3aModelsShared
 
 (* Lets go to work *)
 
@@ -34,6 +19,18 @@ let set_dead_anim a =
 (*
 START Q3A MODELS
 *)
+
+let wbfg = Md3.load_md3_file "./pak0/models/weapons2/bfg/bfg.md3"
+let wg = Md3.load_md3_file "./pak0/models/weapons2/gauntlet/gauntlet.md3"
+let wgrenadel = Md3.load_md3_file "./pak0/models/weapons2/grenadel/grenadel.md3"
+let wl = Md3.load_md3_file "./pak0/models/weapons2/lightning/lightning.md3"
+let wmg = Md3.load_md3_file "./pak0/models/weapons2/machinegun/machinegun.md3"
+let wp = Md3.load_md3_file "./pak0/models/weapons2/plasma/plasma.md3"
+let wr = Md3.load_md3_file "./pak0/models/weapons2/railgun/railgun.md3"
+let wrl = Md3.load_md3_file "./pak0/models/weapons2/rocketl/rocketl.md3"
+let ws = Md3.load_md3_file "./pak0/models/weapons2/shotgun/shotgun.md3"
+
+let wl = wr
 
 let orbb = Player.load_player "./pak0/models/players/orbb/"
 let orbb_black = Player.reskin_player [
@@ -59,6 +56,13 @@ let orbb_anim_death = set_dead_anim (33,30,20)
 let orbb_anim_idle = set_anim (188,21,15) (93,1,15) 92 115
 let orbb_anim_walk = set_anim (124,12,20) (114,1,15) 92 115
 
+let orbb_models = {white_skin=orbb_white;
+                      black_skin=orbb_black;
+                      weapon=wl;
+                      animation={idle=orbb_anim_idle;
+                                 walk=orbb_anim_walk;
+                                 death=orbb_anim_death;}}
+
 
 let hunter = Player.load_player "./pak0/models/players/hunter/"
 let hunter_anim_death = set_dead_anim (60,30,20)
@@ -76,6 +80,14 @@ let hunter_white = Player.reskin_player [
     ("h_head","models/players/hunter/blue_h.tga");
     ("u_torso","models/players/hunter/blue.tga");
     ("l_legs","models/players/hunter/blue.tga");] hunter
+
+let hunter_models = {white_skin=hunter_white;
+                      black_skin=hunter_black;
+                      weapon=wl;
+                      animation={idle=hunter_anim_idle;
+                                 walk=hunter_anim_walk;
+                                 death=hunter_anim_death;}}
+
 
 let mynx = Player.load_player "./pak0/models/players/mynx/"
 
@@ -98,6 +110,14 @@ let mynx_white = Player.reskin_player [
     ("l_legs","models/players/mynx/blue_s.tga");
     ("tag_torso","")] mynx
 
+let mynx_models = {white_skin=mynx_white;
+                      black_skin=mynx_black;
+                      weapon=wl;
+                      animation={idle=mynx_anim_idle;
+                                 walk=mynx_anim_walk;
+                                 death=mynx_anim_death;}}
+
+
 let slash = Player.load_player "./pak0/models/players/slash/"
 let slash_anim_death = set_dead_anim (0,30,20)
 let slash_anim_idle = set_anim (230,15,15) (70,47,15) 69 139
@@ -118,6 +138,13 @@ let slash_white = Player.reskin_player [
     ("l_skater","models/players/slash/slashskate.TGA");
     ("l_legs","models/players/slash/blue.tga");] slash
   
+let slash_models = {white_skin=slash_white;
+                      black_skin=slash_black;
+                      weapon=wl;
+                      animation={idle=slash_anim_idle;
+                                 walk=slash_anim_walk;
+                                 death=slash_anim_death;}}
+
 
 let tankjr = Player.load_player "./pak0/models/players/tankjr/"
 let tankjr_anim_death = set_dead_anim (0,45,20)
@@ -160,6 +187,14 @@ let tankjr_white = Player.reskin_player [
     ("l_ltoes","models/players/tankjr/blue.tga");
     ("l_lcalf","models/players/tankjr/blue.tga");] tankjr
 
+let tankjr_models = {white_skin=tankjr_white;
+                      black_skin=tankjr_black;
+                      weapon=wl;
+                      animation={idle=tankjr_anim_idle;
+                                 walk=tankjr_anim_walk;
+                                 death=tankjr_anim_death;}}
+
+
 let xaero = Player.load_player "./pak0/models/players/xaero/"
 let xaero_anim_death = set_dead_anim (0,49,20) 
 let xaero_anim_idle = set_anim (245,10,15) (117,33,20) 116 172
@@ -199,51 +234,18 @@ let xaero_white = Player.reskin_player [
     ("l_sash_back","models/players/xaero/blue.tga");
     ("l_sash_front","models/players/xaero/blue.tga")] xaero
 
+let xaero_models = {white_skin=xaero_white;
+                      black_skin=xaero_black;
+                      weapon=wl;
+                      animation={idle=xaero_anim_idle;
+                                 walk=xaero_anim_walk;
+                                 death=xaero_anim_death;}}
+
 (* END QUAKE 3 ANIMS *)
 
-let pawn = orbb 
-let pawn_anim_death = orbb_anim_death 
-let pawn_anim_idle = orbb_anim_idle
-let pawn_anim_walk = orbb_anim_walk
-let pawn_black = orbb_black
-let pawn_white = orbb_white
-
-let rook = tankjr 
-let rook_anim_death = tankjr_anim_death 
-let rook_anim_idle = tankjr_anim_idle
-let rook_anim_walk = tankjr_anim_walk
-let rook_black = tankjr_black
-let rook_white = tankjr_white
-
-let knight = hunter 
-let knight_anim_death = hunter_anim_death 
-let knight_anim_idle = hunter_anim_idle
-let knight_anim_walk = hunter_anim_walk
-let knight_black = hunter_black
-let knight_white = hunter_white
-
-let bishop = slash 
-let bishop_anim_death = slash_anim_death 
-let bishop_anim_idle = slash_anim_idle
-let bishop_anim_walk = slash_anim_walk
-let bishop_black = slash_black
-let bishop_white = slash_white
-
-let queen = mynx 
-let queen_anim_death = mynx_anim_death 
-let queen_anim_idle = mynx_anim_idle
-let queen_anim_walk = mynx_anim_walk
-let queen_black = mynx_black
-let queen_white = mynx_white
-
-let king = xaero 
-let king_anim_death = xaero_anim_death 
-let king_anim_idle = xaero_anim_idle
-let king_anim_walk = xaero_anim_walk
-let king_black = xaero_black
-let king_white = xaero_white
-
-let wrl = Md3.load_md3_file "./pak0/models/weapons2/rocketl/rocketl_1.md3";;
-let ws = Md3.load_md3_file "./pak0/models/weapons2/shotgun/shotgun.md3";;
-let wr = Md3.load_md3_file "./pak0/models/weapons2/gauntlet/gauntlet.md3";;
-let wg = Md3.load_md3_file "./pak0/models/weapons2/railgun/railgun.md3";;
+let pawn = orbb_models
+let rook = tankjr_models
+let knight = hunter_models
+let bishop = slash_models
+let queen = mynx_models
+let king = xaero_models

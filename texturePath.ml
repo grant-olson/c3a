@@ -1,1 +1,1 @@
-let basepath = "./openarena/"
+let basepath = "./pak0/"
