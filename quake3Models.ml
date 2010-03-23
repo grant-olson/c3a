@@ -20,15 +20,15 @@ open C3aModelsShared
 START Q3A MODELS
 *)
 
-let wbfg = Md3.load_md3_file "./pak0/models/weapons2/bfg/bfg.md3"
-let wg = Md3.load_md3_file "./pak0/models/weapons2/gauntlet/gauntlet.md3"
-let wgrenadel = Md3.load_md3_file "./pak0/models/weapons2/grenadel/grenadel.md3"
-let wl = Md3.load_md3_file "./pak0/models/weapons2/lightning/lightning.md3"
-let wmg = Md3.load_md3_file "./pak0/models/weapons2/machinegun/machinegun.md3"
-let wp = Md3.load_md3_file "./pak0/models/weapons2/plasma/plasma.md3"
-let wr = Md3.load_md3_file "./pak0/models/weapons2/railgun/railgun.md3"
-let wrl = Md3.load_md3_file "./pak0/models/weapons2/rocketl/rocketl.md3"
-let ws = Md3.load_md3_file "./pak0/models/weapons2/shotgun/shotgun.md3"
+let wbfg = load_weapon "./pak0/models/weapons2/bfg/bfg.md3"
+let wg = load_weapon "./pak0/models/weapons2/gauntlet/gauntlet.md3"
+let wgrenadel = load_weapon "./pak0/models/weapons2/grenadel/grenadel.md3"
+let wl = load_weapon "./pak0/models/weapons2/lightning/lightning.md3"
+let wmg = load_weapon "./pak0/models/weapons2/machinegun/machinegun.md3"
+let wp = load_weapon "./pak0/models/weapons2/plasma/plasma.md3"
+let wr = load_weapon "./pak0/models/weapons2/railgun/railgun.md3"
+let wrl = load_weapon "./pak0/models/weapons2/rocketl/rocketl.md3"
+let ws = load_weapon "./pak0/models/weapons2/shotgun/shotgun.md3"
 
 let wl = wr
 

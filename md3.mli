@@ -67,4 +67,5 @@ val get_tag : string -> md3 -> int -> tag
 
 val draw_md3 : md3 -> int -> unit
 val load_md3_file : string -> md3
+val skin_md3 : md3 -> unit
 val reskin_md3 : (string * string) list -> md3 -> md3

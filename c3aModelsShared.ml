@@ -29,3 +29,8 @@ let set_anim legs torso last_dead last_torso =
 let set_dead_anim a =
   let fixed = quake_to_my_format a in
     Player.init_player_anim_state fixed fixed
+
+let load_weapon name =
+  let md3 = Md3.load_md3_file name in
+    Md3.skin_md3 md3;
+    md3

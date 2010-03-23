@@ -14,19 +14,19 @@ open C3aModelsShared
 
 (* Lets go to work *)
 
-let wbfg = Md3.load_md3_file "./openarena/models/weapons2/bfg/bfg.md3"
-let wg = Md3.load_md3_file "./openarena/models/weapons2/gauntlet/gauntlet.md3"
-let wgrenadel = Md3.load_md3_file "./openarena/models/weapons2/grenadel/grenadel.md3"
-let wl = Md3.load_md3_file "./openarena/models/weapons2/lightning/lightning.md3"
-let wmg = Md3.load_md3_file "./openarena/models/weapons2/machinegun/machinegun.md3"
+let wbfg = load_weapon "./openarena/models/weapons2/bfg/bfg.md3"
+let wg = load_weapon "./openarena/models/weapons2/gauntlet/gauntlet.md3"
+(*let wgrenadel = load_weapon "./openarena/models/weapons2/grenadel/grenadel.md3"*)
+let wl = load_weapon "./openarena/models/weapons2/lightning/lightning.md3"
+(*let wmg = load_weapon "./openarena/models/weapons2/machinegun/machinegun.md3"*)
 
 (* 
-let wp = Md3.load_md3_file "./openarena/models/weapons2/plasma/plasma.md3"
+let wp = load_weapon "./openarena/models/weapons2/plasma/plasma.md3"
 TGA reader doesn't like skin.tga
 *)
-let wr = Md3.load_md3_file "./openarena/models/weapons2/railgun/railgun.md3"
-let wrl = Md3.load_md3_file "./openarena/models/weapons2/rocketl/rocketl.md3"
-let ws = Md3.load_md3_file "./openarena/models/weapons2/shotgun/shotgun.md3"
+let wr = load_weapon "./openarena/models/weapons2/railgun/railgun.md3"
+let wrl = load_weapon "./openarena/models/weapons2/rocketl/rocketl.md3"
+let ws = load_weapon "./openarena/models/weapons2/shotgun/shotgun.md3"
 
 (* OpenArena models.  GPL'ed.  These are a little more resource intensive
    than the original Quake models, so I can't have them taunt while waiting.
@@ -108,6 +108,7 @@ let ayumi_models = {white_skin=ayumi_white;
                                  death=ayumi_anim_death;}}
 
 
+(*
 let assassin = Player.load_player "./openarena/models/players/assassin/"
 let assassin_black = Player.reskin_player [
     ("h_head","models/players/assassin/upper-red.tga");
@@ -132,6 +133,7 @@ let assassin_models = {white_skin=assassin_white;
                       animation={idle=assassin_anim_idle;
                                  walk=assassin_anim_walk;
                                  death=assassin_anim_death;}}
+*)
 
 (* Beret - isn't scaling correctly *)
 
@@ -165,7 +167,6 @@ let gargoyle_models = {white_skin=gargoyle_white;
                       animation={idle=gargoyle_anim_idle;
                                  walk=gargoyle_anim_walk;
                                  death=gargoyle_anim_death;}}
-
 
 let kyonshi = Player.load_player "./openarena/models/players/kyonshi/"
 let kyonshi_black = Player.reskin_player [
@@ -238,6 +239,7 @@ let major_models = {white_skin=major_white;
 
 
 (* MERMAN - weird stuff on blue  *)
+(*
 let merman = Player.load_player "./openarena/models/players/merman/"
 let merman_black = Player.reskin_player [
     ("h_head","models/players/merman/skinred.tga");
@@ -270,6 +272,7 @@ let merman_models = {white_skin=merman_white;
                                  walk=merman_anim_walk;
                                  death=merman_anim_death;}}
 
+*)
 
 let penguin = Player.load_player "./openarena/models/players/penguin/"
 let penguin_black = Player.reskin_player [
@@ -350,33 +353,10 @@ let smarine_anim_walk = set_anim (56,10,20) (83,1,15) 35 149
 
 (* tony - HUGE *)
 
-(*
-Queen -> ayumi
-Bishop -> assassin
-King -> kyonshi
-Knight -> penguin
-Rook -> sarge
-Pawn -> Major
-
-merman?
-
-too slow!
-
-gargoyle
-arachna
-
-let pawn = major 
-let rook = sarge
-let knight = arachna 
-let bishop = penguin 
-let queen = ayumi 
-let king = kyonshi 
-
-*)
 
 let pawn = major_models
 let rook = sarge_models
-let knight = arachna_models
+let knight = gargoyle_models (*arachna_models*)
 let bishop = penguin_models
 let queen = ayumi_models
 let king = kyonshi_models

@@ -163,10 +163,21 @@ let in_vertexes f surface_offset vertex_offset vertex_count frame_count =
 
 
 let in_surface surface_offset f =
+  let fix_surface_name sn =
+    (* Fix surface name on low-res models.  See Player.load_player
+       for more details *)
+    let strlen = String.length sn in
+    let ext = String.sub sn (strlen - 2) 2 in
+    match ext with
+       "_1" -> String.sub sn 0 (strlen - 2) 
+     | "_2" -> String.sub sn 0 (strlen - 2) 
+     | _ -> sn
+  in
   match input_char f, input_char f,
     input_char f, input_char f with
         'I','D','P','3' ->
           let surface_name = in_string f 64 in
+          let surface_name = fix_surface_name surface_name in
           let surface_flags = in_dword_as_int32 f in
           let frame_count = in_dword f in
           let shader_count = in_dword f in
@@ -245,7 +256,8 @@ let read_version f =
 let rec get_tag_two name tags =
   match tags with
       [] -> raise Not_found
-    | h::t -> (if h.tag_name = name then h else get_tag_two name t);;
+    | h::t ->
+      (if h.tag_name = name then h else get_tag_two name t);;
 
 let get_tag name md3 frame_no =
   let tags = Array.get md3.tags frame_no in
@@ -336,6 +348,16 @@ let load_md3_file fname =
   let _ = close_in f in
     md3
 
+let skin_md3 md3 = 
+  (* We defer loading of skins on players so we don't load the 'normal'
+     skins.  But we need to do this for weapons *)
+  let iter_shaders shader =
+    Texture.load_texture_from_file shader.shader_name
+  in
+  let iter_surfaces surface =
+    Array.iter iter_shaders surface.shaders
+  in
+    Array.iter iter_surfaces md3.surfaces
 
 let reskin_md3 assoc_list md3 =
   let new_surface surface =

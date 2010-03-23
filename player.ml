@@ -48,11 +48,45 @@ let draw_player p weapon state =
     GlMat.pop();;
  
 
-let load_player path = 
-  let lower = load_md3_file (path ^ "lower.md3") in
-  let upper = load_md3_file (path ^ "upper.md3") in
-  let head = load_md3_file (path ^ "head.md3") in
+(*
+  Quake Models may have alternate version of lower resolution,
+  if a full res model is "upper.md3" there may be "upper_1.md3" and 
+  "upper_2.md3" which become progressively less detailed.
+
+  For chess, level one seems to be good.  We're using way more players
+  than a normal quake level.
+*)
+let load_player preferred_detail_level path =
+  let preferred_detail_ext =
+    match preferred_detail_level with
+        1 -> "_1"
+      | 2 -> "_2"
+      | _ -> ""
+  in
+  let file_exists fname =
+    try
+      let f = open_in_bin fname in
+      close_in f;
+      true
+    with
+      Sys_error a -> false
+  in
+  let load path part =
+    let default_file = path ^ part ^ ".md3" in
+    let preferred_file = path ^ part ^ preferred_detail_ext ^ ".md3" in
+    let filename =
+      if file_exists preferred_file then preferred_file else default_file
+    in
+    Printf.printf "Loading %s\n" filename;
+    flush stdout;
+    load_md3_file filename
+  in
+  let lower = load path "lower" in
+  let upper = load path "upper" in
+  let head = load path "head" in
     {lower=lower;upper=upper;head=head;};;
+
+let load_player = load_player 1
 
 (* animation operations *)
 
