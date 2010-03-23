@@ -1091,8 +1091,30 @@ let _ = Arg.parse [
   ("-red",Arg.String (black_comp),
    "Specify computer back-end to play red '-red gnuchess'");
   ("-blue",Arg.String (white_comp),
-   "Specify computer back-end to play blue '-blue gnuchess'")] anon "c3a - Chess III Arena v0.6 (Copyright 2007,2010 Grant T Olson)\n\nBlue is 'white' and goes first.\n"
+   "Specify computer back-end to play blue '-blue gnuchess'")] anon "c3a - Chess III Arena v0.6 (Copyright 2007-2010 Grant T Olson)\n\nBlue is 'white' and goes first.\n"
 
+
+(* little bit of black magic for windows users, so they don't need
+   the command line.  If gnuchess.exe is in the directory, and
+   a computer player hasn't been specified, have computer play white *)
+
+let comp_on_windows () = 
+  let is_gnuchess_on_windows () =
+    try
+      let f = open_in_bin "./gnuchess.exe" in
+      close_in f;
+      true
+    with
+      Sys_error a -> false
+  in
+  let wp = !white_player_type in
+  let bp = !black_player_type in
+  let is_gnuchess = is_gnuchess_on_windows () in
+    match wp,bp,is_gnuchess with
+        Human, Human, true -> black_comp "gnuchess"
+      | _ -> ()
+
+let _ = comp_on_windows ()
 
 let _ = main ()
 

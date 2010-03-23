@@ -3,7 +3,7 @@ TODO List
 - UPDATE COPYRIGHT
 - FIGURE OUT DIST ISSUES ON OPENARENA STUFF
 - UPDATE README
-- windows test for gnuchess instead of command line option.
+- UPDATE TEXT on --version
 
 - OpenGL is cross-cutting the logic.  Can I break the GL out into GL only files?
 - Smart clipping.
