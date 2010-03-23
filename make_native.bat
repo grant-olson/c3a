@@ -26,7 +26,7 @@ ocamlopt %DEBUG% -o c3a.exe -I +lablGL lablgl.cmxa lablglut.cmxa unix.cmxa quake
 :: openarena version
 
 copy /Y openArenaModels.ml c3aModels.ml
-copy /Y OpenAreanaStrings.ml strings.ml
+copy /Y OpenArenaStrings.ml strings.ml
 
 ocamlopt %DEBUG% -I +lablGL lablgl.cmxa lablglut.cmxa unix.cmxa binfile.mli binfile.ml tga.mli tga.ml strings.ml texture.mli texture.ml md3.mli md3.ml player.mli player.ml q3Fonts.mli q3Fonts.ml
 ocamlopt %DEBUG% -o oatools.cmxa -a binfile.cmx tga.cmx strings.cmx texture.cmx md3.cmx player.cmx q3Fonts.cmx
