@@ -314,6 +314,12 @@ let draw_md3 md3 frame_no =
     draw_surfaces md3 frame_no (0.0,1.0,1.0) `triangles;
     GlMat.pop()
 
+(*
+
+Using this code gets us a faster framerate, but memory goes through
+the roof.  2-3 times the memory without.  Which takes us from 100-200
+megs to 500-600 megs.
+
 let draw_md3 =
   let m = Hashtbl.create 1 in
   fun x y ->
@@ -322,7 +328,7 @@ let draw_md3 =
       draw_md3 x y;
       GlList.ends();
       GlList.call list;
-      Hashtbl.add m (x, y) list
+      Hashtbl.add m (x, y) list *)
 
 let load_md3_file fname =
   let f = open_in_bin(fname) in
