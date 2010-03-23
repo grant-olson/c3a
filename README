@@ -2,11 +2,19 @@
 CHESS III ARENA
 ===============
 
-Chess III Arena is a simple chess game that utilizes the Quake III
-Arena characters.  It was written as my first (allegedly) non- trivial
-ocaml application so I could see what I thought about the language.
-But more about that later.  Most normal people are probably just
-interested in playing the game.
+Chess III Arena is a simple chess game that utilizes Quake III Arena
+.md3 models for the various pieces.  It was written as my first
+(allegedly) non-trivial ocaml application so I could see what I
+thought about the language.  But more about that later.  Most normal
+people are probably just interested in playing the game.
+
+I did not create any models or art.  All models and art are courtesy
+of the openarena project, and is licensed under GPL v2.  Thanks guys!
+I'm no artist.  Visit http://openarena.ws for more details.
+
+Chess III Arena can optionally be configured to play a computer
+opponent via gnuchess and to use the original Quake III models from id
+Software if you have a copy of Quake III.
 
 ------------ 
 Installation
@@ -19,6 +27,104 @@ Windows
 
   - Extract the files.  [Right- click, choose Extract All, Next your
     way through the wizard.]
+
+  - Open the new 'c3a-win32' folder.
+
+  - Double-click on the c3a icon.
+
+  - Enjoy!
+
+Linux
+=====
+
+Note: Although the program should run on any OpenGL implementation,
+you're really going to need some sort of hardware acceleration for
+reasonable rendering performance.
+
+  - Install OCaml 3.09 or greater and the accompanying LablGL
+    library, however that is done on your distro.
+
+  - Grab the source .tgz, extract it somewhere.
+
+  - cd into the directory
+
+  - run ./make_native.sh
+
+  - Right now there is no 'install', you run out of the working directory
+
+  - Run ./c3a and enjoy!
+
+----------------
+Playing the Game
+----------------
+
+Simply double-click on the file c3a.exe in windows, or run ./c3a on
+linux.
+
+When you run the game, you should initially see a title screen.  Click
+anywhere on the screen to start the game.  You will see an overhead
+view of the board.  Blue is "white" and Red is "black", so Blue goes
+first.  Click on the piece you want to move.  Click on where you want
+to move it.  If you want to change pieces (that is, you haven't 'taken
+your hand off the piece yet') simply click on a square that is in
+invalid move location, such as the piece itself.  Repeat for red.
+Repeat until someone checkmates.
+
+---------------------------------
+Playing the computer via gnuchess
+---------------------------------
+
+Chess III Arena can act as a front end to gnuchess, allowing you to
+play the computer.
+
+On Windows
+==========
+
+The easy way:
+
+  - Obtain and install the binaries from the gnuwin32 project:
+
+      http://gnuwin32.sourceforge.net/packages/chess.htm
+
+  - Copy the gnuchess files from the install directory into your
+    c3a directory.
+
+  - double-click on c3a.  The computer should now play red.
+
+The easy way will only allow you to play the computer as red, and will
+not allow you to diable the computer opponent without deleting or
+renaming the gnuchess executable.  If you wish to have the computer
+play blue, or toggle human versus computer opponents:
+
+  - Install gnuchess.
+
+  - Include gnuchess in your path.
+
+  - Start the game from the command-line with either 'c3a -blue
+    gnuchess' or or '-red gnuchess'.
+
+On Linux
+========
+
+Run the command-line:
+
+  ./c3a -red gnuchess
+
+to have the computer play red with you going first, or:
+
+  ./c3a -white gnuchess
+
+to have the computer start first.
+
+--------------------------------
+Using Id Software Models and Art
+--------------------------------
+
+If you have a copy of Quake III, you can use the id Software models
+instead of the openArena models.  To install:
+
+On Windows
+==========
 
   - Either:
   
@@ -45,76 +151,39 @@ Windows
     directory, you should be able to navigate to the following
     directory: pak0/models/players
 
-  - Double-click on c3a.exe and enjoy!
+  - Double-click on c3a-id-models.exe and enjoy!
 
-Linux
-=====
+On Linux
+========
 
-Note: Although the program should run on any OpenGL implementation,
-you're really going to need some sort of hardware acceleration for
-reasonable rendering performance.
+  - Within the new c3a directory, create a subdirectory called pak0
 
-    - Install OCaml 3.09 or greater and the accompanying LablGL
-      library, however that is done on your distro.
+  - Locate the file pak0.pk3 from either your Quake 3 installation
+    or the Quake 3 CD.  It is located under the subdirectory
+    Quake3/baseq3 on the CD
 
-    - Grab the source .tgz, extract it somewhere.
+  - Rename the file to pak0.pk3 [mv pak0.pak pak0.zip]
 
-    - Within the new c3a directory, create a subdirectory called pak0
+  - Unzip the contents. [unzip pak0.zip]
 
-    - Locate the file pak0.pk3 from either your Quake 3 installation
-      or the Quake 3 CD.  It is located under the subdirectory
-      Quake3/baseq3 on the CD
+  - Verify that the files are in the right place.  From the c3a
+    directory, you should be able to navigate to the following
+    directory: pak0/models/players
 
-    - Rename the file to pak0.pk3 [mv pak0.pak pak0.zip]
+  - Build the executable if you haven't already.  (./make_native.sh)
 
-    - Unzip the contents. [unzip pak0.zip]
+  - Run ./c3a-id-models and enjoy!
 
-    - Verify that the files are in the right place.  From the c3a
-      directory, you should be able to navigate to the following
-      directory: pak0/models/players
-
-    - Go back to the original c3a directory.
-
-    - run ./make_native.sh
-
-    - Right now there is no 'install', you run out of the working directory
-
-    - Run ./c3a.exe and enjoy!
-
+-------------------
 Building on Windows
-===================
+-------------------
 
 I'm compiling on the MSVC version of Ocaml.  In addition to the base
 install, you'll need to install LablGL and flexdll.  If everything is
 working, you should be able to run make_native.bat from the source
 directory.
 
-----------------
-Playing the Game
-----------------
-
-Simply double-click on the file c3a.exe in windows, or run ./c3a on
-linux.
-
-When you run the game, you should initially see a title screen.  Click
-anywhere on the screen to start the game.  You will see an overhead
-view of the board.  Blue is "white" and Red is "black", so Blue goes
-first.  Click on the piece you want to move.  Click on where you want
-to move it.  If you want to change pieces (that is, you haven't 'taken
-your hand off the piece yet') simply click on a square that is in
-invalid move location, such as the piece itself.  Repeat for red.
-Repeat until someone checkmates.
-
-Chess III Arena will act as a front end to gnuchess.  If you have
-gnuchess installed, simply start with the command:
-
-c3a -red gnuchess
-
-to have the computer play red with you going first, or:
-
-c3a -white gnuchess
-
-to have the computer start first.
+Enjoy!
 
 -Grant (kgo at grant-olson dot net)
 
