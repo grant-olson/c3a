@@ -37,7 +37,12 @@ xcopy /E c3a\openarena c3a-win32\openarena
 
 zip -r %EXERELEASE% c3a-win32
 
+:: copy built files to release dir and sign
+
 cd ..
+
+mkdir releases
+
 copy distprep\%EXERELEASE% releases
 copy distprep\%SRCRELEASE% releases
 
@@ -46,4 +51,4 @@ gpg --armor --detach-sign %EXERELEASE%
 gpg --armor --detach-sign %SRCRELEASE%
 
 cd ..
-::rmdir /S /Q distprep
+rmdir /S /Q distprep
