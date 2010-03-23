@@ -1,6 +1,10 @@
 TODO List
 
-- Weapons are jpegs, not tiffs.  Need to be able to read those files.
+- UPDATE COPYRIGHT
+- FIGURE OUT DIST ISSUES ON OPENARENA STUFF
+- UPDATE README
+- windows test for gnuchess instead of command line option.
+
 - OpenGL is cross-cutting the logic.  Can I break the GL out into GL only files?
 - Smart clipping.
 - More camera angles during move.

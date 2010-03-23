@@ -1,4 +1,4 @@
-Copyright (c) 2007,2010 Grant T. Olson
+Chess III Arena, Copyright (c) 2007-2010 Grant T. Olson
 
 All rights reserved.
 
@@ -32,9 +32,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =====================================================================
 OpenGL bindings provided via lablgl
-(http://wwwfun.kurims.kyoto-u.ac.jp/soft/lsl/lablgl.html) and is
+(http://wwwfun.kurims.kyoto-u.ac.jp/soft/lsl/lablgl.html) and are
 licensed under the following terms:
-
 
 Copyright (c) 1997-2001 Jacques Garrigue and Kyoto University.
 All rights reserved.
@@ -72,8 +71,14 @@ please let me know.  Here is a link to a license summary:
 
 http://caml.inria.fr/pub/old_caml_site/ocaml/LICENSE.html
 
-
 =========================================================================
 
 The windows binary distribution includes glut32.dll.  See
 glut-README-win32.txt for license details.
+
+=========================================================================
+
+OpenArena models and art are licensed under GPL v2.  See
+openarena/COPYING and openarena/CREDITS for more details.
+
+http://openarena.ws
