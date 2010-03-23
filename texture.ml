@@ -2,8 +2,8 @@
    and conditions *)
 
 open Tga
-open TexturePath
-let basepath = TexturePath.basepath
+
+let basepath = Strings.basepath
 
 let image_height = 64
 and image_width = 64
