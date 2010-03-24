@@ -40,8 +40,6 @@ type active_piece = {loc:location;kind:piece;anim_state:Player.player_anim_state
 
 type notification = Check | Checkmate | Fragged | Intro
 
-type quadrants = TopLeft | TopRight | BottomLeft | BottomRight
-
 let init_board () =
   [{loc={x=1;y=2;};kind=Piece(Black,Pawn);anim_state=pawn.animation.idle};
    {loc={x=2;y=2;};kind=Piece(Black,Pawn);anim_state=pawn.animation.idle};
@@ -752,50 +750,80 @@ let intro_view () =
     else
         GlMat.translate ~y:(-80.0) ~x:(xdist)  ()
 
-let top_left_view () =
-  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(200.0,1000.0);
+let detail_frustum camera_pitch = 
+  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(200.0,2000.0);
   GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-650.0) ();
-  GlMat.rotate ~angle:60.0 ~x:(-1.0) ();
+  GlMat.rotate ~angle:camera_pitch ~x:(-1.0) ()
+
+let top_left_view () =
+  detail_frustum 60.0;
   GlMat.translate ~y:(40.0) ~x:(100.0) ()
 
+let top_mid_view () =
+  detail_frustum 60.0;
+  GlMat.translate ~y:(40.0) ~x:(0.0) ()
+
 let top_right_view () =
-  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(200.0,1000.0);
-  GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-650.0) ();
-  GlMat.rotate ~angle:60.0 ~x:(-1.0) ();
+  detail_frustum 60.0;
   GlMat.translate ~y:(40.0) ~x:(-100.0) ()
 
+let mid_right_view () =
+  detail_frustum 65.0;
+  GlMat.rotate ~angle:(-75.0) ~z:(1.0) ();
+  GlMat.translate ~y:(75.0) ~x:(-350.0) ~z:(-75.0) ()
+
+let mid_left_view () =
+  detail_frustum 65.0;
+  GlMat.rotate ~angle:(75.0) ~z:(1.0) ();
+  GlMat.translate ~y:(75.0) ~x:(350.0) ~z:(-100.0) ()
+
 let bottom_right_view () =
-  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(200.0,1000.0);
-  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-650.0) ();
-  GlMat.rotate ~angle:65.0 ~x:(-1.0) ();
+  detail_frustum 75.0;
 (*  GlMat.rotate ~angle:180.0 ~z:(1.0) ();*)
-  GlMat.translate ~y:(150.0) ~x:(-100.0) ()
+  GlMat.translate ~y:(150.0) ~x:(-100.0) ~z:(0.0) ()
+
+let bottom_mid_view () =
+  detail_frustum 75.0;
+(*  GlMat.rotate ~angle:180.0 ~z:(1.0) ();*)
+  GlMat.translate ~y:(150.0) ~x:(0.0) ~z:(0.0) ()
 
 let bottom_left_view () =
-  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(200.0,1000.0);
-  GlMat.translate ~x:(0.0) ~y:(00.0) ~z:(-650.0) ();
-  GlMat.rotate ~angle:65.0 ~x:(-1.0) ();
+  detail_frustum 75.0;
 (*  GlMat.rotate ~angle:180.0 ~z:(1.0) ();*)
-  GlMat.translate ~y:(150.0) ~x:(100.0) ()
-
-
+  GlMat.translate ~y:(150.0) ~x:(100.0) ~z:(0.0) ()
 
 let set_camera m =
-  let calc_quad pos =
-    match pos with
-        {x=x;y=y} when (x <= 4) && (y <= 4) -> TopLeft
-      | {x=x;y=y} when (x > 4) && (y <= 4) -> TopRight
-      | {x=x;y=y} when (x <= 4) && (y > 4) -> BottomLeft
-      | _ -> BottomRight
+  let between x a b =
+    (x >= a) && (x <= b)
   in
-  let start_pos = calc_quad m.move_from in
-  let end_pos = calc_quad m.move_to in
-    current_view := match start_pos, end_pos with
-        TopLeft,TopLeft -> top_left_view
-      | TopRight,TopRight -> top_right_view
-      | BottomLeft,BottomLeft -> bottom_left_view
-      | BottomRight,BottomRight -> bottom_right_view
-      | _,_ -> overhead_view
+  let both_between x1 x2 a b =
+    (between x1 a b) && (between x2 a b)
+  in
+  let get_mid_camera end_pos =
+    if end_pos.x >= 4 then mid_right_view else mid_left_view
+  in
+  let get_top_camera start_pos end_pos =
+    match start_pos.x,end_pos.x with
+        x1,x2 when (both_between x1 x2 3 6) -> top_mid_view
+      | x1,x2 when (both_between x1 x2 1 4) -> top_left_view
+      | x1,x2 when (both_between x1 x2 5 8) -> top_right_view
+      | _ -> overhead_view
+  in
+  let get_bottom_camera start_pos end_pos =
+    match start_pos.x,end_pos.x with
+        x1,x2 when (both_between x1 x2 3 6) -> bottom_mid_view
+      | x1,x2 when (both_between x1 x2 1 4) -> bottom_left_view
+      | x1,x2 when (both_between x1 x2 5 8) -> bottom_right_view
+      | _ -> overhead_view
+  in
+  let get_camera start_pos end_pos = 
+    match start_pos.y, end_pos.y with
+        y1,y2 when (both_between y1 y2 3 6) -> get_mid_camera end_pos
+      | y1,y2 when (both_between y1 y2 1 4) -> get_top_camera start_pos end_pos
+      | y1,y2 when (both_between y1 y2 5 8) -> get_bottom_camera start_pos end_pos
+      | _ -> overhead_view
+  in
+    current_view := get_camera m.move_from m.move_to
 
 (* END OPEN GL FUNCTIONS *) 
 
