@@ -740,8 +740,8 @@ let intro_view () =
   let pct = time /. seconds in
   let xdist = (pct *. (-200.0)) +. 150.0 in
   let blueside = (mod_float ct 20.0) > 10.0 in
-    GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
-    GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-75.0) ();
+    GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(200.0,10000.0);
+    GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-375.0) ();
     GlMat.rotate ~angle:60.0 ~x:(-1.0) ();
     if blueside
     then
@@ -753,30 +753,30 @@ let intro_view () =
         GlMat.translate ~y:(-80.0) ~x:(xdist)  ()
 
 let top_left_view () =
-  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
-  GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-75.0) ();
-  GlMat.rotate ~angle:45.0 ~x:(-1.0) ();
+  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(200.0,1000.0);
+  GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-650.0) ();
+  GlMat.rotate ~angle:60.0 ~x:(-1.0) ();
   GlMat.translate ~y:(40.0) ~x:(100.0) ()
 
 let top_right_view () =
-  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
-  GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-75.0) ();
-  GlMat.rotate ~angle:45.0 ~x:(-1.0) ();
+  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(200.0,1000.0);
+  GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-650.0) ();
+  GlMat.rotate ~angle:60.0 ~x:(-1.0) ();
   GlMat.translate ~y:(40.0) ~x:(-100.0) ()
 
 let bottom_right_view () =
-  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
-  GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-75.0) ();
-  GlMat.rotate ~angle:45.0 ~x:(-1.0) ();
-  GlMat.rotate ~angle:180.0 ~z:(1.0) ();
-  GlMat.translate ~y:(-40.0) ~x:(-100.0) ()
+  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(200.0,1000.0);
+  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-650.0) ();
+  GlMat.rotate ~angle:65.0 ~x:(-1.0) ();
+(*  GlMat.rotate ~angle:180.0 ~z:(1.0) ();*)
+  GlMat.translate ~y:(150.0) ~x:(-100.0) ()
 
 let bottom_left_view () =
-  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
-  GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-75.0) ();
-  GlMat.rotate ~angle:45.0 ~x:(-1.0) ();
-  GlMat.rotate ~angle:180.0 ~z:(1.0) ();
-  GlMat.translate ~y:(-40.0) ~x:(100.0) ()
+  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(200.0,1000.0);
+  GlMat.translate ~x:(0.0) ~y:(00.0) ~z:(-650.0) ();
+  GlMat.rotate ~angle:65.0 ~x:(-1.0) ();
+(*  GlMat.rotate ~angle:180.0 ~z:(1.0) ();*)
+  GlMat.translate ~y:(150.0) ~x:(100.0) ()
 
 
 
