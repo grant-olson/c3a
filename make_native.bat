@@ -9,7 +9,8 @@ call "C:\Program Files\Microsoft Visual Studio 9.0\VC\bin\vcvars32.bat"
 set LIB=%LIB%;.\c3a-win32
 :compile
 
-set DEBUG=-g
+:: No debug on prod build
+::set DEBUG=-g
 
 :: Quake Version
 
