@@ -10,7 +10,7 @@ set LIB=%LIB%;.\c3a-win32
 :compile
 
 :: No debug on prod build
-::set DEBUG=-g
+set DEBUG= 
 
 :: Quake Version
 
