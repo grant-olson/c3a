@@ -285,14 +285,11 @@ let map_triangles f s =
   let triangles = all_triangles_to_points s in
     Array.map f triangles;;
 
-let draw_triangle surface frame triangle =
-  let current_frame = Array.get surface.vertexes frame in
+let draw_triangle surface current_frame triangle =
   let (v1,v2,v3) = triangle_to_points triangle current_frame in
   let st1 = (Array.get surface.sts triangle.a) in
   let st2 = (Array.get surface.sts triangle.b) in
   let st3 = (Array.get surface.sts triangle.c) in
-
-    GlDraw.begins `triangles;
 
     GlTex.coord2 (st3.s, st3.t);
     GlDraw.normal3 (v3.nx, v3.ny, v3.nz);
@@ -304,26 +301,26 @@ let draw_triangle surface frame triangle =
 
     GlTex.coord2 (st1.s, st1.t);
     GlDraw.normal3 (v1.nx, v1.ny, v1.nz);
-    GlDraw.vertex3 (v1.vx, v1.vy, v1.vz); 
+    GlDraw.vertex3 (v1.vx, v1.vy, v1.vz)
 
-    GlDraw.ends ()
-
-let draw_frame_triangles surface frame_no color style =
+let draw_frame_triangles surface frame_no =
+  let current_frame = Array.get surface.vertexes frame_no in
   let triangles = surface.triangles in
-  Array.iter (fun x -> draw_triangle surface frame_no x) triangles
-
-let draw_surface surface frame_no color style =
+    Array.iter (fun x -> draw_triangle surface current_frame x) triangles
+    
+let draw_surface surface frame_no =
   let tex = Array.get surface.shaders 0 in
     Texture.set_current_texture tex.shader_name;
-    draw_frame_triangles surface frame_no color style
+    GlDraw.begins `triangles;
+    draw_frame_triangles surface frame_no;
+    GlDraw.ends ()
 
-let draw_surfaces md3 frame_no color style =
-  Array.iter (fun x -> draw_surface x frame_no color style) md3.surfaces;;
-
+let draw_surfaces md3 frame_no =
+  Array.iter (fun x -> draw_surface x frame_no) md3.surfaces;;
 
 let draw_md3 md3 frame_no =
     GlMat.push();
-    draw_surfaces md3 frame_no (0.0,1.0,1.0) `triangles;
+    draw_surfaces md3 frame_no;
     GlMat.pop()
 
 (*
@@ -352,9 +349,11 @@ let skin_md3 md3 =
   (* We defer loading of skins on players so we don't load the 'normal'
      skins.  But we need to do this for weapons *)
   let iter_shaders shader =
+    Printf.printf "Loading shader %s\n" shader.shader_name;
     Texture.load_texture_from_file shader.shader_name
   in
   let iter_surfaces surface =
+    Printf.printf "Loading surface %s\n" surface.surface_name;
     Array.iter iter_shaders surface.shaders
   in
     Array.iter iter_surfaces md3.surfaces
