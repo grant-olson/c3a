@@ -39,8 +39,8 @@ copy c3a\LICENSE c3a-win32
 copy c3a\README c3a-win32
 copy c3a\RELEASE c3a-win32
 copy c3a\TODO c3a-win32
-copy c3a\glut-bins\glut32.dll c3a-win
-copy c3a\glut-bins\glut-README-win32.txt c3a-win
+copy c3a\glut-bins\glut32.dll c3a-win32
+copy c3a\glut-bins\glut-README-win32.txt c3a-win32
 
 mkdir c3a-win32\openarena
 xcopy /E c3a\openarena c3a-win32\openarena

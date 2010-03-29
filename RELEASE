@@ -1,3 +1,12 @@
+Release 0.7.2
+=============
+
++ OpenArena graphics and models included by default.
+
++ glut library included.
+
++ Improved camera angles.
+
 Release 0.6
 ===========
 
