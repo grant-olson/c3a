@@ -40,6 +40,9 @@ type active_piece = {loc:location;kind:piece;anim_state:Player.player_anim_state
 
 type notification = Check | Checkmate | Fragged | Intro
 
+type views = IntroView | Overhead | BottomLeft | BottomRight | TopLeft | TopRight | MidLeft | MidRight | TopMid | BottomMid
+type view_clip_zone = {top_left:location;bottom_right:location}
+
 let init_board () =
   [{loc={x=1;y=2;};kind=Piece(Black,Pawn);anim_state=pawn.animation.idle};
    {loc={x=2;y=2;};kind=Piece(Black,Pawn);anim_state=pawn.animation.idle};
@@ -105,7 +108,8 @@ let dead_piece_expires = ref 0.0
 let current_state = ref Introduction
 let current_player = ref White
 let current_notification = ref (Some Intro)
-let current_view = ref (fun () -> ())
+let current_view = ref IntroView
+let current_view_clip_zone = ref {top_left={x=1;y=1};bottom_right={x=8;y=8}} 
 
 let white_player_type = ref Human
 let black_player_type = ref Human
@@ -692,10 +696,23 @@ let really_draw loc k a =
   in
     draw_piece loc skin model.weapon a color
 
+let in_clip_zone loc =
+  let cv = !current_view_clip_zone in
+  let top_left = cv.top_left in
+  let bottom_right = cv.bottom_right in
+  let in_x_range = (loc.x >= top_left.x) && (loc.x <= bottom_right.x) in
+  let in_y_range = (loc.y >= top_left.y) && (loc.y <= bottom_right.y) in
+    in_x_range && in_y_range
+
 let draw_active_piece ap =
   match ap with
     {loc=loc;kind=k;anim_state=anim_state} ->
-      really_draw loc k anim_state
+      if
+        in_clip_zone loc
+      then
+        really_draw loc k anim_state
+      else
+        ()
 
 let draw_dead_piece loc kind anim_state =
   really_draw loc kind anim_state
@@ -728,8 +745,9 @@ let draw_moving_piece piece_type start finish =
     GlMat.pop()
 
 let overhead_view () =
+  current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=8;y=8}};
   GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
-    GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-250.0) ()
+  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-250.0) ()
 
 let intro_view () =
   let seconds = 10.0 in
@@ -744,11 +762,21 @@ let intro_view () =
     if blueside
     then
       begin
+        let xpos = xdist +. 75.0 in
+        let xpos = xpos /. 25.0 in
+        let xright = int_of_float (xpos +. 3.0) in
+        let xleft = int_of_float (xpos -. 2.0) in
+        Printf.printf "%f %f %i %i\n" xdist xpos xright xleft;
+        flush stdout;
+        current_view_clip_zone := {top_left={x=xleft;y=4};bottom_right={x=xright;y=8}};
         GlMat.rotate ~angle:180.0 ~z:1.0 ();
         GlMat.translate ~y:(80.0) ~x:(-.xdist) ()
       end
     else
+      begin
+        current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=8;y=4}};
         GlMat.translate ~y:(-80.0) ~x:(xdist)  ()
+      end
 
 let detail_frustum camera_pitch = 
   GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(200.0,2000.0);
@@ -792,6 +820,19 @@ let bottom_left_view () =
 (*  GlMat.rotate ~angle:180.0 ~z:(1.0) ();*)
   GlMat.translate ~y:(150.0) ~x:(100.0) ~z:(0.0) ()
 
+let set_current_view () =
+  match !current_view with
+      IntroView -> intro_view ()
+    | Overhead -> overhead_view ()
+    | BottomLeft -> bottom_left_view ()
+    | BottomRight -> bottom_right_view ()
+    | TopLeft -> top_left_view ()
+    | TopRight -> top_right_view ()
+    | MidLeft -> mid_left_view ()
+    | MidRight -> mid_right_view ()
+    | TopMid -> top_mid_view ()
+    | BottomMid -> bottom_mid_view ()
+        
 let set_camera m =
   let between x a b =
     (x >= a) && (x <= b)
@@ -800,28 +841,28 @@ let set_camera m =
     (between x1 a b) && (between x2 a b)
   in
   let get_mid_camera end_pos =
-    if end_pos.x >= 4 then mid_right_view else mid_left_view
+    if end_pos.x >= 4 then MidRight else MidLeft
   in
   let get_top_camera start_pos end_pos =
     match start_pos.x,end_pos.x with
-        x1,x2 when (both_between x1 x2 3 6) -> top_mid_view
-      | x1,x2 when (both_between x1 x2 1 4) -> top_left_view
-      | x1,x2 when (both_between x1 x2 5 8) -> top_right_view
-      | _ -> overhead_view
+        x1,x2 when (both_between x1 x2 3 6) -> TopMid
+      | x1,x2 when (both_between x1 x2 1 4) -> TopLeft
+      | x1,x2 when (both_between x1 x2 5 8) -> TopRight
+      | _ -> Overhead
   in
   let get_bottom_camera start_pos end_pos =
     match start_pos.x,end_pos.x with
-        x1,x2 when (both_between x1 x2 3 6) -> bottom_mid_view
-      | x1,x2 when (both_between x1 x2 1 4) -> bottom_left_view
-      | x1,x2 when (both_between x1 x2 5 8) -> bottom_right_view
-      | _ -> overhead_view
+        x1,x2 when (both_between x1 x2 3 6) -> BottomMid
+      | x1,x2 when (both_between x1 x2 1 4) -> BottomLeft
+      | x1,x2 when (both_between x1 x2 5 8) -> BottomRight
+      | _ -> Overhead
   in
   let get_camera start_pos end_pos = 
     match start_pos.y, end_pos.y with
         y1,y2 when (both_between y1 y2 3 6) -> get_mid_camera end_pos
       | y1,y2 when (both_between y1 y2 1 4) -> get_top_camera start_pos end_pos
       | y1,y2 when (both_between y1 y2 5 8) -> get_bottom_camera start_pos end_pos
-      | _ -> overhead_view
+      | _ -> Overhead
   in
     current_view := get_camera m.move_from m.move_to
 
@@ -955,7 +996,7 @@ let update_state () =
             begin
               current_notification := None;
               set_current_state Waiting;
-              current_view := overhead_view
+              current_view := Overhead
             end
     | Waiting ->
         let player_type = get_player_type !current_player in
@@ -1033,7 +1074,7 @@ let display () =
   GlMat.mode `projection;
   GlMat.load_identity ();
   
-  !current_view ();
+  set_current_view ();
   GlMat.mode `modelview;
 
   GlMat.load_identity ();
@@ -1082,7 +1123,7 @@ let mouse ~button ~state ~x ~y =
 		   else
 		     set_current_state Waiting;
                      current_notification := None;
-                     current_view := overhead_view)
+                     current_view := Overhead)
               | _ -> ()
           end
       | _ -> ()
@@ -1090,7 +1131,7 @@ let mouse ~button ~state ~x ~y =
       
 
 let main () =
-  current_view := intro_view;
+  current_view := IntroView;
   ignore(Glut.init Sys.argv);
   Glut.initDisplayMode ~alpha:true ~double_buffer:true ~depth:true () ;
   Glut.initWindowSize ~w:500 ~h:500 ;
