@@ -19,4 +19,7 @@ val init_player_anim_state :
 
 val update_player_anim_state :
   float -> player_anim_state -> player_anim_state
+
+val skin_player : player -> unit
+
 val reskin_player : (string * string) list -> player -> player
