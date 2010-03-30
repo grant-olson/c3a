@@ -81,7 +81,7 @@ let ayumi_black = Player.reskin_player [
     ("l_legs","models/players/ayumi/body.tga");
     ("l_skirt","models/players/ayumi/redskirt.tga");
     ("l_boots","models/players/ayumi/boots.tga");
-    ("l_jet","models/players/ayumi/jettest");
+    ("l_jet","models/players/ayumi/jet/jet3e.tga");
 ] ayumi
 let ayumi_white = Player.reskin_player [
     ("h_face","models/players/ayumi/head.tga");
@@ -92,7 +92,7 @@ let ayumi_white = Player.reskin_player [
     ("l_legs","models/players/ayumi/body.tga");
     ("l_skirt","models/players/ayumi/skirt.tga");
     ("l_boots","models/players/ayumi/boots.tga");
-    ("l_jet","models/players/ayumi/jettest");
+    ("l_jet","models/players/ayumi/jet/jet3e.tga");
 ] ayumi
 
 let ayumi_anim_death = set_dead_anim (0,29,15)
