@@ -762,13 +762,13 @@ let intro_view () =
     if blueside
     then
       begin
-        let xpos = xdist +. 75.0 in
+        (*let xpos = xdist +. 75.0 in
         let xpos = xpos /. 25.0 in
         let xright = int_of_float (xpos +. 3.0) in
         let xleft = int_of_float (xpos -. 2.0) in
         Printf.printf "%f %f %i %i\n" xdist xpos xright xleft;
-        flush stdout;
-        current_view_clip_zone := {top_left={x=xleft;y=4};bottom_right={x=xright;y=8}};
+        flush stdout;*)
+        current_view_clip_zone := {top_left={x=1;y=4};bottom_right={x=8;y=8}};
         GlMat.rotate ~angle:180.0 ~z:1.0 ();
         GlMat.translate ~y:(80.0) ~x:(-.xdist) ()
       end
@@ -785,40 +785,56 @@ let detail_frustum camera_pitch =
 
 let top_left_view () =
   detail_frustum 60.0;
-  GlMat.translate ~y:(40.0) ~x:(100.0) ()
+  GlMat.translate ~y:(40.0) ~x:(100.0) ();
+  GlMat.rotate ~angle:(-10.0) ~z:(1.0) ();
+  current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=4;y=6}}
 
 let top_mid_view () =
   detail_frustum 60.0;
-  GlMat.translate ~y:(40.0) ~x:(0.0) ()
+  GlMat.translate ~y:(40.0) ~x:(0.0) ();
+  current_view_clip_zone := {top_left={x=2;y=1};bottom_right={x=7;y=6}}
 
 let top_right_view () =
   detail_frustum 60.0;
-  GlMat.translate ~y:(40.0) ~x:(-100.0) ()
+  GlMat.translate ~y:(40.0) ~x:(-100.0) ();
+  GlMat.rotate ~angle:10.0 ~z:(1.0) ();
+  current_view_clip_zone := {top_left={x=5;y=1};bottom_right={x=8;y=6}}
+
 
 let mid_right_view () =
   detail_frustum 65.0;
   GlMat.rotate ~angle:(-75.0) ~z:(1.0) ();
-  GlMat.translate ~y:(75.0) ~x:(-350.0) ~z:(-75.0) ()
+  GlMat.translate ~y:(75.0) ~x:(-350.0) ~z:(-75.0) ();
+  current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=8;y=7}}
+
 
 let mid_left_view () =
   detail_frustum 65.0;
   GlMat.rotate ~angle:(75.0) ~z:(1.0) ();
-  GlMat.translate ~y:(75.0) ~x:(350.0) ~z:(-100.0) ()
+  GlMat.translate ~y:(75.0) ~x:(350.0) ~z:(-100.0) ();
+  current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=8;y=7}}
+
 
 let bottom_right_view () =
   detail_frustum 75.0;
-(*  GlMat.rotate ~angle:180.0 ~z:(1.0) ();*)
-  GlMat.translate ~y:(150.0) ~x:(-100.0) ~z:(0.0) ()
+  GlMat.translate ~y:(125.0) ~x:(-150.0) ~z:(0.0) ();
+  GlMat.rotate ~angle:25.0 ~z:(1.0) ();
+  current_view_clip_zone := {top_left={x=5;y=1};bottom_right={x=8;y=8}}
+
 
 let bottom_mid_view () =
   detail_frustum 75.0;
 (*  GlMat.rotate ~angle:180.0 ~z:(1.0) ();*)
-  GlMat.translate ~y:(150.0) ~x:(0.0) ~z:(0.0) ()
+  GlMat.translate ~y:(150.0) ~x:(0.0) ~z:(0.0) ();
+  current_view_clip_zone := {top_left={x=2;y=1};bottom_right={x=7;y=8}}
+
 
 let bottom_left_view () =
   detail_frustum 75.0;
-(*  GlMat.rotate ~angle:180.0 ~z:(1.0) ();*)
-  GlMat.translate ~y:(150.0) ~x:(100.0) ~z:(0.0) ()
+  GlMat.translate ~y:(125.0) ~x:(150.0) ~z:(0.0) ();
+  GlMat.rotate ~angle:(-25.0) ~z:(1.0) ();
+  current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=4;y=8}}
+
 
 let set_current_view () =
   match !current_view with
@@ -845,16 +861,16 @@ let set_camera m =
   in
   let get_top_camera start_pos end_pos =
     match start_pos.x,end_pos.x with
-        x1,x2 when (both_between x1 x2 3 6) -> TopMid
+        x1,x2 when (both_between x1 x2 4 5) -> TopMid
       | x1,x2 when (both_between x1 x2 1 4) -> TopLeft
       | x1,x2 when (both_between x1 x2 5 8) -> TopRight
       | _ -> Overhead
   in
   let get_bottom_camera start_pos end_pos =
     match start_pos.x,end_pos.x with
-        x1,x2 when (both_between x1 x2 3 6) -> BottomMid
-      | x1,x2 when (both_between x1 x2 1 4) -> BottomLeft
-      | x1,x2 when (both_between x1 x2 5 8) -> BottomRight
+        x1,x2 when (both_between x1 x2 4 5) -> BottomMid
+      | x1,x2 when (both_between x1 x2 1 3) -> BottomLeft
+      | x1,x2 when (both_between x1 x2 4 8) -> BottomRight
       | _ -> Overhead
   in
   let get_camera start_pos end_pos = 
