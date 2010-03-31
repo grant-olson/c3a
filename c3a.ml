@@ -4,6 +4,7 @@
 (* LOAD GRAPHICS *)
 
 open C3aModels
+open Camera
 
 (* TYPES *)
 
@@ -120,13 +121,14 @@ let computerized_opponent = ref None
 
 (* TRANSLATE BETWEEN BOARD COORDINATES AND X/Y VALS, COLLISION DETECTION, ETC *)
 
-let square_size = 50.0
+let square_size = Foot(4.0)
 
 let square_center loc =
   let x_f = float_of_int loc.x in
   let y_f = float_of_int loc.y in
-  let xc = (square_size *. -4.0) +. (square_size *. x_f) -. (square_size /. 2.0) in
-  let yc = (square_size *. 4.0) -. (square_size *. y_f) +. (square_size /. 2.0) in
+  let ss = float_of_foot square_size in
+  let xc = (ss *. -4.0) +. (ss *. x_f) -. (ss /. 2.0) in
+  let yc = (ss *. 4.0) -. (ss *. y_f) +. (ss /. 2.0) in
     (xc, yc)
 
 let calc_current_pos start finish = 
@@ -140,9 +142,14 @@ let calc_current_pos start finish =
     cur_x, cur_y
 
 let calc_grid_pos x y =
-  let x = (x /. square_size) +. 5.0  in
-  let y = (y /. square_size) +. 5.0 in
-   (int_of_float x), (int_of_float y)
+  let offset,square_size = 37.0,53.25 in
+  let x = (float_of_int x) -. offset in
+  let y = (float_of_int y) -. offset in
+  let x = x /. square_size in
+  let y = y /. square_size in
+  let x = x +. 1.0 in
+  let y = y +. 1.0 in
+    (int_of_float x), (int_of_float y)
 
 let is_at_destination start finish =
   let distance start_x start_y end_x end_y =
@@ -631,12 +638,13 @@ let draw_squares () =
   Gl.disable `texture_2d;
   for i = 1 to 8  do
     for j = 1 to 8 do
+      let ss = float_of_foot square_size in
       let i_f = float_of_int i in
       let j_f = float_of_int j in
-      let x1 = (-4.0 *. square_size) +. ((i_f -. 1.0) *. square_size) in
-      let x2 = x1 +. square_size in
-      let y1 = (4.0 *. square_size) -. ((j_f -. 1.0) *. square_size) in
-      let y2 = y1 -. square_size in
+      let x1 = (-4.0 *. ss) +. ((i_f -. 1.0) *. ss) in
+      let x2 = x1 +. ss in
+      let y1 = (4.0 *. ss) -. ((j_f -. 1.0) *. ss) in
+      let y2 = y1 -. ss in
       let even_row = (i mod 2) = 0 in
       let even_column = (j mod 2) = 0 in
         begin
@@ -744,10 +752,18 @@ let draw_moving_piece piece_type start finish =
     Player.draw_player skin model.weapon !moving_piece_anim;
     GlMat.pop()
 
+let action_cam camera_pitch =
+  (* init the 'action cam' to a position behind the chess board
+     pan/zoom/dolly from there *)
+  camera_normal_lens ();
+  move_camera_forward (Foot(6.0));
+  move_camera_up (Foot(52.0));
+  rotate_camera_down camera_pitch
+
 let overhead_view () =
   current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=8;y=8}};
-  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(25.0,1000.0);
-  GlMat.translate ~x:(0.0) ~y:(0.0) ~z:(-250.0) ()
+  camera_normal_lens ();
+  move_camera_up (Foot(125.0))
 
 let intro_view () =
   let seconds = 10.0 in
@@ -756,83 +772,81 @@ let intro_view () =
   let pct = time /. seconds in
   let xdist = (pct *. (-200.0)) +. 150.0 in
   let blueside = (mod_float ct 20.0) > 10.0 in
-    GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(200.0,10000.0);
-    GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-375.0) ();
-    GlMat.rotate ~angle:60.0 ~x:(-1.0) ();
+    camera_normal_lens ();
+    move_camera_forward (Foot(6.0));
+    move_camera_up (Foot(30.0));
+    rotate_camera_down 60.0;
     if blueside
     then
       begin
-        (*let xpos = xdist +. 75.0 in
-        let xpos = xpos /. 25.0 in
-        let xright = int_of_float (xpos +. 3.0) in
-        let xleft = int_of_float (xpos -. 2.0) in
-        Printf.printf "%f %f %i %i\n" xdist xpos xright xleft;
-        flush stdout;*)
         current_view_clip_zone := {top_left={x=1;y=4};bottom_right={x=8;y=8}};
-        GlMat.rotate ~angle:180.0 ~z:1.0 ();
+        rotate_camera_left 180.0;
         GlMat.translate ~y:(80.0) ~x:(-.xdist) ()
       end
     else
       begin
         current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=8;y=4}};
-        GlMat.translate ~y:(-80.0) ~x:(xdist)  ()
+        GlMat.translate  ~y:(-80.0) ~x:(xdist)  ()
       end
 
-let detail_frustum camera_pitch = 
-  GlMat.frustum ~x:(-30.0,30.0) ~y:(-30.0,30.0) ~z:(200.0,2000.0);
-  GlMat.translate ~x:(0.0) ~y:(-75.0) ~z:(-650.0) ();
-  GlMat.rotate ~angle:camera_pitch ~x:(-1.0) ()
-
 let top_left_view () =
-  detail_frustum 75.0;
-  GlMat.translate ~y:(-160.0) ~x:(100.0) ~z:(75.0) ();
-  GlMat.rotate ~angle:(-10.0) ~z:(1.0) ();
+  action_cam 75.0;
+  move_camera_forward (Foot(12.8));
+  move_camera_left (Foot(8.0));
+  move_camera_down (Foot(6.0));
+  rotate_camera_left 10.0;
   current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=4;y=6}}
 
 let top_mid_view () =
-  detail_frustum 75.0;
-  GlMat.translate ~y:(-120.0) ~x:(0.0) ~z:(75.0) ();
+  action_cam 75.0;
+  move_camera_forward (Foot(9.6));
+  move_camera_down (Foot(6.0));
   current_view_clip_zone := {top_left={x=2;y=1};bottom_right={x=7;y=6}}
 
 let top_right_view () =
-  detail_frustum 75.0;
-  GlMat.translate ~y:(-160.0) ~x:(-100.0) ~z:(75.0) ();
-  GlMat.rotate ~angle:10.0 ~z:(1.0) ();
+  action_cam 75.0;
+  move_camera_forward(Foot(12.8));
+  move_camera_right (Foot(8.0));
+  move_camera_down (Foot(6.0));
+  rotate_camera_right 10.0;
   current_view_clip_zone := {top_left={x=5;y=1};bottom_right={x=8;y=6}}
 
 
 let mid_right_view () =
-  detail_frustum 65.0;
-  GlMat.rotate ~angle:(-75.0) ~z:(1.0) ();
-  GlMat.translate ~y:(75.0) ~x:(-350.0) ~z:(-75.0) ();
+  action_cam 65.0;
+  rotate_camera_left 75.0;
+  move_camera_back (Foot(6.0));
+  move_camera_right (Foot(28.0));
+  move_camera_up (Foot(6.0));
   current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=8;y=7}}
 
 
 let mid_left_view () =
-  detail_frustum 65.0;
-  GlMat.rotate ~angle:(75.0) ~z:(1.0) ();
-  GlMat.translate ~y:(75.0) ~x:(350.0) ~z:(-100.0) ();
+  action_cam 65.0;
+  rotate_camera_right 75.0;
+  move_camera_back (Foot(6.0));
+  move_camera_left (Foot(28.0));
+  move_camera_up (Foot(8.0));
   current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=8;y=7}}
 
-
 let bottom_right_view () =
-  detail_frustum 75.0;
-  GlMat.translate ~y:(125.0) ~x:(-150.0) ~z:(0.0) ();
-  GlMat.rotate ~angle:25.0 ~z:(1.0) ();
+  action_cam 75.0;
+  move_camera_back (Foot(12.5));
+  move_camera_right (Foot(12.0));
+  rotate_camera_right 25.0;
   current_view_clip_zone := {top_left={x=5;y=1};bottom_right={x=8;y=8}}
 
-
 let bottom_mid_view () =
-  detail_frustum 75.0;
-(*  GlMat.rotate ~angle:180.0 ~z:(1.0) ();*)
-  GlMat.translate ~y:(150.0) ~x:(0.0) ~z:(0.0) ();
+  action_cam 75.0;
+  move_camera_back (Foot(12.0));
   current_view_clip_zone := {top_left={x=2;y=1};bottom_right={x=7;y=8}}
 
 
 let bottom_left_view () =
-  detail_frustum 75.0;
-  GlMat.translate ~y:(125.0) ~x:(150.0) ~z:(0.0) ();
-  GlMat.rotate ~angle:(-25.0) ~z:(1.0) ();
+  action_cam 75.0;
+  move_camera_back (Foot(12.0));
+  move_camera_left (Foot(12.0));
+  rotate_camera_left 25.0;
   current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=4;y=8}}
 
 
@@ -1116,8 +1130,6 @@ let display () =
 exception Mouse_click of (float * float * float)
 
 let mouse ~button ~state ~x ~y =
-  let z_in = 0.92 in
-  let x,y,z = GluMat.unproject ((float_of_int x), (float_of_int y), z_in) in
   let x,y = calc_grid_pos x y in
     match state with
         Glut.DOWN ->

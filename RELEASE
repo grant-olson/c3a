@@ -5,6 +5,8 @@ Release 0.8
 
 + Adjusted camera angles.
 
++ Made camera code more declarative.  No longer deal with GlMat calls directly.
+
 Release 0.7.2
 =============
 

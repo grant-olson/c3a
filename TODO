@@ -1,6 +1,7 @@
 TODO List
 
+- Do clipping right with my own matrix math.
+- Declarative way to set camera angles.
 - OpenGL is cross-cutting the logic.  Can I break the GL out into GL only files?
-- Smart clipping.
 - extract_piece_from_list should take location, not coordinates
 - Acutally read animation config files for models instead of hardcoding.
