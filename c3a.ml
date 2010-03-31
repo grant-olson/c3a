@@ -784,19 +784,19 @@ let detail_frustum camera_pitch =
   GlMat.rotate ~angle:camera_pitch ~x:(-1.0) ()
 
 let top_left_view () =
-  detail_frustum 60.0;
-  GlMat.translate ~y:(40.0) ~x:(100.0) ();
+  detail_frustum 75.0;
+  GlMat.translate ~y:(-160.0) ~x:(100.0) ~z:(75.0) ();
   GlMat.rotate ~angle:(-10.0) ~z:(1.0) ();
   current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=4;y=6}}
 
 let top_mid_view () =
-  detail_frustum 60.0;
-  GlMat.translate ~y:(40.0) ~x:(0.0) ();
+  detail_frustum 75.0;
+  GlMat.translate ~y:(-120.0) ~x:(0.0) ~z:(75.0) ();
   current_view_clip_zone := {top_left={x=2;y=1};bottom_right={x=7;y=6}}
 
 let top_right_view () =
-  detail_frustum 60.0;
-  GlMat.translate ~y:(40.0) ~x:(-100.0) ();
+  detail_frustum 75.0;
+  GlMat.translate ~y:(-160.0) ~x:(-100.0) ~z:(75.0) ();
   GlMat.rotate ~angle:10.0 ~z:(1.0) ();
   current_view_clip_zone := {top_left={x=5;y=1};bottom_right={x=8;y=6}}
 

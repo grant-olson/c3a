@@ -1,3 +1,10 @@
+Release 0.8
+===========
+
++ Added clipping so we don't (always) draw characters that aren't on screen.
+
++ Adjusted camera angles.
+
 Release 0.7.2
 =============
 
