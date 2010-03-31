@@ -77,8 +77,8 @@ let load_player preferred_detail_level path =
     let filename =
       if file_exists preferred_file then preferred_file else default_file
     in
-    Printf.printf "Loading %s\n" filename;
-    flush stdout;
+    (*Printf.printf "Loading %s\n" filename;
+    flush stdout;*)
     load_md3_file filename
   in
   let lower = load path "lower" in
