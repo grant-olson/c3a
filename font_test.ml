@@ -47,7 +47,7 @@ let display () =
 
   Gl.flush ();
 
-  Glut.postRedisplay () ;;
+  Glut.postRedisplay () 
 
 let main () =
   ignore(Glut.init Sys.argv);
@@ -56,8 +56,8 @@ let main () =
   ignore(Glut.createWindow ~title:"lablglut & LablGL");
   Glut.displayFunc ~cb:display;
 
-  Glut.mainLoop();
-  ;;
+  Glut.mainLoop()
+  
 
 let _ = main ()
 

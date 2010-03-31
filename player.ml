@@ -5,7 +5,7 @@
 Player model is build up of 3 md3s.  THis will probably be a class (once I learn how classes work!)
 *)
 
-open Md3;;
+open Md3
 
 type player = {lower:md3;upper:md3;head:md3;}
 
@@ -45,7 +45,7 @@ let draw_player p weapon state =
     GlMat.mult head_matrix;
     draw_md3 p.head 0;
    
-    GlMat.pop();;
+    GlMat.pop()
  
 
 (*
@@ -84,7 +84,7 @@ let load_player preferred_detail_level path =
   let lower = load path "lower" in
   let upper = load path "upper" in
   let head = load path "head" in
-    {lower=lower;upper=upper;head=head;};;
+    {lower=lower;upper=upper;head=head;}
 
 let load_player = load_player 1
 
@@ -94,13 +94,13 @@ let init_anim_state start stop loop fps =
   let frame_rate = 1.0 /. (float_of_int fps) in
   let update_time = frame_rate +. (Unix.gettimeofday ()) in
     {time_to_advance=update_time;start_pos=start;end_pos=stop;
-     loop_pos=loop;current_pos=start;frame_rate=frame_rate};;
+     loop_pos=loop;current_pos=start;frame_rate=frame_rate}
 
 let init_player_anim_state (lstart,lstop,lloop,lfps)
                            (tstart,tstop,tloop,tfps) =
   let leg_state = init_anim_state lstart lstop lloop lfps in
   let torso_state = init_anim_state tstart tstop tloop tfps in
-    {leg=leg_state;torso=torso_state;};;
+    {leg=leg_state;torso=torso_state;}
 
 let rec update_anim_state cur_time cur_state =
   if
@@ -116,12 +116,12 @@ let rec update_anim_state cur_time cur_state =
                                   current_pos=next_frame;
                                   frame_rate=cur_state.frame_rate;}
   else
-    cur_state;;
+    cur_state
 
 let update_player_anim_state cur_time cur_state =
   let leg_state = update_anim_state cur_time cur_state.leg in
   let torso_state = update_anim_state cur_time cur_state.torso in
-    {leg=leg_state;torso=torso_state;};;
+    {leg=leg_state;torso=torso_state;}
 
 let skin_player player =
   Md3.skin_md3 player.lower;

@@ -47,11 +47,11 @@ let make_image_from_tga_file filename =
   (*Printf.printf "Loading %s with ext %s\n" filename ext;
   flush stdout;*)
   let tga = Tga.load_tga_file filename in
-    make_image_from_tga tga;;
+    make_image_from_tga tga
 
-let textures : (string,([`rgba],[`ubyte])GlPix.t) Hashtbl.t = Hashtbl.create 100;;
+let textures : (string,([`rgba],[`ubyte])GlPix.t) Hashtbl.t = Hashtbl.create 100
 
-Hashtbl.add textures "unknown" (make_generic_image ());;
+let _ = Hashtbl.add textures "unknown" (make_generic_image ())
 
 let load_texture_from_file filename =
   let is_loaded = Hashtbl.mem textures filename in
@@ -60,7 +60,7 @@ let load_texture_from_file filename =
         let tga_file = make_image_from_tga_file (filename) in
           Hashtbl.add textures filename tga_file
       with
-          Sys_error a -> () ;; (* TODO: Better handling *)
+          Sys_error a -> ()  (* TODO: Better handling *)
 
       
 
@@ -72,7 +72,7 @@ let activate_texture tex =
         `wrap_t `clamp;
         `mag_filter `linear;
         `min_filter `linear ];
-  GlTex.env (`mode `modulate);;
+  GlTex.env (`mode `modulate)
 
 let set_current_texture texname =
   if
@@ -80,7 +80,7 @@ let set_current_texture texname =
   then
     activate_texture (Hashtbl.find textures texname)
   else
-    activate_texture (Hashtbl.find textures "unknown");;
+    activate_texture (Hashtbl.find textures "unknown")
 
 
 

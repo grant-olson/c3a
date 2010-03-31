@@ -24,7 +24,7 @@ let axes () =
   GlDraw.vertex3(0.0,0.0,-50.0);
   GlDraw.vertex3(0.0,0.0,50.0);
 
-  GlDraw.ends ();;
+  GlDraw.ends ()
 
 let diamond () =
   (* Draw a diamond with different colors on the sides so we
@@ -81,7 +81,7 @@ let diamond () =
   GlDraw.vertex3 (-25.0, 0.0, 25.0);
   GlDraw.vertex3 (0.0,  -25.0, 0.0);
 
-  GlDraw.ends ();;
+  GlDraw.ends ()
 
 let main () =
   ignore(Glut.init Sys.argv);
@@ -116,7 +116,7 @@ let main () =
     end;
   (* ignore (Timer.add ~ms:10000 ~callback:(fun () -> exit 0));  *)
   Glut.mainLoop();
-  ;;
+  
 
 let _ = main ()
 

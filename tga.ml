@@ -3,9 +3,9 @@
 
 (* tga parsing *)
 
-exception Unknown_tga_format;;
+exception Unknown_tga_format
 
-open Binfile;;
+open Binfile
 
 let debug_print f d =
   Printf.printf f d;
@@ -13,11 +13,11 @@ let debug_print f d =
 
 let debug_print f d = ()
 
-type rgba = {r:int;g:int;b:int;a:int};;
+type rgba = {r:int;g:int;b:int;a:int}
 
 type color_map_spec = {first_index:int;
                        color_map_length:int;
-                       color_map_entry_size:int;};;
+                       color_map_entry_size:int;}
 
 type image_spec = {xorg:int;
                    yorg:int;
@@ -32,27 +32,27 @@ type tga = {tga_id:int;
             cms:color_map_spec;
             spec:image_spec;
             rgb_data:rgba array array;
-           };;
+           }
 
 let in_rgba f =
   let b = in_char f in
   let g = in_char f in
   let r = in_char f in
   let a = in_char f in (* should we use this later? *)
-    {r=r;g=g;b=b;a=a};;
+    {r=r;g=g;b=b;a=a}
 
 let in_rgb f =
   let b = in_char f in
   let g = in_char f in
   let r = in_char f in
   let a = 255 in
-    {r=r;g=g;b=b;a=a};;
+    {r=r;g=g;b=b;a=a}
 
 let in_color_data f spec =
   match spec.px_depth with
       32 -> in_rgba f
     | 24 -> in_rgb f
-    | _ -> raise Unknown_tga_format;;
+    | _ -> raise Unknown_tga_format
         
 
 let in_spec f =
@@ -63,7 +63,7 @@ let in_spec f =
   let px_depth = in_char f in
   let image_descriptor = in_char f in
     {xorg=xorg;yorg=yorg;width=width;height=height;px_depth=px_depth;
-     image_descriptor=image_descriptor};;
+     image_descriptor=image_descriptor}
 
 let in_cms f =
   let first_index = in_word f in
@@ -74,7 +74,7 @@ let in_cms f =
     debug_print "Color map entry size %i\n" color_map_entry_size;
     {first_index=first_index;
      color_map_length=color_map_length;
-     color_map_entry_size=color_map_entry_size};;
+     color_map_entry_size=color_map_entry_size}
 
 let flip_array a =
   let len = Array.length a in
@@ -165,12 +165,12 @@ let read_tga_file f =
     {tga_id=tga_id;
      color_map_type=color_map_type;
      image_type=image_type;
-    cms=cms;spec=spec;rgb_data=rgb_data;};;
+    cms=cms;spec=spec;rgb_data=rgb_data;}
 
 
 let load_tga_file filename =
   let f = open_in_bin(filename) in
   let tga = read_tga_file f in
   let _ = close_in f in
-    tga;;
+    tga
 

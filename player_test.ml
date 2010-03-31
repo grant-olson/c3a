@@ -1,27 +1,27 @@
 (* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
    and conditions *)
 
-let m = Player.load_player "./pak0/models/players/mynx/";;
+let m = Player.load_player "./pak0/models/players/mynx/"
 let m_state = ref (Player.init_player_anim_state (111,128,111,20)
                       (95,134,95,15))
-let s = Player.load_player "./pak0/models/players/sarge/";;
+let s = Player.load_player "./pak0/models/players/sarge/"
 let s_state =  ref (Player.init_player_anim_state (31,45,31,20)
-                       (31,45,31,20));;
-let b = Player.load_player "./pak0/models/players/orbb/";;
+                       (31,45,31,20))
+let b = Player.load_player "./pak0/models/players/orbb/"
 let b_state =  ref (Player.init_player_anim_state (141,148,141,10)
-                       (99,104,99,20));;
-let r = Player.load_player "./pak0/models/players/slash/";;
+                       (99,104,99,20))
+let r = Player.load_player "./pak0/models/players/slash/"
 let r_state =  ref (Player.init_player_anim_state (97,107,97,20)
-                       (134,137,134,20));;
-let wrl = Md3.load_md3_file "./pak0/models/weapons2/rocketl/rocketl_1.md3";;
-let ws = Md3.load_md3_file "./pak0/models/weapons2/shotgun/shotgun.md3";;
-let wr = Md3.load_md3_file "./pak0/models/weapons2/gauntlet/gauntlet.md3";;
-let wg = Md3.load_md3_file "./pak0/models/weapons2/railgun/railgun.md3";;
+                       (134,137,134,20))
+let wrl = Md3.load_md3_file "./pak0/models/weapons2/rocketl/rocketl_1.md3"
+let ws = Md3.load_md3_file "./pak0/models/weapons2/shotgun/shotgun.md3"
+let wr = Md3.load_md3_file "./pak0/models/weapons2/gauntlet/gauntlet.md3"
+let wg = Md3.load_md3_file "./pak0/models/weapons2/railgun/railgun.md3"
 
 let set_material_color r g b a =
   GlLight.material `front (`specular (r, g, b, a));
   GlLight.material `front (`diffuse (r, g, b, a));
-  GlLight.material `front (`ambient (r, g, b, a));;
+  GlLight.material `front (`ambient (r, g, b, a))
 
 
 let draw_axes () =
@@ -49,7 +49,7 @@ let draw_axes () =
       GlDraw.vertex3 (xmark,-1000.0,0.0);GlDraw.vertex3 (xmark,1000.0,0.0)
   done;
 
-  GlDraw.ends ();;
+  GlDraw.ends ()
 
 let lighting_init () =
   let light_ambient = 0.1, 0.1, 0.1, 1.0
@@ -65,11 +65,11 @@ let lighting_init () =
   GlLight.light ~num:0 (`specular light_specular);
   GlLight.light ~num:0 (`position light_position);
 
-  List.iter Gl.enable [`lighting; `light0; `depth_test; `texture_2d];;
+  List.iter Gl.enable [`lighting; `light0; `depth_test; `texture_2d]
 
-let angle = ref 0.0;;
-let xpos = ref 100.0;;
-let xdir = ref false;;
+let angle = ref 0.0
+let xpos = ref 100.0
+let xdir = ref false
 
 let display () =
   Gl.enable `cull_face;
@@ -164,7 +164,7 @@ let display () =
 
     
 
-  Glut.postRedisplay () ;;
+  Glut.postRedisplay () 
 
 let main () =
   ignore(Glut.init Sys.argv);
@@ -173,8 +173,8 @@ let main () =
   ignore(Glut.createWindow ~title:"lablglut & LablGL");
   Glut.displayFunc ~cb:display;
 
-  Glut.mainLoop();
-  ;;
+  Glut.mainLoop()
+  
 
 let _ = main ()
 

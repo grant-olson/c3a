@@ -625,7 +625,7 @@ let vect_to_angle x y =
 let set_material_color r g b a =
   GlLight.material `front (`specular (r, g, b, a));
   GlLight.material `front (`diffuse (r *. 0.5, g *. 0.5, b *. 0.5, a));
-  GlLight.material `front (`ambient (r *. 0.5, g *. 0.5, b *. 0.5, a));;      
+  GlLight.material `front (`ambient (r *. 0.5, g *. 0.5, b *. 0.5, a))      
 
 let draw_squares () =
   Gl.disable `texture_2d;

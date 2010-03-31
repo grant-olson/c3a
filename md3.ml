@@ -4,38 +4,38 @@
 (* Load a Quake 3 .md3 format file into a structure and provide
    render it in openGl *)
 
-open Binfile;;
+open Binfile
 
-exception Invalid_md3_format;;
+exception Invalid_md3_format
 
 
 
-type vector = {x:float;y:float;z:float};;
+type vector = {x:float;y:float;z:float}
 
 let print_vector vect =
   Printf.printf " vector = {x = %.2f; y = %.2f; z = %.2f;}" vect.x
-    vect.y vect.z;;
+    vect.y vect.z
 
 (*#install_printer print_vector;;*)
 
-type triangle = {a:int;b:int;c:int};;
+type triangle = {a:int;b:int;c:int}
 
-type st = {s:float;t:float};;
+type st = {s:float;t:float}
 
 type frame = {min_bounds:vector;
               max_bounds:vector;
               frame_origin:vector;
               radius:float;
-              frame_name:string};;
+              frame_name:string}
 
 
 type tag = {tag_name:string;
             tag_origin:vector;
             axis1:vector;
             axis2:vector;
-            axis3:vector;};;
+            axis3:vector;}
 
-type vertex = {vx:float;vy:float;vz:float;nx:float;ny:float;nz:float};;
+type vertex = {vx:float;vy:float;vz:float;nx:float;ny:float;nz:float}
 
 type shader = {shader_name:string;
                shader_index:int;}
@@ -55,7 +55,7 @@ type surface = {surface_name:string;
                 triangles:triangle array;
                 sts:st array;
                 vertexes:vertex array array;
-               };;
+               }
 
 type md3 = {path:string;
             flags:int32;
@@ -69,7 +69,7 @@ type md3 = {path:string;
             eof_offset:int;
            frames:frame array;
            tags:tag array array;
-           surfaces:surface array;};;
+           surfaces:surface array;}
           
 
 let in_packed_float f =
@@ -77,24 +77,24 @@ let in_packed_float f =
      as a signed 16 bit int.  You devide by 64.0
      to get the float *)
   let sw1 = float_of_int (in_signed_word f) in
-    sw1 /. 64.0;;
+    sw1 /. 64.0
 
 let in_vector f =
   let x = in_single f in
   let y = in_single f in
   let z = in_single f in
-     {x=x;y=y;z=z};;
+     {x=x;y=y;z=z}
 
 let in_triangle f =
   let a = in_dword f in
   let b = in_dword f in
   let c = in_dword f in
-    {a=a;b=b;c=c};;
+    {a=a;b=b;c=c}
 
 let in_st f =
   let s = in_single f in
   let t = in_single f in
-    {s=s;t=t};;
+    {s=s;t=t}
 
 let in_vertex f =
   let vx = in_packed_float f in
@@ -107,11 +107,11 @@ let in_vertex f =
   let nx = (cos lat) *. (sin lng) in
   let ny = (sin lat) *. (sin lng) in
   let nz = (cos lng) in    
-    {vx=vx;vy=vy;vz=vz;nx=nx;ny=ny;nz=nz};;
+    {vx=vx;vy=vy;vz=vz;nx=nx;ny=ny;nz=nz}
  
 let read_path f =
   let buf = in_string f 64 in
-      buf;;
+      buf
 
 let in_frame f =
   let min_bounds = in_vector f in
@@ -120,7 +120,7 @@ let in_frame f =
   let radius = in_single f in
   let name = in_string f 16 in
     {min_bounds=min_bounds;max_bounds=max_bounds;frame_origin=local_origin;
-    radius=radius;frame_name=name};;
+    radius=radius;frame_name=name}
 
 
 let in_tag f =
@@ -129,7 +129,7 @@ let in_tag f =
   let axis1 = in_vector f in
   let axis2 = in_vector f in
   let axis3 = in_vector f in
-    {tag_name=name;tag_origin=origin;axis1=axis1;axis2=axis2;axis3=axis3};;
+    {tag_name=name;tag_origin=origin;axis1=axis1;axis2=axis2;axis3=axis3}
 
 
 let tag_to_matrix t =
@@ -141,7 +141,7 @@ let tag_to_matrix t =
                   [| a2.x;a2.y;a2.z;0.0 |];
                   [| a3.x;a3.y;a3.z;0.0 |];
                   [| o.x; o.y ;o.z;1.0;|] |] in
-    GlMat.of_array matrix;;
+    GlMat.of_array matrix
 
 
 
@@ -151,15 +151,15 @@ let in_shader f =
   let shader_index = in_dword f in
     String.set shader_name 0 'm';
     Texture.load_texture_from_file shader_name;
-    {shader_name=shader_name;shader_index=shader_index};;
+    {shader_name=shader_name;shader_index=shader_index}
 
 let in_frame_vertexes f surface_offset vertex_offset vertex_count frame_no =
   let begin_frame = surface_offset + vertex_offset + (vertex_count * frame_no *8) in (* 8 is sizeof(vertex) *)
   let _ = seek_in f begin_frame in
-    Array.init vertex_count (fun x -> in_vertex f);; 
+    Array.init vertex_count (fun x -> in_vertex f) 
 
 let in_vertexes f surface_offset vertex_offset vertex_count frame_count =
-  Array.init frame_count (fun x -> in_frame_vertexes f surface_offset vertex_offset vertex_count x);;
+  Array.init frame_count (fun x -> in_frame_vertexes f surface_offset vertex_offset vertex_count x)
 
 
 let in_surface surface_offset f =
@@ -212,11 +212,11 @@ let in_surface surface_offset f =
              triangles=triangles;
              sts=sts;
              vertexes=vertexes};
-      | _ -> raise Invalid_md3_format;;
+      | _ -> raise Invalid_md3_format
 
 let in_surface_array f offset count  =
   seek_in f offset;
-  Array.init count (fun x -> in_surface (pos_in f) f);;
+  Array.init count (fun x -> in_surface (pos_in f) f)
 
 let read_version f =
   match in_dword_as_int32 f with
@@ -251,39 +251,39 @@ let read_version f =
            tags=tags;
            surfaces=surfaces;}
 
-   | _ -> raise Invalid_md3_format;;
+   | _ -> raise Invalid_md3_format
 
 let rec get_tag_two name tags =
   match tags with
       [] -> raise Not_found
     | h::t ->
-      (if h.tag_name = name then h else get_tag_two name t);;
+      (if h.tag_name = name then h else get_tag_two name t)
 
 let get_tag name md3 frame_no =
   let tags = Array.get md3.tags frame_no in
   let tag_list = Array.to_list tags in
-    get_tag_two name tag_list;;
+    get_tag_two name tag_list
 
 let readfile f =
     match input_char f, input_char f,
       input_char f, input_char f with
         'I','D','P','3' -> read_version f;
-    | _ -> raise Invalid_md3_format;;
+    | _ -> raise Invalid_md3_format
 
 let get_point v p =
-  Array.get v p;;
+  Array.get v p
 
 let triangle_to_points t v =
- get_point v t.a, get_point v t.b, get_point v t.c;;
+ get_point v t.a, get_point v t.b, get_point v t.c
 
 let all_triangles_to_points s =
   let t = s.triangles in
   let v = s.vertexes in 
-  Array.map (fun x -> triangle_to_points x v) t;;
+  Array.map (fun x -> triangle_to_points x v) t
 
 let map_triangles f s =
   let triangles = all_triangles_to_points s in
-    Array.map f triangles;;
+    Array.map f triangles
 
 let draw_triangle surface current_frame triangle =
   let (v1,v2,v3) = triangle_to_points triangle current_frame in
@@ -316,7 +316,7 @@ let draw_surface surface frame_no =
     GlDraw.ends ()
 
 let draw_surfaces md3 frame_no =
-  Array.iter (fun x -> draw_surface x frame_no) md3.surfaces;;
+  Array.iter (fun x -> draw_surface x frame_no) md3.surfaces
 
 let draw_md3 md3 frame_no =
     GlMat.push();
@@ -349,11 +349,11 @@ let skin_md3 md3 =
   (* We defer loading of skins on players so we don't load the 'normal'
      skins.  But we need to do this for weapons *)
   let iter_shaders shader =
-    Printf.printf "Loading shader %s\n" shader.shader_name;
+    (*Printf.printf "Loading shader %s\n" shader.shader_name;*)
     Texture.load_texture_from_file shader.shader_name
   in
   let iter_surfaces surface =
-    Printf.printf "Loading surface %s\n" surface.surface_name;
+    (*Printf.printf "Loading surface %s\n" surface.surface_name;*)
     Array.iter iter_shaders surface.shaders
   in
     Array.iter iter_surfaces md3.surfaces
