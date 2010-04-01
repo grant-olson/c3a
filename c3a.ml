@@ -3,8 +3,8 @@
 
 (* LOAD GRAPHICS *)
 
+open Foot
 open C3aModels
-open Camera
 
 (* TYPES *)
 
@@ -88,7 +88,6 @@ let init_board () =
    {loc={x=5;y=8};kind=Piece(White,King);anim_state=king.animation.idle};
   ]
 
-
 (* INIT GLOBALS *)
 
 let active_pieces = ref (init_board ())
@@ -124,22 +123,28 @@ let computerized_opponent = ref None
 let square_size = Foot(4.0)
 
 let square_center loc =
-  let x_f = float_of_int loc.x in
-  let y_f = float_of_int loc.y in
-  let ss = float_of_foot square_size in
-  let xc = (ss *. -4.0) +. (ss *. x_f) -. (ss /. 2.0) in
-  let yc = (ss *. 4.0) -. (ss *. y_f) +. (ss /. 2.0) in
-    (xc, yc)
+  let feet_from_center i =
+  let feet = foot_times_int square_size i in
+  let feet = foot_minus_foot feet square_size in
+  let feet = foot_plus_foot feet (Foot(2.0)) in
+  let feet = foot_minus_foot feet (foot_times_float square_size 4.0) in
+    feet
+  in
+  let x_from_center = feet_from_center loc.x in
+  let y_from_center = feet_from_center loc.y in
+    x_from_center, y_from_center
 
-let calc_current_pos start finish = 
+let calc_current_pos start finish =
   let start_x, start_y = square_center start in
+  let start_x, start_y = (float_of_foot start_x), (float_of_foot start_y) in
   let end_x, end_y = square_center finish in
+  let end_x, end_y = (float_of_foot end_x), (float_of_foot end_y) in
   let dif_x, dif_y = end_x -. start_x, end_y -. start_y in
   let currenttime = Unix.gettimeofday () in
   let delta = (currenttime -. !moving_piece_start_anim) /. 2.5 in
   let cur_x = start_x +. (dif_x *. delta) in
   let cur_y = start_y +. (dif_y *. delta) in
-    cur_x, cur_y
+    (foot_of_float cur_x), (foot_of_float cur_y)
 
 let calc_grid_pos x y =
   let offset,square_size = 37.0,53.25 in
@@ -158,13 +163,18 @@ let is_at_destination start finish =
     let diff_y = end_y -. start_y in
       sqrt ( (diff_x *. diff_x) +. (diff_y *. diff_y) ) in
   let start_x,start_y = square_center start in
+  let start_x,start_y = (float_of_foot start_x),(float_of_foot start_y) in
   let dest_x,dest_y = square_center finish in
+  let dest_x,dest_y = (float_of_foot dest_x),(float_of_foot dest_y) in
   let distance_to_dest = distance start_x start_y dest_x dest_y in
   let cur_x,cur_y = calc_current_pos start finish in
+  let cur_x,cur_y = (float_of_foot cur_x),(float_of_foot cur_y) in
   let distance_travelled = distance start_x start_y cur_x cur_y in
     if distance_travelled > distance_to_dest
     then true (* we've passed the dest *)
     else false (* not there yet *)
+
+(* Algebriac notation translations for computer play *)
 
 let algebraic_of_loc loc =
   (* Turn a location struct into the equivilent Chess Algebraic Notation *)
@@ -271,8 +281,6 @@ let get_players_pieces color pieces =
       | _ -> false
   in
     List.filter right_side pieces
-
-
 
 (* CALCULATE VALID MOVES FOR A GIVEN PIECE *)
 
@@ -629,10 +637,6 @@ let vect_to_angle x y =
   let rads = atan2 x y in
     rads /. two_pi *. 360.0
 
-let set_material_color r g b a =
-  GlLight.material `front (`specular (r, g, b, a));
-  GlLight.material `front (`diffuse (r *. 0.5, g *. 0.5, b *. 0.5, a));
-  GlLight.material `front (`ambient (r *. 0.5, g *. 0.5, b *. 0.5, a))      
 
 let draw_squares () =
   Gl.disable `texture_2d;
@@ -650,29 +654,25 @@ let draw_squares () =
         begin
           (if (even_row == false && even_column == false) or
             (even_row == true && even_column == true) then
-              set_material_color 1.0 0.2 0.2 1.0
+              Pencil.ink_color 1.0 0.2 0.2 1.0
             else
-              set_material_color 0.95 0.95 1.2 1.0);
-          GlDraw.begins `quads;       
-          GlDraw.vertex3 (x1, y1, 0.0);
-          GlDraw.vertex3 (x1, y2, 0.0);
-          GlDraw.vertex3 (x2, y2, 0.0);
-          GlDraw.vertex3 (x2, y1, 0.0);
-          GlDraw.ends ();
+              Pencil.ink_color 0.95 0.95 1.2 1.0);
+          Pencil.draw_square x1 x2 y1 y2;
         end
         done
     done
 
 let draw_piece loc model weapon state dir =
   let x,y = square_center loc in
-    GlMat.push();
-    set_material_color 1.5 1.5 1.5 1.0;
-    GlMat.translate ~x:x ~y:y ~z:(0.0) ();
+    Pencil.save_pos();
+    Pencil.ink_color 1.5 1.5 1.5 1.0;
+    Pencil.move_right x;
+    Pencil.move_down y;
     (match dir with
-        Black -> GlMat.rotate ~angle:270.0 ~z:1.0 ()
-      | White -> GlMat.rotate ~angle:90.0 ~z:1.0 ());
+        Black -> Pencil.spin_paper_counterclockwise 90.0;
+      | White -> Pencil.spin_paper_clockwise 90.0);
     Player.draw_player model weapon state;
-    GlMat.pop()
+    Pencil.restore_pos()
 
 let lighting_init () =
   let light_ambient = 0.1, 0.1, 0.1, 1.0
@@ -744,26 +744,29 @@ let draw_moving_piece piece_type start finish =
   let orig_angle = vect_to_angle x y in
   let angle = orig_angle -. 90.0 
   in
-    GlMat.push();
-    set_material_color 1.5 1.5 1.5 1.0;
-    GlMat.translate ~x:cur_x ~y:cur_y ~z:(0.0) ();
-    GlMat.rotate ~angle:angle ~z:1.0 ();
-    (* FIXME *)
+    Pencil.save_pos ();
+    Pencil.ink_color 1.5 1.5 1.5 1.0;
+    Pencil.move_right cur_x;
+    Pencil.move_down cur_y;
+    Pencil.spin_paper_clockwise angle;
     Player.draw_player skin model.weapon !moving_piece_anim;
-    GlMat.pop()
+    Pencil.restore_pos ()
+
+
+(* c3a specific camera logic *)
 
 let action_cam camera_pitch =
   (* init the 'action cam' to a position behind the chess board
      pan/zoom/dolly from there *)
-  camera_normal_lens ();
-  move_camera_forward (Foot(6.0));
-  move_camera_up (Foot(52.0));
-  rotate_camera_down camera_pitch
+  Camera.normal_lens ();
+  Camera.move_forward (Foot(6.0));
+  Camera.move_up (Foot(52.0));
+  Camera.rotate_down camera_pitch
 
 let overhead_view () =
   current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=8;y=8}};
-  camera_normal_lens ();
-  move_camera_up (Foot(125.0))
+  Camera.normal_lens ();
+  Camera.move_up (Foot(125.0))
 
 let intro_view () =
   let seconds = 10.0 in
@@ -772,15 +775,15 @@ let intro_view () =
   let pct = time /. seconds in
   let xdist = (pct *. (-200.0)) +. 150.0 in
   let blueside = (mod_float ct 20.0) > 10.0 in
-    camera_normal_lens ();
-    move_camera_forward (Foot(6.0));
-    move_camera_up (Foot(30.0));
-    rotate_camera_down 60.0;
+    Camera.normal_lens ();
+    Camera.move_forward (Foot(6.0));
+    Camera.move_up (Foot(30.0));
+    Camera.rotate_down 60.0;
     if blueside
     then
       begin
         current_view_clip_zone := {top_left={x=1;y=4};bottom_right={x=8;y=8}};
-        rotate_camera_left 180.0;
+        Camera.rotate_left 180.0;
         GlMat.translate ~y:(80.0) ~x:(-.xdist) ()
       end
     else
@@ -791,62 +794,62 @@ let intro_view () =
 
 let top_left_view () =
   action_cam 75.0;
-  move_camera_forward (Foot(12.8));
-  move_camera_left (Foot(8.0));
-  move_camera_down (Foot(6.0));
-  rotate_camera_left 10.0;
+  Camera.move_forward (Foot(12.8));
+  Camera.move_left (Foot(8.0));
+  Camera.move_down (Foot(6.0));
+  Camera.rotate_left 10.0;
   current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=4;y=6}}
 
 let top_mid_view () =
   action_cam 75.0;
-  move_camera_forward (Foot(9.6));
-  move_camera_down (Foot(6.0));
+  Camera.move_forward (Foot(9.6));
+  Camera.move_down (Foot(6.0));
   current_view_clip_zone := {top_left={x=2;y=1};bottom_right={x=7;y=6}}
 
 let top_right_view () =
   action_cam 75.0;
-  move_camera_forward(Foot(12.8));
-  move_camera_right (Foot(8.0));
-  move_camera_down (Foot(6.0));
-  rotate_camera_right 10.0;
+  Camera.move_forward(Foot(12.8));
+  Camera.move_right (Foot(8.0));
+  Camera.move_down (Foot(6.0));
+  Camera.rotate_right 10.0;
   current_view_clip_zone := {top_left={x=5;y=1};bottom_right={x=8;y=6}}
 
 
 let mid_right_view () =
   action_cam 65.0;
-  rotate_camera_left 75.0;
-  move_camera_back (Foot(6.0));
-  move_camera_right (Foot(28.0));
-  move_camera_up (Foot(6.0));
+  Camera.rotate_left 75.0;
+  Camera.move_back (Foot(6.0));
+  Camera.move_right (Foot(28.0));
+  Camera.move_up (Foot(6.0));
   current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=8;y=7}}
 
 
 let mid_left_view () =
   action_cam 65.0;
-  rotate_camera_right 75.0;
-  move_camera_back (Foot(6.0));
-  move_camera_left (Foot(28.0));
-  move_camera_up (Foot(8.0));
+  Camera.rotate_right 75.0;
+  Camera.move_back (Foot(6.0));
+  Camera.move_left (Foot(28.0));
+  Camera.move_up (Foot(8.0));
   current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=8;y=7}}
 
 let bottom_right_view () =
   action_cam 75.0;
-  move_camera_back (Foot(12.5));
-  move_camera_right (Foot(12.0));
-  rotate_camera_right 25.0;
+  Camera.move_back (Foot(12.5));
+  Camera.move_right (Foot(12.0));
+  Camera.rotate_right 25.0;
   current_view_clip_zone := {top_left={x=5;y=1};bottom_right={x=8;y=8}}
 
 let bottom_mid_view () =
   action_cam 75.0;
-  move_camera_back (Foot(12.0));
+  Camera.move_back (Foot(12.0));
   current_view_clip_zone := {top_left={x=2;y=1};bottom_right={x=7;y=8}}
 
 
 let bottom_left_view () =
   action_cam 75.0;
-  move_camera_back (Foot(12.0));
-  move_camera_left (Foot(12.0));
-  rotate_camera_left 25.0;
+  Camera.move_back (Foot(12.0));
+  Camera.move_left (Foot(12.0));
+  Camera.rotate_left 25.0;
   current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=4;y=8}}
 
 
@@ -896,7 +899,7 @@ let set_camera m =
   in
     current_view := get_camera m.move_from m.move_to
 
-(* END OPEN GL FUNCTIONS *) 
+(* End c3a specific camera logic *)
 
 (* MAIN DISPLAY LOOP *)
 
@@ -1063,11 +1066,9 @@ let display_text () =
        I suppose we could figure out how to push and pop all the matricies,
        but why bother?
     *)
-    GlMat.mode `projection;
-    GlMat.load_identity ();
+    Camera.init();
 
-    GlMat.mode `modelview;
-    GlMat.load_identity ();
+    Pencil.init();
 
     Gl.enable `texture_2d;
     Gl.enable `blend;
@@ -1101,13 +1102,11 @@ let display () =
   GlClear.clear [`depth];
   GlDraw.color (1.0, 1.0, 1.0);
 
-  GlMat.mode `projection;
-  GlMat.load_identity ();
-  
+  Camera.init ();  
   set_current_view ();
-  GlMat.mode `modelview;
 
-  GlMat.load_identity ();
+  Pencil.init ();
+
   draw_squares ();
 
   Gl.enable `texture_2d;
