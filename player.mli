@@ -1,4 +1,4 @@
-(* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
+(* Copyright 2007-2010 Grant T. Olson.  See LICENSE file for license terms 
    and conditions *)
 
 type player = { lower : Md3.md3; upper : Md3.md3; head : Md3.md3; }

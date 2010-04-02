@@ -1,4 +1,4 @@
-(* Copyright 2007,2010 Grant T. Olson.  See LICENSE file for license terms 
+(* Copyright 2007-2010 Grant T. Olson.  See LICENSE file for license terms 
    and conditions *)
 
 (* Shared code for the Quake 3 and open arena models *)

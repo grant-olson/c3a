@@ -1,3 +1,6 @@
+(* Copyright 2007-2010 Grant T. Olson.  See LICENSE file for license terms 
+   and conditions *)
+
 (*
 
 A matrix type so we can see if we should draw characters or not.

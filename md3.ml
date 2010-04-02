@@ -1,4 +1,4 @@
-(* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
+(* Copyright 2007-2010 Grant T. Olson.  See LICENSE file for license terms 
    and conditions *)
 
 (* Load a Quake 3 .md3 format file into a structure and provide

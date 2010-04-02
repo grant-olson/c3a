@@ -1,3 +1,6 @@
+(* Copyright 2007-2010 Grant T. Olson.  See LICENSE file for license terms 
+   and conditions *)
+
 type computer_opponent = {
   in_chan : in_channel;
   out_chan : out_channel;
