@@ -96,9 +96,9 @@ let ayumi_white = Player.reskin_player [
 ] ayumi
 
 let ayumi_anim_death = set_dead_anim (0,29,15)
-let ayumi_anim_idle = set_anim (181,1,12) (95,37,13) 89 154
-let ayumi_anim_idle = set_anim (181,1,12) (154,1,6) 89 154
-let ayumi_anim_walk = set_anim (124,10,15) (154,1,6) 89 154
+let ayumi_anim_idle = set_anim (181,1,12) (95,37,13) 89 89
+let ayumi_anim_idle = set_anim (181,1,12) (154,1,6) 89 89
+let ayumi_anim_walk = set_anim (124,10,15) (154,1,6) 89 89
 
 let ayumi_models = {white_skin=ayumi_white;
                       black_skin=ayumi_black;
@@ -123,9 +123,8 @@ let assassin_white = Player.reskin_player [
 ] assassin
 
 let assassin_anim_death = set_dead_anim (51,30,30)
-let assassin_anim_idle = set_anim (166,8,8) (82,29,20) 80 155 
-let assassin_anim_idle = set_anim (166,8,8) (155,16,16) 80 155 
-let assassin_anim_walk = set_anim (92,10,15) (155,16,16) 80 155
+let assassin_anim_idle = set_anim (153,11,11) (82,29,20) 80 80 
+let assassin_anim_walk = set_anim (92,10,15) (155,16,16) 80 80
 
 let assassin_models = {white_skin=assassin_white;
                       black_skin=assassin_black;
@@ -157,8 +156,7 @@ let gargoyle_white = Player.reskin_player [
 ] gargoyle
 
 let gargoyle_anim_death = set_dead_anim (30,32,30)
-let gargoyle_anim_idle = set_anim (235,9,9) (95,37,13) 93 154
-let gargoyle_anim_idle = set_anim (184,9,19) (95,37,13) 93 154
+let gargoyle_anim_idle = set_anim (235,9,8) (95,37,13) 93 154
 let gargoyle_anim_walk = set_anim (184,9,19) (154,10,6) 93 154
 
 let gargoyle_models = {white_skin=gargoyle_white;
@@ -168,7 +166,7 @@ let gargoyle_models = {white_skin=gargoyle_white;
                                  walk=gargoyle_anim_walk;
                                  death=gargoyle_anim_death;}}
 
-let kyonshi = Player.load_player "./openarena/models/players/kyonshi/"
+(*let kyonshi = Player.load_player "./openarena/models/players/kyonshi/"
 let kyonshi_black = Player.reskin_player [
     ("h_face","models/players/kyonshi/skinred.tga");
     ("h_hat","models/players/kyonshi/torsored.tga");
@@ -209,6 +207,7 @@ let kyonshi_models = {white_skin=kyonshi_white;
                                  walk=kyonshi_anim_walk;
                                  death=kyonshi_anim_death;}}
 
+*)
 
 (* LIZ - HUGE *)
 
