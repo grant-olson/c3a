@@ -1,11 +1,11 @@
 Release 0.8
 ===========
 
-+ Added clipping so we don't (always) draw characters that aren't on screen.
++ Added clipping so we don't draw characters that aren't on screen.
 
 + Adjusted camera angles.
 
-+ Made camera code more declarative.  No longer deal with GlMat calls directly.
++ Made camera code and drawing code more declarative.  No longer deal with GlMat calls directly.  In case I ever want to try to port to F#/DirectX.
 
 Release 0.7.2
 =============

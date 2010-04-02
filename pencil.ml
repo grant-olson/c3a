@@ -46,3 +46,9 @@ let spin_paper_clockwise angle =
     
 let spin_paper_counterclockwise angle = 
   GlMat.rotate ~angle:(-. angle) ~z:1.0 ()
+
+let is_onscreen () =
+  let x,y,z = GluMat.project(0.0,0.0,0.0) in
+  let x_bounds = x > -50.0 && x < 550.0 in
+  let y_bounds = y > -50.0 && y < 550.0 in
+    x_bounds && y_bounds

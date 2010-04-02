@@ -42,7 +42,6 @@ type active_piece = {loc:location;kind:piece;anim_state:Player.player_anim_state
 type notification = Check | Checkmate | Fragged | Intro
 
 type views = IntroView | Overhead | BottomLeft | BottomRight | TopLeft | TopRight | MidLeft | MidRight | TopMid | BottomMid
-type view_clip_zone = {top_left:location;bottom_right:location}
 
 let init_board () =
   [{loc={x=1;y=2;};kind=Piece(Black,Pawn);anim_state=pawn.animation.idle};
@@ -109,7 +108,6 @@ let current_state = ref Introduction
 let current_player = ref White
 let current_notification = ref (Some Intro)
 let current_view = ref IntroView
-let current_view_clip_zone = ref {top_left={x=1;y=1};bottom_right={x=8;y=8}} 
 
 let white_player_type = ref Human
 let black_player_type = ref Human
@@ -671,7 +669,10 @@ let draw_piece loc model weapon state dir =
     (match dir with
         Black -> Pencil.spin_paper_counterclockwise 90.0;
       | White -> Pencil.spin_paper_clockwise 90.0);
-    Player.draw_player model weapon state;
+      if Pencil.is_onscreen () then
+          Player.draw_player model weapon state
+        else
+          ();
     Pencil.restore_pos()
 
 let lighting_init () =
@@ -704,23 +705,10 @@ let really_draw loc k a =
   in
     draw_piece loc skin model.weapon a color
 
-let in_clip_zone loc =
-  let cv = !current_view_clip_zone in
-  let top_left = cv.top_left in
-  let bottom_right = cv.bottom_right in
-  let in_x_range = (loc.x >= top_left.x) && (loc.x <= bottom_right.x) in
-  let in_y_range = (loc.y >= top_left.y) && (loc.y <= bottom_right.y) in
-    in_x_range && in_y_range
-
 let draw_active_piece ap =
   match ap with
     {loc=loc;kind=k;anim_state=anim_state} ->
-      if
-        in_clip_zone loc
-      then
         really_draw loc k anim_state
-      else
-        ()
 
 let draw_dead_piece loc kind anim_state =
   really_draw loc kind anim_state
@@ -764,7 +752,6 @@ let action_cam camera_pitch =
   Camera.rotate_down camera_pitch
 
 let overhead_view () =
-  current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=8;y=8}};
   Camera.normal_lens ();
   Camera.move_up (Foot(125.0))
 
@@ -782,13 +769,11 @@ let intro_view () =
     if blueside
     then
       begin
-        current_view_clip_zone := {top_left={x=1;y=4};bottom_right={x=8;y=8}};
         Camera.rotate_left 180.0;
         GlMat.translate ~y:(80.0) ~x:(-.xdist) ()
       end
     else
       begin
-        current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=8;y=4}};
         GlMat.translate  ~y:(-80.0) ~x:(xdist)  ()
       end
 
@@ -797,61 +782,49 @@ let top_left_view () =
   Camera.move_forward (Foot(12.8));
   Camera.move_left (Foot(8.0));
   Camera.move_down (Foot(6.0));
-  Camera.rotate_left 10.0;
-  current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=4;y=6}}
+  Camera.rotate_left 10.0
 
 let top_mid_view () =
   action_cam 75.0;
   Camera.move_forward (Foot(9.6));
-  Camera.move_down (Foot(6.0));
-  current_view_clip_zone := {top_left={x=2;y=1};bottom_right={x=7;y=6}}
+  Camera.move_down (Foot(6.0))
 
 let top_right_view () =
   action_cam 75.0;
   Camera.move_forward(Foot(12.8));
   Camera.move_right (Foot(8.0));
   Camera.move_down (Foot(6.0));
-  Camera.rotate_right 10.0;
-  current_view_clip_zone := {top_left={x=5;y=1};bottom_right={x=8;y=6}}
-
+  Camera.rotate_right 10.0
 
 let mid_right_view () =
   action_cam 65.0;
   Camera.rotate_left 75.0;
   Camera.move_back (Foot(6.0));
   Camera.move_right (Foot(28.0));
-  Camera.move_up (Foot(6.0));
-  current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=8;y=7}}
-
+  Camera.move_up (Foot(6.0))
 
 let mid_left_view () =
   action_cam 65.0;
   Camera.rotate_right 75.0;
   Camera.move_back (Foot(6.0));
   Camera.move_left (Foot(28.0));
-  Camera.move_up (Foot(8.0));
-  current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=8;y=7}}
+  Camera.move_up (Foot(8.0))
 
 let bottom_right_view () =
   action_cam 75.0;
   Camera.move_back (Foot(12.5));
   Camera.move_right (Foot(12.0));
-  Camera.rotate_right 25.0;
-  current_view_clip_zone := {top_left={x=5;y=1};bottom_right={x=8;y=8}}
+  Camera.rotate_right 25.0
 
 let bottom_mid_view () =
   action_cam 75.0;
-  Camera.move_back (Foot(12.0));
-  current_view_clip_zone := {top_left={x=2;y=1};bottom_right={x=7;y=8}}
-
+  Camera.move_back (Foot(12.0))
 
 let bottom_left_view () =
   action_cam 75.0;
   Camera.move_back (Foot(12.0));
   Camera.move_left (Foot(12.0));
-  Camera.rotate_left 25.0;
-  current_view_clip_zone := {top_left={x=1;y=1};bottom_right={x=4;y=8}}
-
+  Camera.rotate_left 25.0
 
 let set_current_view () =
   match !current_view with
