@@ -108,7 +108,7 @@ let ayumi_models = {white_skin=ayumi_white;
                                  death=ayumi_anim_death;}}
 
 
-(*
+
 let assassin = Player.load_player "./openarena/models/players/assassin/"
 let assassin_black = Player.reskin_player [
     ("h_head","models/players/assassin/upper-red.tga");
@@ -133,7 +133,7 @@ let assassin_models = {white_skin=assassin_white;
                       animation={idle=assassin_anim_idle;
                                  walk=assassin_anim_walk;
                                  death=assassin_anim_death;}}
-*)
+
 
 (* Beret - isn't scaling correctly *)
 
@@ -357,7 +357,7 @@ let smarine_anim_walk = set_anim (56,10,20) (83,1,15) 35 149
 let pawn = major_models
 let rook = sarge_models
 let knight = gargoyle_models (*arachna_models*)
-let bishop = penguin_models
+let bishop = assassin_models
 let queen = ayumi_models
-let king = kyonshi_models
+let king = penguin_models
 
