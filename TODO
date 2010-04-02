@@ -1,5 +1,15 @@
 TODO List
 
-- Pawn to Queen
+TODO for 0.8
+------------
+
+Figure out the wonking animations on a few characters.  Gargoyle.  Ayumi.
+
+Replace Kyonshi.  Bad texture.
+
+
+Todo later
+----------
+
 - extract_piece_from_list should take location, not coordinates
 - Acutally read animation config files for models instead of hardcoding.

@@ -1,4 +1,4 @@
-(* Copyright 2007, Grant T. Olson.  See LICENSE file for license terms 
+(* Copyright 2007-2010, Grant T. Olson.  See LICENSE file for license terms 
    and conditions *)
 
 (* LOAD GRAPHICS *)
@@ -798,16 +798,14 @@ let top_right_view () =
 
 let mid_right_view () =
   action_cam 65.0;
-  Camera.rotate_left 75.0;
-  Camera.move_back (Foot(6.0));
-  Camera.move_right (Foot(28.0));
+  Camera.rotate_left 90.0;
+  Camera.move_right (Foot(22.0));
   Camera.move_up (Foot(6.0))
 
 let mid_left_view () =
   action_cam 65.0;
-  Camera.rotate_right 75.0;
-  Camera.move_back (Foot(6.0));
-  Camera.move_left (Foot(28.0));
+  Camera.rotate_right 90.0;
+  Camera.move_left (Foot(26.0));
   Camera.move_up (Foot(8.0))
 
 let bottom_right_view () =
