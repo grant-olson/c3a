@@ -1,4 +1,3 @@
-===============
 CHESS III ARENA
 ===============
 
@@ -16,12 +15,10 @@ Chess III Arena can optionally be configured to play a computer
 opponent via gnuchess and to use the original Quake III models from id
 Software if you have a copy of Quake III.
 
------------- 
 Installation
 ------------ 
 
-Windows
-=======
+### Windows
 
   - Download the executable in zip format.
 
@@ -34,8 +31,7 @@ Windows
 
   - Enjoy!
 
-Linux
-=====
+### Linux
 
 Note: Although the program should run on any OpenGL implementation,
 you're really going to need some sort of hardware acceleration for
@@ -54,7 +50,6 @@ reasonable rendering performance.
 
   - Run ./c3a and enjoy!
 
-----------------
 Playing the Game
 ----------------
 
@@ -70,15 +65,13 @@ your hand off the piece yet') simply click on a square that is in
 invalid move location, such as the piece itself.  Repeat for red.
 Repeat until someone checkmates.
 
----------------------------------
 Playing the computer via gnuchess
 ---------------------------------
 
 Chess III Arena can act as a front end to gnuchess, allowing you to
 play the computer.
 
-On Windows
-==========
+### On Windows
 
 The easy way:
 
@@ -103,8 +96,7 @@ play blue, or toggle human versus computer opponents:
   - Start the game from the command-line with either 'c3a -blue
     gnuchess' or or '-red gnuchess'.
 
-On Linux
-========
+### On Linux
 
 Run the command-line:
 
@@ -116,15 +108,13 @@ to have the computer play red with you going first, or:
 
 to have the computer start first.
 
---------------------------------
 Using Id Software Models and Art
 --------------------------------
 
 If you have a copy of Quake III, you can use the id Software models
 instead of the openArena models.  To install:
 
-On Windows
-==========
+### On Windows
 
   - Either:
   
@@ -153,8 +143,7 @@ On Windows
 
   - Double-click on c3a-id-models.exe and enjoy!
 
-On Linux
-========
+### On Linux
 
   - Within the new c3a directory, create a subdirectory called pak0
 
@@ -174,7 +163,6 @@ On Linux
 
   - Run ./c3a-id-models and enjoy!
 
--------------------
 Building on Windows
 -------------------
 
