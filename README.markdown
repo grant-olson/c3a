@@ -9,7 +9,7 @@ people are probably just interested in playing the game.
 
 I did not create any models or art.  All models and art are courtesy
 of the openarena project, and is licensed under GPL v2.  Thanks guys!
-I'm no artist.  Visit http://openarena.ws for more details.
+I'm no artist.  Visit [OpenArena](http://openarena.ws) for more details.
 
 Chess III Arena can optionally be configured to play a computer
 opponent via gnuchess and to use the original Quake III models from id
@@ -20,7 +20,7 @@ Installation
 
 ### Windows
 
-  - Download the executable in zip format.
+  - Download the [executable in zip format](http://www.mediafire.com/file/ttfjd1n5nwj/c3a-exe-20100402.zip) ([sig](http://www.mediafire.com/file/4j1mtyrjmzw/c3a-exe-20100402.zip.asc)).
 
   - Extract the files.  [Right- click, choose Extract All, Next your
     way through the wizard.]
@@ -40,7 +40,9 @@ reasonable rendering performance.
   - Install OCaml 3.09 or greater and the accompanying LablGL
     library, however that is done on your distro.
 
-  - Grab the source .tgz, extract it somewhere.
+  - Clone the git repository OR grab the [stable source
+    .tgz](http://www.mediafire.com/file/tzdegi2nnon/c3a-source-20100402.tar.gz)
+    ([sig](http://www.mediafire.com/file/xmmozjtt0om/c3a-source-20100402.tar.gz.asc))and extract it somewhere.
 
   - cd into the directory
 
@@ -77,7 +79,7 @@ The easy way:
 
   - Obtain and install the binaries from the gnuwin32 project:
 
-      http://gnuwin32.sourceforge.net/packages/chess.htm
+      [http://gnuwin32.sourceforge.net/packages/chess.htm](http://gnuwin32.sourceforge.net/packages/chess.htm)
 
   - Copy the gnuchess files from the install directory into your
     c3a directory.
@@ -162,6 +164,15 @@ instead of the openArena models.  To install:
   - Build the executable if you haven't already.  (./make_native.sh)
 
   - Run ./c3a-id-models and enjoy!
+
+OpenArena Model Source
+----------------------
+
+This [archive](http://www.mediafire.com/file/zzndi2c0mjt/openarena-model-blender-source-files-20100328.tar.gz) ([sig](http://www.mediafire.com/file/cmydyjwkhlk/openarena-model-blender-source-files-20100328.tar.gz.asc)) contains the OpenArena models in blender format,
+the 'source' for the .md3 files.  It is provided for GPL compliance.
+You are of course free to download, but it only contains the models
+used in the C3A distribution.  You may wish to grab a full copy of the
+OpenArena source from the [OpenArena website](http://openarena.ws/).
 
 Building on Windows
 -------------------
