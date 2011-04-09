@@ -1,13 +1,13 @@
 CHESS III ARENA
 ===============
 
+![example with Q3A models](http://www.grant-olson.net/_/rsrc/1269868369273/ocaml/chess-iii-arena/c3a-id.png)
+
 Chess III Arena is a simple chess game that utilizes Quake III Arena
 .md3 models for the various pieces.  It was written as my first
 (allegedly) non-trivial ocaml application so I could see what I
 thought about the language.  But more about that later.  Most normal
 people are probably just interested in playing the game.
-
-![example with Q3A models](http://www.grant-olson.net/_/rsrc/1269868369273/ocaml/chess-iii-arena/c3a-id.png)
 
 I did not create any models or art.  All models and art are courtesy
 of the openarena project, and is licensed under GPL v2.  Thanks guys!
@@ -60,8 +60,6 @@ Playing the Game
 Simply double-click on the file c3a.exe in windows, or run ./c3a on
 linux.
 
-![example with OA models](http://www.grant-olson.net/_/rsrc/1269868802812/ocaml/chess-iii-arena/c3a-oa-frag.png)
-
 When you run the game, you should initially see a title screen.  Click
 anywhere on the screen to start the game.  You will see an overhead
 view of the board.  Blue is "white" and Red is "black", so Blue goes
@@ -70,6 +68,8 @@ to move it.  If you want to change pieces (that is, you haven't 'taken
 your hand off the piece yet') simply click on a square that is in
 invalid move location, such as the piece itself.  Repeat for red.
 Repeat until someone checkmates.
+
+![example with OA models](http://www.grant-olson.net/_/rsrc/1269868802812/ocaml/chess-iii-arena/c3a-oa-frag.png)
 
 Playing the computer via gnuchess
 ---------------------------------
