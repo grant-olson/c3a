@@ -7,6 +7,8 @@ Chess III Arena is a simple chess game that utilizes Quake III Arena
 thought about the language.  But more about that later.  Most normal
 people are probably just interested in playing the game.
 
+![example with Q3A models](http://www.grant-olson.net/_/rsrc/1269868369273/ocaml/chess-iii-arena/c3a-id.png)
+
 I did not create any models or art.  All models and art are courtesy
 of the openarena project, and is licensed under GPL v2.  Thanks guys!
 I'm no artist.  Visit [OpenArena](http://openarena.ws) for more details.
@@ -57,6 +59,8 @@ Playing the Game
 
 Simply double-click on the file c3a.exe in windows, or run ./c3a on
 linux.
+
+![example with OA models](http://www.grant-olson.net/_/rsrc/1269868802812/ocaml/chess-iii-arena/c3a-oa-frag.png)
 
 When you run the game, you should initially see a title screen.  Click
 anywhere on the screen to start the game.  You will see an overhead
