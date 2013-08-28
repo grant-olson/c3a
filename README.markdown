@@ -1,7 +1,7 @@
 CHESS III ARENA
 ===============
 
-![example with Q3A models](http://www.grant-olson.net/_/rsrc/1269868369273/ocaml/chess-iii-arena/c3a-id.png)
+![example with Q3A models](https://raw.github.com/grant-olson/c3a/master/media/c3a_id.png)
 
 Chess III Arena is a simple chess game that utilizes Quake III Arena
 .md3 models for the various pieces.  It was written as my first
@@ -69,7 +69,7 @@ your hand off the piece yet') simply click on a square that is in
 invalid move location, such as the piece itself.  Repeat for red.
 Repeat until someone checkmates.
 
-![example with OA models](http://www.grant-olson.net/_/rsrc/1269868802812/ocaml/chess-iii-arena/c3a-oa-frag.png)
+![example with OA models](https://raw.github.com/grant-olson/c3a/master/media/c3a_oa.png)
 
 Playing the computer via gnuchess
 ---------------------------------
